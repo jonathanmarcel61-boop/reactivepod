@@ -1,0 +1,1330 @@
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --fondo: #07111f;
+    --tarjeta: #111c2d;
+    --tarjeta2: #172337;
+    --tarjeta3: #253247;
+
+    --verde: #22c55e;
+    --verdeOscuro: #16a34a;
+
+    --azul: #3b82f6;
+    --rojo: #ef4444;
+    --naranja: #f59e0b;
+
+    --texto: #ffffff;
+    --texto2: #9ca3af;
+    --borde: #273449;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family:
+        Inter,
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        radial-gradient(
+            circle at top,
+            #10243f 0%,
+            #07111f 42%
+        );
+
+    color: var(--texto);
+}
+
+button,
+select,
+input {
+    font-family: inherit;
+}
+
+button {
+    transition:
+        transform 0.15s,
+        opacity 0.15s,
+        border-color 0.15s;
+}
+
+button:hover {
+    opacity: 0.93;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+
+/* ================================================= */
+/* PANTALLAS */
+/* ================================================= */
+
+.pantalla {
+    display: none;
+    min-height: 100vh;
+    padding: 24px;
+}
+
+.pantalla.activa {
+    display: block;
+}
+
+.contenedorApp {
+    width: 100%;
+    max-width: 900px;
+    margin: auto;
+}
+
+
+/* ================================================= */
+/* CABECERAS */
+/* ================================================= */
+
+.cabeceraPrincipal,
+.cabeceraSecundaria,
+.cabeceraEntrenamiento {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.marca {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.logoReactiPod {
+    width: 55px;
+    height: 55px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        linear-gradient(
+            135deg,
+            #22c55e,
+            #16a34a
+        );
+
+    border-radius: 17px;
+
+    font-size: 29px;
+    font-weight: bold;
+
+    box-shadow:
+        0 0 25px rgba(34, 197, 94, 0.25);
+}
+
+.marca h1 {
+    margin: 0;
+    font-size: 27px;
+}
+
+.marca p {
+    margin: 3px 0 0;
+    color: var(--texto2);
+}
+
+.cabeceraSecundaria h2,
+.cabeceraEntrenamiento h2 {
+    margin: 0;
+}
+
+.cabeceraSecundaria p {
+    margin: 4px 0 0;
+    color: var(--texto2);
+}
+
+.cabeceraEntrenamiento small {
+    color: var(--texto2);
+}
+
+
+/* ================================================= */
+/* TARJETAS */
+/* ================================================= */
+
+.tarjeta {
+    padding: 20px;
+    margin-bottom: 17px;
+
+    background:
+        rgba(17, 28, 45, 0.96);
+
+    border: 1px solid var(--borde);
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, 0.22);
+}
+
+.bienvenida {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.bienvenida small {
+    color: var(--texto2);
+}
+
+.bienvenida h2 {
+    margin: 6px 0;
+}
+
+.bienvenida p {
+    margin: 0;
+    color: var(--texto2);
+}
+
+
+/* ================================================= */
+/* BOTONES */
+/* ================================================= */
+
+.boton {
+    width: 100%;
+    min-height: 52px;
+
+    padding: 14px 18px;
+
+    margin-bottom: 13px;
+
+    border: none;
+    border-radius: 13px;
+
+    color: white;
+
+    font-size: 15px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.botonPrincipal {
+    background:
+        linear-gradient(
+            135deg,
+            #22c55e,
+            #16a34a
+        );
+
+    box-shadow:
+        0 10px 25px rgba(34, 197, 94, 0.17);
+}
+
+.botonAzul {
+    background: #2563eb;
+}
+
+.botonRojo {
+    background: #b91c1c;
+}
+
+.botonNaranja {
+    background: #d97706;
+}
+
+.botonOscuro {
+    background: #253247;
+}
+
+.botonVolver {
+    width: 45px;
+    height: 45px;
+
+    flex-shrink: 0;
+
+    border: none;
+    border-radius: 12px;
+
+    background: var(--tarjeta2);
+    color: white;
+
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.botonIcono {
+    width: 45px;
+    height: 45px;
+
+    border: none;
+    border-radius: 13px;
+
+    background: var(--tarjeta2);
+    color: white;
+
+    font-size: 21px;
+    cursor: pointer;
+}
+
+.botonSecundarioPequeno {
+    padding: 9px 12px;
+
+    border: none;
+    border-radius: 9px;
+
+    background: var(--tarjeta3);
+    color: white;
+
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+
+/* ================================================= */
+/* TITULOS */
+/* ================================================= */
+
+.tituloFila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.tituloFila h3 {
+    margin: 5px 0;
+}
+
+.etiquetaTitulo {
+    color: var(--texto2);
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+
+/* ================================================= */
+/* ESTADO PODS */
+/* ================================================= */
+
+.estadoGeneralPods {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.indicador {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+}
+
+.indicador.desconectado {
+    background: var(--rojo);
+}
+
+.indicador.parcial {
+    background: var(--naranja);
+}
+
+.indicador.conectado {
+    background: var(--verde);
+}
+
+.miniPods {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+
+    margin: 18px 0;
+}
+
+.miniPod {
+    min-height: 55px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--tarjeta2);
+
+    border-radius: 15px;
+
+    font-size: 18px;
+    font-weight: bold;
+}
+
+
+/* ================================================= */
+/* RESUMEN INICIO */
+/* ================================================= */
+
+.gridResumenInicio {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 12px;
+}
+
+.estadisticaInicio {
+    text-align: center;
+}
+
+.estadisticaInicio > span {
+    font-size: 24px;
+}
+
+.estadisticaInicio small {
+    display: block;
+
+    margin-top: 10px;
+
+    color: var(--texto2);
+
+    font-size: 10px;
+}
+
+.estadisticaInicio strong {
+    display: block;
+
+    margin-top: 7px;
+
+    font-size: 22px;
+}
+
+
+/* ================================================= */
+/* MENÚ */
+/* ================================================= */
+
+.menuPrincipal {
+    position: sticky;
+    bottom: 12px;
+
+    margin-top: 24px;
+
+    padding: 8px;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 8px;
+
+    background:
+        rgba(17, 28, 45, 0.97);
+
+    border: 1px solid var(--borde);
+
+    border-radius: 18px;
+
+    backdrop-filter: blur(10px);
+}
+
+.menuItem {
+    padding: 9px;
+
+    border: none;
+    border-radius: 12px;
+
+    background: transparent;
+
+    color: var(--texto2);
+
+    cursor: pointer;
+
+    font-size: 12px;
+}
+
+.menuItem span {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 18px;
+}
+
+.menuItem.activo {
+    background: #193526;
+    color: var(--verde);
+}
+
+
+/* ================================================= */
+/* CONEXIÓN */
+/* ================================================= */
+
+.listaConexionPods {
+    display: grid;
+    gap: 12px;
+}
+
+.conexionPod {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    padding: 16px;
+
+    background: var(--tarjeta);
+
+    border: 1px solid var(--borde);
+
+    border-radius: 15px;
+}
+
+.numeroPod {
+    width: 48px;
+    height: 48px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--tarjeta3);
+
+    border-radius: 50%;
+
+    font-size: 19px;
+    font-weight: bold;
+}
+
+.datosConexionPod {
+    flex: 1;
+}
+
+.datosConexionPod strong {
+    display: block;
+}
+
+.datosConexionPod small {
+    display: block;
+    margin-top: 5px;
+    color: var(--rojo);
+}
+
+.datosConexionPod small.conectadoTexto {
+    color: var(--verde);
+}
+
+.botonConexionPod {
+    padding: 10px 14px;
+
+    border: none;
+    border-radius: 9px;
+
+    background: #2563eb;
+
+    color: white;
+
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.botonConexionPod.conectado {
+    background: var(--verdeOscuro);
+}
+
+.resumenConexion {
+    text-align: center;
+    margin-top: 16px;
+}
+
+.resumenConexion strong {
+    display: block;
+    font-size: 32px;
+}
+
+.resumenConexion span {
+    color: var(--texto2);
+}
+
+
+/* ================================================= */
+/* PERFILES */
+/* ================================================= */
+
+.listaPerfiles {
+    display: grid;
+    gap: 12px;
+}
+
+.perfilItem {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    padding: 15px;
+
+    background: var(--tarjeta);
+
+    border: 2px solid transparent;
+
+    border-radius: 15px;
+}
+
+.perfilItem.activo {
+    border-color: var(--verde);
+}
+
+.avatarPerfil {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--tarjeta3);
+
+    border-radius: 50%;
+
+    font-size: 23px;
+}
+
+.perfilInfo {
+    flex: 1;
+}
+
+.perfilInfo strong {
+    display: block;
+}
+
+.perfilInfo small {
+    display: block;
+    margin-top: 5px;
+    color: var(--texto2);
+}
+
+.accionesPerfil {
+    display: flex;
+    gap: 7px;
+}
+
+.btnPerfilUsar,
+.btnPerfilEliminar {
+    padding: 8px 10px;
+
+    border: none;
+    border-radius: 8px;
+
+    color: white;
+
+    cursor: pointer;
+}
+
+.btnPerfilUsar {
+    background: #2563eb;
+}
+
+.btnPerfilEliminar {
+    background: #b91c1c;
+}
+
+.etiquetaActivo {
+    padding: 7px 9px;
+
+    background: #173923;
+
+    color: var(--verde);
+
+    border-radius: 14px;
+
+    font-size: 11px;
+}
+
+
+/* ================================================= */
+/* MODOS */
+/* ================================================= */
+
+.perfilEntrenamientoSeleccion {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-bottom: 20px;
+
+    padding: 14px;
+
+    background: var(--tarjeta);
+
+    border: 1px solid var(--borde);
+
+    border-radius: 14px;
+}
+
+.perfilEntrenamientoSeleccion > span {
+    font-size: 26px;
+}
+
+.perfilEntrenamientoSeleccion div {
+    display: flex;
+    flex-direction: column;
+}
+
+.perfilEntrenamientoSeleccion small {
+    color: var(--texto2);
+}
+
+.gridEntrenamientos {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 14px;
+}
+
+.tarjetaEntrenamientoModo {
+    min-height: 210px;
+
+    padding: 20px;
+
+    border: 2px solid transparent;
+    border-radius: 18px;
+
+    background: var(--tarjeta);
+
+    color: white;
+
+    text-align: left;
+
+    cursor: pointer;
+}
+
+.tarjetaEntrenamientoModo:hover {
+    border-color: var(--azul);
+}
+
+.iconoModo {
+    width: 55px;
+    height: 55px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--tarjeta3);
+
+    border-radius: 15px;
+
+    font-size: 29px;
+}
+
+.contenidoModo h3 {
+    margin: 18px 0 8px;
+}
+
+.contenidoModo p {
+    color: var(--texto2);
+    line-height: 1.5;
+}
+
+.etiquetaFisico {
+    display: inline-block;
+
+    padding: 7px 10px;
+
+    background: #153a24;
+
+    color: var(--verde);
+
+    border-radius: 14px;
+
+    font-size: 11px;
+}
+
+
+/* ================================================= */
+/* CONFIGURACIÓN */
+/* ================================================= */
+
+.iconoConfiguracion {
+    width: 54px;
+    height: 54px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--tarjeta2);
+
+    border-radius: 15px;
+
+    font-size: 27px;
+}
+
+.descripcionModo {
+    color: #b8c2d2;
+    line-height: 1.5;
+}
+
+label {
+    display: block;
+    margin: 17px 0 8px;
+    color: #d1d5db;
+    font-weight: bold;
+}
+
+select {
+    width: 100%;
+    min-height: 48px;
+
+    padding: 11px;
+
+    border: 1px solid var(--borde);
+    border-radius: 11px;
+
+    background: var(--tarjeta3);
+
+    color: white;
+}
+
+.filaOpcion,
+.estadoPodsConfiguracion,
+.filaAjuste {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 15px 0;
+}
+
+.filaOpcion div,
+.filaAjuste div {
+    display: flex;
+    flex-direction: column;
+}
+
+.filaOpcion small,
+.filaAjuste small {
+    margin-top: 4px;
+    color: var(--texto2);
+}
+
+.filaOpcion input,
+.filaAjuste input {
+    width: 23px;
+    height: 23px;
+}
+
+.estadoPodsConfiguracion strong {
+    color: var(--verde);
+}
+
+.separador {
+    height: 1px;
+    background: var(--borde);
+}
+
+
+/* ================================================= */
+/* CUENTA */
+/* ================================================= */
+
+.cuentaContenedor {
+    min-height: calc(100vh - 48px);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.cuentaContenedor p {
+    color: var(--texto2);
+    font-size: 24px;
+}
+
+#numeroCuenta {
+    font-size: 120px;
+    font-weight: bold;
+}
+
+
+/* ================================================= */
+/* ENTRENAMIENTO */
+/* ================================================= */
+
+.deportistaEntrenamiento {
+    margin-top: 5px;
+    color: var(--azul);
+}
+
+.estadoEntrenamiento {
+    padding: 8px 13px;
+
+    background: #153a24;
+
+    color: var(--verde);
+
+    border-radius: 20px;
+
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.estadoEntrenamiento.pausa {
+    background: #4b330b;
+    color: var(--naranja);
+}
+
+.filaRonda {
+    display: flex;
+    justify-content: space-between;
+
+    padding: 12px;
+
+    background: var(--tarjeta2);
+
+    border-radius: 11px;
+}
+
+#textoFase {
+    color: var(--azul);
+}
+
+.cronometroCaja {
+    margin-top: 18px;
+    padding: 20px;
+
+    text-align: center;
+
+    background: #08101b;
+
+    border-radius: 16px;
+}
+
+.cronometroCaja small {
+    color: var(--texto2);
+}
+
+.cronometroCaja strong {
+    display: block;
+
+    margin-top: 7px;
+
+    font-size: 40px;
+}
+
+.zonaObjetivo {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.colorObjetivo {
+    width: 90px;
+    height: 90px;
+
+    margin: 16px auto;
+
+    background: #374151;
+
+    border-radius: 50%;
+
+    box-shadow:
+        inset 0 0 20px rgba(0, 0, 0, 0.35);
+}
+
+.pods {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 12px;
+
+    margin-top: 22px;
+}
+
+.pod {
+    padding: 14px;
+
+    border: 1px solid var(--borde);
+    border-radius: 15px;
+
+    background: var(--tarjeta2);
+
+    color: white;
+
+    cursor: pointer;
+}
+
+.luzPod {
+    width: 58px;
+    height: 58px;
+
+    margin: auto auto 10px;
+
+    background: #374151;
+
+    border-radius: 50%;
+}
+
+.datosEntrenamiento {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 10px;
+
+    margin-top: 18px;
+}
+
+.datosEntrenamiento div {
+    padding: 13px;
+
+    background: var(--tarjeta2);
+
+    border-radius: 11px;
+
+    text-align: center;
+}
+
+.datosEntrenamiento span {
+    color: var(--texto2);
+    font-size: 12px;
+}
+
+.datosEntrenamiento strong {
+    display: block;
+    margin-top: 5px;
+    font-size: 19px;
+}
+
+.mensajeResultado {
+    min-height: 38px;
+
+    margin-top: 18px;
+
+    text-align: center;
+
+    font-weight: bold;
+}
+
+.mensajeCorrecto {
+    color: var(--verde);
+}
+
+.mensajeError {
+    color: var(--rojo);
+}
+
+.controlesEntrenamiento {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+}
+
+
+/* ================================================= */
+/* RESULTADOS */
+/* ================================================= */
+
+.resultadoHero {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.resultadoIcono {
+    width: 70px;
+    height: 70px;
+
+    margin: auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #253247;
+
+    border-radius: 22px;
+
+    font-size: 35px;
+}
+
+.resultadoHero h2 {
+    margin-bottom: 5px;
+}
+
+.resultadoHero p {
+    margin: 0;
+    color: var(--texto2);
+}
+
+.gridResultados {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 11px;
+}
+
+.resultadoDato {
+    text-align: center;
+}
+
+.resultadoDato span {
+    color: var(--texto2);
+    font-size: 12px;
+}
+
+.resultadoDato strong {
+    display: block;
+    margin-top: 7px;
+    font-size: 21px;
+}
+
+.listaResultados,
+.historialEntrenamientos {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.resultadoFila {
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr 2fr;
+
+    gap: 8px;
+
+    padding: 11px;
+
+    margin-bottom: 8px;
+
+    background: var(--tarjeta2);
+
+    border-radius: 10px;
+}
+
+
+/* ================================================= */
+/* PROGRESO */
+/* ================================================= */
+
+.gridProgreso {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 11px;
+}
+
+.progresoDato {
+    text-align: center;
+}
+
+.progresoDato > span {
+    font-size: 24px;
+}
+
+.progresoDato small {
+    display: block;
+    margin-top: 8px;
+    color: var(--texto2);
+    font-size: 10px;
+}
+
+.progresoDato strong {
+    display: block;
+    margin-top: 7px;
+    font-size: 21px;
+}
+
+.objetivoNumeros {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 15px;
+
+    margin: 18px 0;
+}
+
+.objetivoNumeros div {
+    padding: 13px;
+
+    background: var(--tarjeta2);
+
+    border-radius: 12px;
+}
+
+.objetivoNumeros small {
+    display: block;
+    color: var(--texto2);
+}
+
+.objetivoNumeros strong {
+    display: block;
+    margin-top: 6px;
+    font-size: 20px;
+}
+
+.barraProgreso {
+    width: 100%;
+    height: 13px;
+
+    overflow: hidden;
+
+    background: #253247;
+
+    border-radius: 15px;
+}
+
+.rellenoObjetivo {
+    width: 0%;
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            #16a34a,
+            #22c55e
+        );
+
+    border-radius: 15px;
+
+    transition: width 0.4s;
+}
+
+.textoProgreso,
+.mensajeProgreso {
+    color: var(--texto2);
+    line-height: 1.5;
+}
+
+#graficoProgreso {
+    width: 100%;
+    max-width: 100%;
+}
+
+.actividadItem {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+
+    padding: 13px 0;
+
+    border-bottom: 1px solid var(--borde);
+}
+
+.actividadItem:last-child {
+    border-bottom: none;
+}
+
+.actividadItem small {
+    display: block;
+    margin-top: 4px;
+    color: var(--texto2);
+}
+
+.actividadTiempo {
+    text-align: right;
+}
+
+.actividadTiempo strong {
+    color: var(--verde);
+}
+
+
+/* ================================================= */
+/* HISTORIAL */
+/* ================================================= */
+
+.historialItem {
+    display: grid;
+
+    grid-template-columns:
+        1.2fr 1fr;
+
+    gap: 12px;
+
+    padding: 14px;
+
+    margin-bottom: 9px;
+
+    background: var(--tarjeta2);
+
+    border-radius: 11px;
+}
+
+.historialFecha {
+    margin-top: 5px;
+    color: var(--texto2);
+    font-size: 12px;
+}
+
+.historialDato {
+    margin-bottom: 5px;
+    font-size: 13px;
+}
+
+.textoSecundario {
+    color: var(--texto2);
+}
+
+
+/* ================================================= */
+/* MÓVIL */
+/* ================================================= */
+
+@media(max-width: 700px) {
+
+    .pantalla {
+        padding: 14px;
+    }
+
+    .gridResumenInicio,
+    .gridProgreso {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .gridEntrenamientos {
+        grid-template-columns: 1fr;
+    }
+
+    .pods {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .gridResultados {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .datosEntrenamiento {
+        grid-template-columns: 1fr;
+    }
+
+    .controlesEntrenamiento {
+        grid-template-columns: 1fr;
+    }
+
+    .resultadoFila {
+        grid-template-columns: 1fr;
+    }
+
+    .historialItem {
+        grid-template-columns: 1fr;
+    }
+
+    .conexionPod {
+        flex-wrap: wrap;
+    }
+
+    .botonConexionPod {
+        width: 100%;
+    }
+
+    #numeroCuenta {
+        font-size: 90px;
+    }
+}
