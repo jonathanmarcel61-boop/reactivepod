@@ -1573,7 +1573,7 @@ async function buscarPodsParaReconectar() {
   try {
     await inicializarBLENativo();
 
-    console.log("🔎 Buscando ReactiPods...");
+    console.log("🔎 Buscando pods RehabPod...");
 
     const encontrados = new Map();
 
@@ -1852,17 +1852,11 @@ function guardarDatos() {
 }
 
 function aplicarTema(tema) {
-
   if (tema === "claro") {
-
     document.body.classList.add("tema-claro");
-
   } else {
-
     document.body.classList.remove("tema-claro");
-
   }
-
 }
 
 function cargarAjustes() {
@@ -4409,9 +4403,7 @@ function crearPanelEntrenadorActivo() {
 
   // El control del entrenador va justo después de "ELIGE UN POD" / círculo,
   // y antes de las métricas (Aciertos/Errores/Último).
-  const zonaObjetivoRef = nombreColor
-    ? nombreColor.closest(".zonaObjetivo")
-    : null;
+  const zonaObjetivoRef = nombreColor ? nombreColor.closest(".zonaObjetivo") : null;
 
   if (zonaObjetivoRef) {
     zonaObjetivoRef.insertAdjacentElement("afterend", panel);
@@ -6116,13 +6108,11 @@ ajusteTema.addEventListener(
   "change",
 
   () => {
-
     ajustesApp.tema = ajusteTema.value;
 
     aplicarTema(ajustesApp.tema);
 
     guardarAjustes();
-
   }
 );
 
@@ -6194,7 +6184,7 @@ function crearPantallaInicioApp() {
                 letter-spacing:1px;
             "
         >
-            ReactiPod
+            RehabPod
         </div>
  
         <div
@@ -7250,9 +7240,7 @@ function ordenarEntrenadorActivoV15() {
 
   // nombreColor vive dentro de la tarjeta central que contiene:
   // ELIGE UN POD -> círculo -> CONTROL MANUAL.
-  const zonaObjetivoRef = nombreColor
-    ? nombreColor.closest(".zonaObjetivo")
-    : null;
+  const zonaObjetivoRef = nombreColor ? nombreColor.closest(".zonaObjetivo") : null;
 
   if (zonaObjetivoRef && zonaObjetivoRef.nextElementSibling !== panel) {
     zonaObjetivoRef.insertAdjacentElement("afterend", panel);
@@ -7394,9 +7382,7 @@ function rehabActualizarInterfazConexionGenerica() {
     }
 
     if (estado && pod && pod.conectado) {
-      estado.textContent = pod.nombre
-        ? `Conectado · ${pod.nombre}`
-        : "Conectado";
+      estado.textContent = pod.nombre ? `Conectado · ${pod.nombre}` : "Conectado";
     }
   });
 
@@ -7937,15 +7923,11 @@ feedbackTodosPods = async function (comando, colorCSS, duracion = 800) {
 
   activos.forEach((indice) => encenderVisual(indice, colorCSS));
 
-  await Promise.all(
-    activos.map((indice) => enviarComandoPod(indice, comando))
-  );
+  await Promise.all(activos.map((indice) => enviarComandoPod(indice, comando)));
 
   await new Promise((resolver) => setTimeout(resolver, duracion));
 
-  await Promise.all(
-    activos.map((indice) => enviarComandoPod(indice, "off"))
-  );
+  await Promise.all(activos.map((indice) => enviarComandoPod(indice, "off")));
 
   activos.forEach((indice) => apagarVisualPod(indice));
 };
@@ -7995,9 +7977,7 @@ activarColores = async function () {
   var objetivo = coloresActuales[objetivoCorrecto];
 
   await Promise.all(
-    activos.map((indice) =>
-      enviarComandoPod(indice, coloresActuales[indice].comando)
-    )
+    activos.map((indice) => enviarComandoPod(indice, coloresActuales[indice].comando))
   );
 
   textoFase.textContent = "¡AHORA!";
@@ -8066,9 +8046,7 @@ activarColorProhibido = async function () {
   var prohibido = coloresActuales[indiceColorProhibido];
 
   await Promise.all(
-    activos.map((indice) =>
-      enviarComandoPod(indice, coloresActuales[indice].comando)
-    )
+    activos.map((indice) => enviarComandoPod(indice, coloresActuales[indice].comando))
   );
 
   textoFase.textContent = "¡CUIDADO!";
@@ -8171,8 +8149,7 @@ respuestaCircuito = async function (indice) {
   detenerCronometro();
   fase = "resultado";
 
-  var tiempo =
-    (performance.now() - circuitoTiempoInicio - tiempoPausado) / 1000;
+  var tiempo = (performance.now() - circuitoTiempoInicio - tiempoPausado) / 1000;
 
   aciertos++;
   contadorAciertos.textContent = aciertos;
@@ -8185,9 +8162,7 @@ respuestaCircuito = async function (indice) {
     ronda: rondaActual,
     correcto: true,
     tiempo,
-    estado: `Circuito ${circuitoOrden
-      .map((i) => rehabNumeroVisiblePod(i))
-      .join("-")}`,
+    estado: `Circuito ${circuitoOrden.map((i) => rehabNumeroVisiblePod(i)).join("-")}`,
   });
 
   await apagarTodosLosPods();
@@ -8354,11 +8329,9 @@ if (btnCancelar) {
 var REHABPOD_CLAVE_MODO_VIRTUAL = "rehabpodModoVirtual";
 var REHABPOD_CLAVE_COLOR_MEMORIA = "rehabpodColorMemoria";
 
-var rehabModoVirtual =
-  localStorage.getItem(REHABPOD_CLAVE_MODO_VIRTUAL) === "true";
+var rehabModoVirtual = localStorage.getItem(REHABPOD_CLAVE_MODO_VIRTUAL) === "true";
 
-var rehabColorMemoria =
-  localStorage.getItem(REHABPOD_CLAVE_COLOR_MEMORIA) || "blue";
+var rehabColorMemoria = localStorage.getItem(REHABPOD_CLAVE_COLOR_MEMORIA) || "blue";
 
 // En Memoria NO se permiten rojo ni verde porque quedan reservados para
 // feedback de error/correcto al terminar la secuencia.
@@ -8378,8 +8351,7 @@ if (!REHABPOD_COLORES_MEMORIA.includes(rehabColorMemoria)) {
 
 function rehabObtenerColorMemoria() {
   return (
-    catalogoColoresPersonalizados[rehabColorMemoria] ||
-    catalogoColoresPersonalizados.blue
+    catalogoColoresPersonalizados[rehabColorMemoria] || catalogoColoresPersonalizados.blue
   );
 }
 
@@ -8544,7 +8516,8 @@ function rehabActualizarModoVirtual() {
   check.checked = rehabModoVirtual;
 
   if (rehabModoVirtual) {
-    estado.textContent = "SIMULACIÓN ACTIVADA · toca un Pod en pantalla para simular el golpe";
+    estado.textContent =
+      "SIMULACIÓN ACTIVADA · toca un Pod en pantalla para simular el golpe";
     estado.style.color = "#22c55e";
   } else {
     estado.textContent = "SIMULACIÓN DESACTIVADA · se usarán los Pods Bluetooth";
@@ -8828,8 +8801,7 @@ if (btnCancelar) {
 var REHABPOD_CLAVE_COLOR_CAZA = "rehabpodColorCaza";
 var REHABPOD_CLAVE_TIEMPO_AUTOMATICO = "rehabpodTiempoAutomatico";
 
-var rehabColorCaza =
-  localStorage.getItem(REHABPOD_CLAVE_COLOR_CAZA) || "red";
+var rehabColorCaza = localStorage.getItem(REHABPOD_CLAVE_COLOR_CAZA) || "red";
 
 var rehabTiempoAutomaticoMs = Number(
   localStorage.getItem(REHABPOD_CLAVE_TIEMPO_AUTOMATICO) || 1000
@@ -8864,16 +8836,14 @@ var rehabUltimoPodAutomatico = -1;
 
 function rehabObtenerColorCaza() {
   return (
-    catalogoColoresPersonalizados[rehabColorCaza] ||
-    catalogoColoresPersonalizados.red
+    catalogoColoresPersonalizados[rehabColorCaza] || catalogoColoresPersonalizados.red
   );
 }
 
 function rehabColoresCazaSecundarios() {
-  return REHABPOD_COLORES_CAZA
-    .filter(function (clave) {
-      return clave !== rehabColorCaza;
-    })
+  return REHABPOD_COLORES_CAZA.filter(function (clave) {
+    return clave !== rehabColorCaza;
+  })
     .map(function (clave) {
       return catalogoColoresPersonalizados[clave];
     })
@@ -9206,7 +9176,8 @@ obtenerGuiaModoV7 = function () {
     return {
       icono: "🔁⚡",
       titulo: "Cambio automático",
-      descripcion: "Los Pods cambian de estímulo automáticamente. Este modo sirve para desplazamientos, seguimiento visual y ejercicios guiados sin necesidad de tocar los Pods.",
+      descripcion:
+        "Los Pods cambian de estímulo automáticamente. Este modo sirve para desplazamientos, seguimiento visual y ejercicios guiados sin necesidad de tocar los Pods.",
       pasos: [
         "Observa el Pod que se ilumina.",
         "Desplázate, apunta, gira o realiza el ejercicio indicado por el entrenador.",
@@ -9296,8 +9267,7 @@ async function rehabV19RespuestaCazaColor(indice) {
   detenerCronometro();
   fase = "resultado";
 
-  var tiempo =
-    (performance.now() - tiempoInicio - tiempoPausado) / 1000;
+  var tiempo = (performance.now() - tiempoInicio - tiempoPausado) / 1000;
 
   aciertos++;
   contadorAciertos.textContent = aciertos;
@@ -9473,12 +9443,7 @@ alternarPausa = async function () {
 
   await rehabV19AlternarPausaBase();
 
-  if (
-    modoActual === "automatico" &&
-    entrenamientoActivo &&
-    estabaPausado &&
-    !pausado
-  ) {
+  if (modoActual === "automatico" && entrenamientoActivo && estabaPausado && !pausado) {
     rehabTemporizadorAutomatico = setTimeout(function () {
       rehabV19IniciarRondaAutomatica();
     }, 250);
@@ -9527,7 +9492,871 @@ if (btnCancelar) {
     rehabV19PrepararCategorias();
   }, 0);
 
-  console.log(
-    "RehabPod V19: Caza de color + Cambio automático activados."
-  );
+  console.log("RehabPod V19: Caza de color + Cambio automático activados.");
 })();
+// =====================================================
+// REHABPOD V20
+// DIFICULTAD ESPECIFICA + STROOP (PALABRA VS COLOR)
+// PEGAR AL FINAL DE app.js, DESPUES DE V19.
+// =====================================================
+
+var rehabProhibidosActuales = new Set();
+var rehabColorProhibidoActual = null;
+var rehabUltimoColorCazaDinamico = rehabColorCaza;
+var rehabReglaStroopActual = "palabra";
+var rehabObjetivoStroop = -1;
+var rehabColorSemanticoStroop = null;
+var rehabColorVisualStroop = null;
+
+MINIMO_PODS_POR_MODO.stroop = 2;
+
+function rehabDificultad() {
+  return dificultadActual || ajustesApp.dificultad || "media";
+}
+
+function rehabElegirColorClave(excluir) {
+  excluir = excluir || [];
+  var disponibles = REHABPOD_COLORES_CAZA.filter(function (c) {
+    return !excluir.includes(c) && catalogoColoresPersonalizados[c];
+  });
+  if (!disponibles.length) disponibles = REHABPOD_COLORES_CAZA.slice();
+  return disponibles[Math.floor(Math.random() * disponibles.length)];
+}
+
+function rehabColorPorClave(clave) {
+  return catalogoColoresPersonalizados[clave] || catalogoColoresPersonalizados.blue;
+}
+
+// -----------------------------------------------------
+// 1. RESUMEN DE DIFICULTAD ESPECIFICO POR MODO
+// -----------------------------------------------------
+function rehabDescripcionDificultadEspecifica(modo, dificultad) {
+  var mapa = {
+    simple: {
+      facil: "Fácil · El estímulo tarda 2–4 s en aparecer y hay más pausa entre rondas.",
+      media: "Media · Espera de 1–3 s y ritmo equilibrado.",
+      dificil: "Difícil · El estímulo aparece en 0.5–1.5 s y la pausa es corta.",
+      personalizada: "Personal · Tú eliges la espera y la pausa entre rondas."
+    },
+    colores: {
+      facil: "Fácil · Ritmo lento para identificar con calma el color objetivo.",
+      media: "Media · Colores dinámicos y ritmo equilibrado.",
+      dificil: "Difícil · Los colores cambian con espera y pausas más cortas; exige discriminación rápida.",
+      personalizada: "Personal · Mantiene los colores dinámicos y usa tus tiempos personalizados."
+    },
+    secuencia: {
+      facil: "Fácil · La secuencia crece de 1 en 1 y se muestra lentamente.",
+      media: "Media · La secuencia crece de 1 en 1 a velocidad normal.",
+      dificil: "Difícil · La secuencia crece de 2 en 2 y se muestra mucho más rápido.",
+      personalizada: "Personal · La secuencia crece de 1 en 1 con los tiempos personalizados disponibles."
+    },
+    libre: {
+      facil: "Fácil · Sesión libre con ritmo cómodo y sin una secuencia obligatoria.",
+      media: "Media · Sesión libre para mantener un ritmo continuo.",
+      dificil: "Difícil · Busca mantener golpes rápidos y continuos; la app conserva el registro de tiempos.",
+      personalizada: "Personal · Sesión libre con la configuración general elegida."
+    },
+    persecucion: {
+      facil: "Fácil · El siguiente objetivo aparece con una pausa aproximada de 450 ms.",
+      media: "Media · El siguiente objetivo aparece con una pausa aproximada de 250 ms.",
+      dificil: "Difícil · El objetivo cambia casi inmediatamente, con una pausa aproximada de 120 ms.",
+      personalizada: "Personal · Mantiene el comportamiento de persecución con la configuración disponible."
+    },
+    doble: {
+      facil: "Fácil · Toca los dos Pods objetivo; no importa el orden ni la mano.",
+      media: "Media · Toca los dos Pods con un ritmo más rápido; no importa el orden.",
+      dificil: "Difícil · La pantalla asigna un Pod a IZQUIERDA y otro a DERECHA. La app valida los Pods, pero el sensor actual no puede comprobar qué mano usaste.",
+      personalizada: "Personal · Dos objetivos simultáneos con tus tiempos personalizados."
+    },
+    prohibido: {
+      facil: "Fácil · 1 Pod muestra el color prohibido. Toca cualquiera de los permitidos.",
+      media: "Media · Hasta 2 Pods muestran el mismo color prohibido. Debes evitar ambos.",
+      dificil: "Difícil · Entre 2 y 3 Pods pueden mostrar el mismo color prohibido, variando aleatoriamente según la cantidad de Pods activos.",
+      personalizada: "Personal · 1 Pod prohibido y tus tiempos personalizados."
+    },
+    circuito: {
+      facil: "Fácil · Recorre los Pods en orden lógico 1→2→3→4 (solo los seleccionados).",
+      media: "Media · El orden del circuito cambia aleatoriamente en cada ronda.",
+      dificil: "Difícil · Orden aleatorio y ritmo más rápido entre estímulos.",
+      personalizada: "Personal · Circuito con orden aleatorio y configuración general personalizada."
+    },
+    contrarreloj: {
+      facil: "Fácil · Prioriza precisión durante el tiempo disponible.",
+      media: "Media · Equilibrio entre velocidad y precisión.",
+      dificil: "Difícil · Busca encadenar respuestas lo más rápido posible; el siguiente objetivo aparece inmediatamente tras acertar.",
+      personalizada: "Personal · Mantiene la duración elegida y la configuración general personalizada."
+    },
+    entrenador: {
+      facil: "Fácil · El entrenador puede dar más tiempo entre activaciones manuales.",
+      media: "Media · Control manual con ritmo normal.",
+      dificil: "Difícil · El entrenador puede alternar Pods rápidamente y combinar indicaciones físicas o cognitivas.",
+      personalizada: "Personal · El entrenador controla manualmente la exigencia de la sesión."
+    },
+    cazaColor: {
+      facil: "Fácil · Busca el mismo color durante todo el entrenamiento.",
+      media: "Media · El color objetivo cambia automáticamente cada 3 rondas.",
+      dificil: "Difícil · El color objetivo puede cambiar en cada ronda; debes leer el nuevo objetivo antes de responder.",
+      personalizada: "Personal · Mantiene fijo el color que elegiste y usa la configuración personalizada."
+    },
+    automatico: {
+      facil: "Fácil · Cada estímulo permanece encendido aproximadamente 2 s antes de cambiar solo.",
+      media: "Media · Cada estímulo permanece aproximadamente 1 s.",
+      dificil: "Difícil · Cambio automático rápido, aproximadamente cada 0.5 s.",
+      personalizada: "Personal · Se usa exactamente el tiempo por estímulo que seleccionaste."
+    },
+    stroop: {
+      facil: "Fácil · La pantalla te indica claramente si debes seguir la PALABRA o el COLOR visual.",
+      media: "Media · La regla PALABRA/COLOR cambia aleatoriamente en cada ronda.",
+      dificil: "Difícil · La regla cambia en cada ronda y la palabra siempre aparece escrita con un color diferente para generar interferencia Stroop.",
+      personalizada: "Personal · Regla aleatoria con tus tiempos personalizados."
+    }
+  };
+  var grupo = mapa[modo] || mapa.simple;
+  return grupo[dificultad] || grupo.media;
+}
+
+var rehabV20ActualizarResumenBase = actualizarResumenDificultad;
+actualizarResumenDificultad = function () {
+  var resumen = document.getElementById("resumenDificultadReactiPod");
+  if (!resumen) return;
+  resumen.textContent = rehabDescripcionDificultadEspecifica(modoActual, rehabDificultad());
+};
+
+// -----------------------------------------------------
+// 2. COLOR PROHIBIDO: 1 / 2 / 2-3 PODS PROHIBIDOS
+// -----------------------------------------------------
+activarColorProhibido = async function () {
+  fase = "prohibidoRespuesta";
+  var activos = rehabIndicesPodsActivos();
+  if (activos.length < 2) return;
+
+  var maxPermitido = Math.max(1, activos.length - 1); // siempre queda al menos un Pod válido
+  var cantidadProhibidos = 1;
+  var dif = rehabDificultad();
+
+  if (dif === "media") {
+    cantidadProhibidos = Math.min(2, maxPermitido);
+  } else if (dif === "dificil") {
+    var maxDificil = Math.min(3, maxPermitido);
+    var minDificil = Math.min(2, maxDificil);
+    cantidadProhibidos = minDificil + Math.floor(Math.random() * (maxDificil - minDificil + 1));
+  }
+
+  var claveProhibida = rehabElegirColorClave([]);
+  rehabColorProhibidoActual = rehabColorPorClave(claveProhibida);
+  var mezclados = rehabMezclarCopia(activos);
+  rehabProhibidosActuales = new Set(mezclados.slice(0, cantidadProhibidos));
+  indiceColorProhibido = mezclados[0]; // compatibilidad con variables antiguas
+  coloresActuales = new Array(podsBLE.length).fill(null);
+
+  var clavesPermitidas = REHABPOD_COLORES_CAZA.filter(function (c) { return c !== claveProhibida; });
+  var pos = 0;
+
+  activos.forEach(function (indice) {
+    var color;
+    if (rehabProhibidosActuales.has(indice)) {
+      color = rehabColorProhibidoActual;
+    } else {
+      color = rehabColorPorClave(clavesPermitidas[pos % clavesPermitidas.length]);
+      pos++;
+    }
+    coloresActuales[indice] = color;
+    encenderVisual(indice, color.css);
+  });
+
+  await Promise.all(activos.map(function (indice) {
+    return enviarComandoPod(indice, coloresActuales[indice].comando);
+  }));
+
+  textoFase.textContent = "¡CUIDADO!";
+  textoObjetivo.textContent = cantidadProhibidos === 1 ? "NO TOQUES ESTE COLOR" : `EVITA ${cantidadProhibidos} PODS`;
+  nombreColor.textContent = rehabColorProhibidoActual.nombre;
+  colorObjetivo.style.background = rehabColorProhibidoActual.css;
+  mensajeResultado.textContent = cantidadProhibidos > 1 ? `${cantidadProhibidos} Pods tienen el color prohibido` : "Evita el color prohibido";
+  mensajeResultado.className = "mensajeResultado";
+  iniciarMedicion();
+};
+
+respuestaColorProhibido = async function (indice) {
+  if (!esperandoRespuesta) return;
+  esperandoRespuesta = false;
+  detenerCronometro();
+  fase = "resultado";
+
+  var tiempo = (performance.now() - tiempoInicio - tiempoPausado) / 1000;
+  var correcto = !rehabProhibidosActuales.has(indice);
+  ultimoTiempo.textContent = `${tiempo.toFixed(3)} s`;
+
+  if (correcto) {
+    aciertos++;
+    contadorAciertos.textContent = aciertos;
+    mensajeResultado.textContent = `✅ Evitaste ${rehabColorProhibidoActual.nombre}`;
+    mensajeResultado.className = "mensajeResultado mensajeCorrecto";
+    tono(1000, 130);
+  } else {
+    errores++;
+    contadorErrores.textContent = errores;
+    mensajeResultado.textContent = `❌ Tocaste un Pod ${rehabColorProhibidoActual.nombre} prohibido`;
+    mensajeResultado.className = "mensajeResultado mensajeError";
+    tono(220, 240);
+  }
+
+  resultados.push({
+    ronda: rondaActual,
+    correcto: correcto,
+    tiempo: tiempo,
+    estado: correcto ? `Evitó ${rehabColorProhibidoActual.nombre}` : `Tocó prohibido ${rehabColorProhibidoActual.nombre}`
+  });
+
+  await apagarTodosLosPods();
+  continuar();
+};
+
+// -----------------------------------------------------
+// 3. DOBLE ESTIMULO: COORDINACION IZQUIERDA/DERECHA
+// -----------------------------------------------------
+var rehabV20ActivarDobleBase = activarDobleEstimulo;
+activarDobleEstimulo = async function () {
+  await rehabV20ActivarDobleBase();
+
+  if (rehabDificultad() === "dificil" && objetivosDobles && objetivosDobles.length >= 2) {
+    var izquierda = objetivosDobles[0];
+    var derecha = objetivosDobles[1];
+    textoFase.textContent = "¡DOS MANOS!";
+    textoObjetivo.textContent = `IZQUIERDA → POD ${rehabNumeroVisiblePod(izquierda)}   |   DERECHA → POD ${rehabNumeroVisiblePod(derecha)}`;
+    nombreColor.textContent = "COORDINACIÓN BILATERAL";
+    mensajeResultado.textContent = "Usa la mano indicada para cada Pod";
+    mensajeResultado.className = "mensajeResultado";
+  }
+};
+
+// -----------------------------------------------------
+// 4. MEMORIA: EN DIFICIL AGREGA 2 PASOS POR RONDA
+// V18 sigue controlando el color fijo elegido.
+// -----------------------------------------------------
+iniciarSecuencia = function () {
+  fase = "secuenciaMostrar";
+  var cantidadAgregar = rehabDificultad() === "dificil" ? 2 : 1;
+
+  for (var i = 0; i < cantidadAgregar; i++) {
+    var elegido = rehabElegirPodActivo();
+    if (elegido >= 0) secuencia.push(elegido);
+  }
+
+  indiceMostrarSecuencia = 0;
+  posicionSecuencia = 0;
+  textoFase.textContent = "Memoriza";
+  textoObjetivo.textContent = rehabDificultad() === "dificil" ? "MEMORIZA · +2 PASOS" : "MEMORIZA";
+  nombreColor.textContent = `${secuencia.length} pasos`;
+  colorObjetivo.style.background = "#374151";
+  mostrarElementoSecuencia();
+};
+
+// -----------------------------------------------------
+// 5. CIRCUITO: FACIL ORDENADO; MEDIA/DIFICIL ALEATORIO
+// -----------------------------------------------------
+var rehabV20ActivarCircuitoBase = activarCircuito;
+activarCircuito = async function () {
+  if (rehabDificultad() !== "facil") {
+    return await rehabV20ActivarCircuitoBase();
+  }
+
+  if (!entrenamientoActivo || pausado) return;
+  circuitoOrden = rehabIndicesPodsActivos().slice();
+  circuitoPosicion = 0;
+  circuitoTiempoInicio = performance.now();
+  fase = "circuitoRespuesta";
+  esperandoRespuesta = true;
+  textoFase.textContent = "¡CIRCUITO!";
+  mensajeResultado.textContent = "Orden fácil: sigue los Pods en orden";
+  await mostrarObjetivoCircuito();
+  iniciarMedicion();
+};
+
+// -----------------------------------------------------
+// 6. CAZA DE COLOR: OBJETIVO FIJO / CADA 3 / CADA RONDA
+// -----------------------------------------------------
+var rehabV20ActivarCazaBase = rehabV19ActivarCazaColor;
+rehabV19ActivarCazaColor = async function () {
+  var dif = rehabDificultad();
+  var debeCambiar = false;
+
+  if (dif === "media" && ((rondaActual - 1) % 3 === 0) && rondaActual > 1) debeCambiar = true;
+  if (dif === "dificil") debeCambiar = true;
+
+  if (debeCambiar) {
+    rehabColorCaza = rehabElegirColorClave([rehabUltimoColorCazaDinamico]);
+    rehabUltimoColorCazaDinamico = rehabColorCaza;
+  }
+
+  await rehabV20ActivarCazaBase();
+
+  if (dif === "media") {
+    mensajeResultado.textContent = "El color objetivo cambia cada 3 rondas";
+  } else if (dif === "dificil") {
+    mensajeResultado.textContent = "Objetivo nuevo: léelo antes de tocar";
+  }
+};
+
+// -----------------------------------------------------
+// 7. CAMBIO AUTOMATICO: TIEMPO SEGUN DIFICULTAD
+// Personal conserva el selector de V19.
+// -----------------------------------------------------
+var rehabV20IniciarAutomaticoBase = rehabV19IniciarRondaAutomatica;
+rehabV19IniciarRondaAutomatica = async function () {
+  var dif = rehabDificultad();
+  if (dif === "facil") rehabTiempoAutomaticoMs = 2000;
+  else if (dif === "media") rehabTiempoAutomaticoMs = 1000;
+  else if (dif === "dificil") rehabTiempoAutomaticoMs = 500;
+  // personalizada conserva rehabTiempoAutomaticoMs elegido por el usuario
+  return await rehabV20IniciarAutomaticoBase();
+};
+
+// -----------------------------------------------------
+// 8. NUEVO MODO: PALABRA VS COLOR (EFECTO STROOP)
+// -----------------------------------------------------
+function rehabV20CrearTarjetaStroop() {
+  var tarjeta = document.createElement("button");
+  tarjeta.type = "button";
+  tarjeta.className = "tarjetaEntrenamientoModo";
+  tarjeta.dataset.modo = "stroop";
+  tarjeta.style.width = "100%";
+  tarjeta.style.textAlign = "left";
+  tarjeta.innerHTML = `
+    <div style="font-size:34px;margin-bottom:8px;">🧠🎨</div>
+    <strong style="display:block;font-size:17px;">Palabra vs color</strong>
+    <small style="display:block;margin-top:6px;line-height:1.45;opacity:.78;">
+      Lee la regla: toca el color que DICE la palabra o el color con el que está ESCRITA.
+    </small>`;
+  tarjeta.addEventListener("click", function () { seleccionarModo("stroop"); });
+  return tarjeta;
+}
+
+function rehabV20InsertarStroopSiCoordinacion() {
+  var detalle = document.getElementById("gridDetalleCategoriaV9");
+  var titulo = document.getElementById("detalleTituloV9");
+  if (!detalle || !titulo || titulo.textContent.trim() !== "Coordinación") return;
+  if (!detalle.querySelector('[data-modo="stroop"]')) detalle.appendChild(rehabV20CrearTarjetaStroop());
+}
+
+async function rehabV20ActivarStroop() {
+  if (!entrenamientoActivo || pausado || modoActual !== "stroop") return;
+  var activos = rehabIndicesPodsActivos();
+  if (activos.length < 2) return;
+
+  fase = "stroopRespuesta";
+  esperandoRespuesta = true;
+
+  var clavePalabra = rehabElegirColorClave([]);
+  var claveVisual = rehabElegirColorClave([clavePalabra]);
+  rehabColorSemanticoStroop = rehabColorPorClave(clavePalabra);
+  rehabColorVisualStroop = rehabColorPorClave(claveVisual);
+
+  var dif = rehabDificultad();
+  if (dif === "facil") {
+    // Fácil alterna de manera predecible por ronda.
+    rehabReglaStroopActual = rondaActual % 2 === 0 ? "visual" : "palabra";
+  } else {
+    rehabReglaStroopActual = Math.random() < 0.5 ? "palabra" : "visual";
+  }
+
+  var colorObjetivoReal = rehabReglaStroopActual === "palabra" ? rehabColorSemanticoStroop : rehabColorVisualStroop;
+  var claveObjetivo = rehabReglaStroopActual === "palabra" ? clavePalabra : claveVisual;
+  var otrasClaves = REHABPOD_COLORES_CAZA.filter(function (c) { return c !== claveObjetivo; });
+  otrasClaves = rehabMezclarCopia(otrasClaves);
+
+  rehabObjetivoStroop = rehabElegirPodActivo();
+  objetivoCorrecto = rehabObjetivoStroop;
+  coloresActuales = new Array(podsBLE.length).fill(null);
+  var pos = 0;
+
+  activos.forEach(function (indice) {
+    var color = indice === rehabObjetivoStroop ? colorObjetivoReal : rehabColorPorClave(otrasClaves[pos++ % otrasClaves.length]);
+    coloresActuales[indice] = color;
+    encenderVisual(indice, color.css);
+  });
+
+  await Promise.all(activos.map(function (indice) {
+    return enviarComandoPod(indice, coloresActuales[indice].comando);
+  }));
+
+  textoFase.textContent = "¡STROOP!";
+  textoObjetivo.textContent = rehabReglaStroopActual === "palabra" ? "TOCA LO QUE DICE" : "TOCA EL COLOR DE LA PALABRA";
+  nombreColor.textContent = rehabColorSemanticoStroop.nombre;
+  nombreColor.style.color = rehabColorVisualStroop.css;
+  nombreColor.style.fontWeight = "900";
+  nombreColor.style.textShadow = "0 1px 2px rgba(0,0,0,.25)";
+  colorObjetivo.style.background = rehabColorVisualStroop.css;
+  mensajeResultado.textContent = rehabReglaStroopActual === "palabra"
+    ? `La palabra dice ${rehabColorSemanticoStroop.nombre}; ignora el color de las letras.`
+    : `Ignora lo que dice la palabra; busca el color ${rehabColorVisualStroop.nombre} de las letras.`;
+  mensajeResultado.className = "mensajeResultado";
+  iniciarMedicion();
+}
+
+async function rehabV20RespuestaStroop(indice) {
+  if (!entrenamientoActivo || modoActual !== "stroop" || fase !== "stroopRespuesta" || !esperandoRespuesta) return;
+  esperandoRespuesta = false;
+  detenerCronometro();
+  fase = "resultado";
+
+  var tiempo = (performance.now() - tiempoInicio - tiempoPausado) / 1000;
+  var correcto = indice === rehabObjetivoStroop;
+  ultimoTiempo.textContent = `${tiempo.toFixed(3)} s`;
+
+  if (correcto) {
+    aciertos++;
+    contadorAciertos.textContent = aciertos;
+    mensajeResultado.textContent = `✅ CORRECTO · ${tiempo.toFixed(3)} s`;
+    mensajeResultado.className = "mensajeResultado mensajeCorrecto";
+    tono(1000, 130);
+  } else {
+    errores++;
+    contadorErrores.textContent = errores;
+    mensajeResultado.textContent = "❌ Respuesta incorrecta";
+    mensajeResultado.className = "mensajeResultado mensajeError";
+    tono(220, 220);
+  }
+
+  resultados.push({
+    ronda: rondaActual,
+    correcto: correcto,
+    tiempo: tiempo,
+    estado: `Stroop ${rehabReglaStroopActual === "palabra" ? "palabra" : "color visual"}`
+  });
+
+  nombreColor.style.color = "";
+  nombreColor.style.textShadow = "";
+  await apagarTodosLosPods();
+  continuar();
+}
+
+// Interceptar estimulo: V19 ya intercepta Caza; V20 añade Stroop.
+var rehabV20ActivarEstimuloBase = activarEstimulo;
+activarEstimulo = async function () {
+  if (modoActual === "stroop") {
+    await rehabV20ActivarStroop();
+    return;
+  }
+  await rehabV20ActivarEstimuloBase();
+};
+
+// Interceptar PRESS para Stroop.
+var rehabV20ProcesarPulsacionBase = procesarPulsacion;
+procesarPulsacion = function (indice) {
+  if (modoActual === "stroop" && entrenamientoActivo && fase === "stroopRespuesta") {
+    rehabV20RespuestaStroop(indice);
+    return;
+  }
+  rehabV20ProcesarPulsacionBase(indice);
+};
+
+// -----------------------------------------------------
+// 9. CONFIGURACION, NOMBRE, DESCRIPCION Y GUIA DE STROOP
+// -----------------------------------------------------
+var rehabV20ConfigurarModoBase = configurarModo;
+configurarModo = function () {
+  rehabV20ConfigurarModoBase();
+  if (modoActual === "stroop") {
+    tituloConfiguracion.textContent = "Palabra vs color";
+    iconoConfiguracion.textContent = "🧠🎨";
+  }
+  actualizarResumenDificultad();
+  rehabActualizarEtiquetasMinimoPods();
+  rehabActualizarDescripcionModo();
+};
+
+var rehabV20DescripcionBase = rehabActualizarDescripcionModo;
+rehabActualizarDescripcionModo = function () {
+  rehabV20DescripcionBase();
+  if (modoActual === "stroop" && descripcionModo) {
+    descripcionModo.textContent = "Entrenamiento de atención e inhibición: la palabra puede decir un color pero estar escrita con otro. Sigue la regla indicada en cada ronda.";
+  }
+};
+
+var rehabV20NombreModoBase = obtenerNombreModo;
+obtenerNombreModo = function () {
+  if (modoActual === "stroop") return "Palabra vs color";
+  return rehabV20NombreModoBase();
+};
+
+var rehabV20GuiaBase = obtenerGuiaModoV7;
+obtenerGuiaModoV7 = function () {
+  if (modoActual === "stroop") {
+    return {
+      icono: "🧠🎨",
+      titulo: "Palabra vs color",
+      descripcion: "La palabra y el color con el que está escrita pueden ser diferentes.",
+      pasos: [
+        "Si dice TOCA LO QUE DICE, busca en los Pods el color nombrado por la palabra.",
+        "Si dice TOCA EL COLOR DE LA PALABRA, ignora el texto y busca el color con el que están pintadas las letras.",
+        "Toca el Pod que tenga el color correcto según la regla."
+      ]
+    };
+  }
+  return rehabV20GuiaBase();
+};
+
+// -----------------------------------------------------
+// 10. AL CAMBIAR DIFICULTAD, ACTUALIZAR TEXTO INMEDIATO
+// -----------------------------------------------------
+document.querySelectorAll("[data-dificultad]").forEach(function (boton) {
+  boton.addEventListener("click", function () {
+    setTimeout(function () {
+      actualizarResumenDificultad();
+      if (modoActual === "automatico") rehabV19ActualizarControlTiempoAutomatico();
+    }, 0);
+  });
+});
+
+// -----------------------------------------------------
+// 11. LIMPIEZA VISUAL STROOP
+// -----------------------------------------------------
+var rehabV20FinalizarBase = finalizarEntrenamiento;
+finalizarEntrenamiento = async function () {
+  if (nombreColor) {
+    nombreColor.style.color = "";
+    nombreColor.style.textShadow = "";
+  }
+  return await rehabV20FinalizarBase();
+};
+
+var rehabV20CancelarBase = cancelarEntrenamiento;
+cancelarEntrenamiento = async function () {
+  if (nombreColor) {
+    nombreColor.style.color = "";
+    nombreColor.style.textShadow = "";
+  }
+  return await rehabV20CancelarBase();
+};
+
+if (btnCancelar) btnCancelar.onclick = cancelarEntrenamiento;
+
+(function inicializarRehabPodV20() {
+  setTimeout(function () {
+    var coordinacion = document.querySelector('[data-categoria="coordinacion"]');
+    if (coordinacion && coordinacion.dataset.rehabV20 !== "1") {
+      coordinacion.dataset.rehabV20 = "1";
+      coordinacion.addEventListener("click", function () {
+        setTimeout(rehabV20InsertarStroopSiCoordinacion, 0);
+      });
+      var contador = coordinacion.querySelector("small");
+      if (contador) contador.textContent = "5 entrenamientos";
+    }
+    rehabV20InsertarStroopSiCoordinacion();
+    actualizarResumenDificultad();
+  }, 0);
+  console.log("RehabPod V20: dificultad específica + Palabra vs color activados.");
+})();
+// =====================================================
+// REHABPOD V21
+// FEEDBACK UNIVERSAL DE RESPUESTA
+// Verde = pulsacion correcta
+// Rojo  = pulsacion incorrecta
+// Pegar TODO este bloque al FINAL de app.js, despues de V20.
+// =====================================================
+
+const REHAB_V21_VERDE = "#22c55e";
+const REHAB_V21_ROJO = "#ef4444";
+const REHAB_V21_DURACION = 240;
+
+function rehabV21Esperar(ms) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, ms);
+  });
+}
+
+// Ilumina UNICAMENTE el Pod que se presiono.
+// Si restaurarComando/restaurarCss se indican, vuelve al color anterior
+// despues del feedback. Esto se usa, por ejemplo, en Caza de color cuando
+// el usuario toca un color incorrecto y debe seguir buscando en la misma ronda.
+async function rehabV21FeedbackPod(indice, correcto, duracion, restaurarComando, restaurarCss) {
+  if (typeof indice !== "number" || indice < 0 || indice >= podsBLE.length) return;
+
+  var comando = correcto ? "green" : "red";
+  var css = correcto ? REHAB_V21_VERDE : REHAB_V21_ROJO;
+  var tiempo = typeof duracion === "number" ? duracion : REHAB_V21_DURACION;
+
+  try {
+    encenderVisual(indice, css);
+    await enviarComandoPod(indice, comando);
+    await rehabV21Esperar(tiempo);
+
+    if (restaurarComando) {
+      await enviarComandoPod(indice, restaurarComando);
+      encenderVisual(indice, restaurarCss || "#64748b");
+    } else {
+      await enviarComandoPod(indice, "off");
+      apagarVisualPod(indice);
+    }
+  } catch (error) {
+    console.warn("RehabPod V21: no se pudo mostrar feedback en Pod", indice + 1, error);
+  }
+}
+
+// =====================================================
+// 1. MODO LIBRE + PASOS CORRECTOS DE MEMORIA
+// La funcion original iluminaba el Pod con el color del estimulo.
+// Desde V21, cualquier golpe correcto de estas funciones se muestra VERDE.
+// =====================================================
+iluminarPodPresionado = async function (indice, duracion = 300) {
+  await rehabV21FeedbackPod(indice, true, duracion);
+};
+
+// =====================================================
+// 2. RESPUESTA NORMAL
+// Reaccion aleatoria + Reaccion por colores.
+// La logica original decide si es correcto y registra el resultado.
+// Al terminar esa evaluacion, V21 muestra verde o rojo en el Pod presionado.
+// =====================================================
+var rehabV21RespuestaNormalBase = respuestaNormal;
+respuestaNormal = async function (indice) {
+  // Persecucion tiene su propia funcion V21 mas abajo.
+  if (modoActual === "persecucion") {
+    await respuestaPersecucion(indice);
+    return;
+  }
+
+  if (!esperandoRespuesta) return;
+  var correcto = indice === objetivoCorrecto;
+
+  await rehabV21RespuestaNormalBase(indice);
+  await rehabV21FeedbackPod(indice, correcto, REHAB_V21_DURACION);
+};
+
+// =====================================================
+// 3. DOBLE ESTIMULO
+// Correcto: el Pod tocado parpadea verde.
+// Incorrecto: el Pod tocado parpadea rojo.
+// En dificultad dificil se conserva la indicacion IZQUIERDA / DERECHA de V20.
+// =====================================================
+var rehabV21RespuestaDobleBase = respuestaDobleEstimulo;
+respuestaDobleEstimulo = async function (indice) {
+  if (!esperandoRespuesta) return;
+  var correcto = objetivosDoblesPendientes && objetivosDoblesPendientes.has(indice);
+
+  await rehabV21RespuestaDobleBase(indice);
+  await rehabV21FeedbackPod(indice, correcto, 210);
+};
+
+// =====================================================
+// 4. COLOR PROHIBIDO
+// Correcto (toco un color permitido) = verde.
+// Incorrecto (toco uno de los prohibidos) = rojo.
+// =====================================================
+var rehabV21RespuestaProhibidoBase = respuestaColorProhibido;
+respuestaColorProhibido = async function (indice) {
+  if (!esperandoRespuesta) return;
+
+  var correcto;
+  if (typeof rehabProhibidosActuales !== "undefined" && rehabProhibidosActuales instanceof Set) {
+    correcto = !rehabProhibidosActuales.has(indice);
+  } else {
+    correcto = indice !== indiceColorProhibido;
+  }
+
+  await rehabV21RespuestaProhibidoBase(indice);
+  await rehabV21FeedbackPod(indice, correcto, REHAB_V21_DURACION);
+};
+
+// =====================================================
+// 5. CIRCUITO
+// Si toca el siguiente Pod correcto = verde.
+// Si toca otro = rojo.
+// =====================================================
+var rehabV21RespuestaCircuitoBase = respuestaCircuito;
+respuestaCircuito = async function (indice) {
+  if (!esperandoRespuesta || circuitoPosicion >= circuitoOrden.length) return;
+  var esperado = circuitoOrden[circuitoPosicion];
+  var correcto = indice === esperado;
+
+  await rehabV21RespuestaCircuitoBase(indice);
+  await rehabV21FeedbackPod(indice, correcto, 210);
+};
+
+// =====================================================
+// 6. MODO ENTRENADOR
+// El Pod solicitado por el entrenador = verde.
+// Otro Pod = rojo.
+// =====================================================
+var rehabV21RespuestaEntrenadorBase = respuestaEntrenador;
+respuestaEntrenador = async function (indice) {
+  if (!entrenamientoActivo || modoActual !== "entrenador" || !esperandoRespuesta) return;
+  var correcto = indice === objetivoEntrenador;
+
+  await rehabV21RespuestaEntrenadorBase(indice);
+  await rehabV21FeedbackPod(indice, correcto, REHAB_V21_DURACION);
+};
+
+// =====================================================
+// 7. CAZA DE COLOR
+// Si encuentra el color objetivo = verde.
+// Si toca otro color = rojo y luego el Pod vuelve al color que tenia,
+// porque la ronda continua hasta encontrar el objetivo correcto.
+// =====================================================
+var rehabV21RespuestaCazaBase = rehabV19RespuestaCazaColor;
+rehabV19RespuestaCazaColor = async function (indice) {
+  if (
+    !entrenamientoActivo ||
+    modoActual !== "cazaColor" ||
+    fase !== "cazaColorRespuesta" ||
+    !esperandoRespuesta
+  ) return;
+
+  var correcto = indice === objetivoCorrecto;
+  var colorAnterior = coloresActuales && coloresActuales[indice] ? coloresActuales[indice] : null;
+
+  await rehabV21RespuestaCazaBase(indice);
+
+  if (correcto) {
+    await rehabV21FeedbackPod(indice, true, REHAB_V21_DURACION);
+  } else {
+    await rehabV21FeedbackPod(
+      indice,
+      false,
+      REHAB_V21_DURACION,
+      colorAnterior ? colorAnterior.comando : null,
+      colorAnterior ? colorAnterior.css : null
+    );
+  }
+};
+
+// =====================================================
+// 8. PALABRA VS COLOR (STROOP)
+// Respuesta correcta = verde.
+// Respuesta incorrecta = rojo.
+// =====================================================
+var rehabV21RespuestaStroopBase = rehabV20RespuestaStroop;
+rehabV20RespuestaStroop = async function (indice) {
+  if (!entrenamientoActivo || modoActual !== "stroop" || fase !== "stroopRespuesta" || !esperandoRespuesta) return;
+  var correcto = indice === rehabObjetivoStroop;
+
+  await rehabV21RespuestaStroopBase(indice);
+  await rehabV21FeedbackPod(indice, correcto, REHAB_V21_DURACION);
+};
+
+// =====================================================
+// 9. PERSECUCION
+// Se reemplaza esta funcion para que el feedback ocurra ANTES de encender
+// el siguiente objetivo. Asi el verde/rojo no tapa el siguiente estimulo.
+// =====================================================
+respuestaPersecucion = async function (indice) {
+  if (!esperandoRespuesta) return;
+
+  var tiempo = (performance.now() - tiempoInicio - tiempoPausado) / 1000;
+
+  if (indice !== objetivoCorrecto) {
+    errores++;
+    contadorErrores.textContent = errores;
+    mensajeResultado.textContent = `❌ Pod ${rehabNumeroVisiblePod(indice)} incorrecto`;
+    mensajeResultado.className = "mensajeResultado mensajeError";
+    tono(220, 120);
+
+    await rehabV21FeedbackPod(indice, false, 190);
+    return;
+  }
+
+  esperandoRespuesta = false;
+  detenerCronometro();
+
+  aciertos++;
+  rondaActual = Math.max(rondaActual, aciertos);
+  contadorAciertos.textContent = aciertos;
+  ultimoTiempo.textContent = `${tiempo.toFixed(3)} s`;
+  mensajeResultado.textContent = `✅ ${tiempo.toFixed(3)} s`;
+  mensajeResultado.className = "mensajeResultado mensajeCorrecto";
+  tono(900, 70);
+
+  resultados.push({
+    ronda: aciertos,
+    correcto: true,
+    tiempo: tiempo,
+    estado: `Pod ${rehabNumeroVisiblePod(indice)}`
+  });
+
+  await apagarTodosLosPods();
+  await rehabV21FeedbackPod(indice, true, 190);
+
+  if (aciertos >= totalRondasActual) {
+    fase = "resultado";
+    esperandoRespuesta = false;
+    detenerCronometro();
+    temporizador = setTimeout(finalizarEntrenamiento, 250);
+    return;
+  }
+
+  textoRonda.textContent = `Objetivo ${aciertos + 1} de ${totalRondasActual}`;
+
+  var pausaPersecucion = dificultadActual === "dificil"
+    ? 120
+    : dificultadActual === "facil"
+      ? 450
+      : 250;
+
+  temporizador = setTimeout(activarPersecucion, pausaPersecucion);
+};
+
+// =====================================================
+// 10. CONTRARRELOJ
+// Feedback antes del siguiente objetivo para evitar que el color verde/rojo
+// interfiera visualmente con el siguiente estimulo.
+// =====================================================
+respuestaContrarreloj = async function (indice) {
+  if (!entrenamientoActivo || modoActual !== "contrarreloj" || !esperandoRespuesta) return;
+
+  esperandoRespuesta = false;
+  detenerCronometro();
+
+  var tiempo = (performance.now() - tiempoInicio - tiempoPausado) / 1000;
+  var correcto = indice === objetivoContrarreloj;
+  ultimoTiempo.textContent = `${tiempo.toFixed(3)} s`;
+
+  if (correcto) {
+    aciertos++;
+    contadorAciertos.textContent = aciertos;
+    mensajeResultado.textContent = `✅ ${tiempo.toFixed(3)} s`;
+    mensajeResultado.className = "mensajeResultado mensajeCorrecto";
+    tono(980, 80);
+  } else {
+    errores++;
+    contadorErrores.textContent = errores;
+    mensajeResultado.textContent = `❌ Era el Pod ${rehabNumeroVisiblePod(objetivoContrarreloj)}`;
+    mensajeResultado.className = "mensajeResultado mensajeError";
+    tono(220, 100);
+  }
+
+  resultados.push({
+    ronda: rondaActual,
+    correcto: correcto,
+    tiempo: tiempo,
+    estado: correcto
+      ? `Pod ${rehabNumeroVisiblePod(objetivoContrarreloj)} correcto`
+      : `Pod ${rehabNumeroVisiblePod(indice)}; objetivo Pod ${rehabNumeroVisiblePod(objetivoContrarreloj)}`
+  });
+
+  await apagarTodosLosPods();
+  await rehabV21FeedbackPod(indice, correcto, 190);
+
+  if (performance.now() >= finContrarrelojMs) {
+    terminarContrarreloj();
+    return;
+  }
+
+  await activarObjetivoContrarreloj();
+};
+
+// =====================================================
+// 11. MEMORIA / SECUENCIA
+// - Cada paso correcto usa iluminarPodPresionado(), que V21 puso en VERDE.
+// - Un error ya pone TODOS los Pods en ROJO (logica existente).
+// - Una secuencia completa ya pone TODOS los Pods en VERDE (logica existente).
+// No hace falta reemplazar respuestaSecuencia().
+// =====================================================
+
+// =====================================================
+// 12. CAMBIO AUTOMATICO
+// Este modo NO espera una pulsacion del usuario, por lo tanto no existe una
+// respuesta correcta/incorrecta que marcar. Se conserva sin feedback verde/rojo.
+// =====================================================
+
+console.log("RehabPod V21: feedback universal verde/correcto y rojo/incorrecto activado.");
