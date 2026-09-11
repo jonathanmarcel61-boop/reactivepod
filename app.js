@@ -57,6 +57,8 @@ let ajustesApp = {
   dificultad: "media",
 
   coloresPods: ["red", "green", "blue", "yellow"],
+
+  tema: "oscuro",
 };
 
 // =====================================================
@@ -110,6 +112,8 @@ const btnProgreso = document.getElementById("btnProgreso");
 const btnEstadisticas = document.getElementById("btnEstadisticas");
 
 const btnAjustes = document.getElementById("btnAjustes");
+
+const ajusteTema = document.getElementById("ajusteTema");
 
 const indicadorPods = document.getElementById("indicadorPods");
 
@@ -1847,6 +1851,20 @@ function guardarDatos() {
   );
 }
 
+function aplicarTema(tema) {
+
+  if (tema === "claro") {
+
+    document.body.classList.add("tema-claro");
+
+  } else {
+
+    document.body.classList.remove("tema-claro");
+
+  }
+
+}
+
 function cargarAjustes() {
   try {
     const guardados = localStorage.getItem(CLAVE_AJUSTES);
@@ -1865,6 +1883,10 @@ function cargarAjustes() {
   ajusteSonidos.checked = ajustesApp.sonidos;
 
   sonidosActivados.checked = ajustesApp.sonidos;
+
+  ajusteTema.value = ajustesApp.tema || "oscuro";
+
+  aplicarTema(ajustesApp.tema || "oscuro");
 }
 
 function guardarAjustes() {
@@ -6090,6 +6112,20 @@ ajusteSonidos.addEventListener(
   }
 );
 
+ajusteTema.addEventListener(
+  "change",
+
+  () => {
+
+    ajustesApp.tema = ajusteTema.value;
+
+    aplicarTema(ajustesApp.tema);
+
+    guardarAjustes();
+
+  }
+);
+
 sonidosActivados.addEventListener(
   "change",
 
@@ -7269,3 +7305,2229 @@ mostrarPanelEntrenadorActivo = function (mostrar) {
 
 // Aplicar de inmediato a la pantalla actualmente cargada.
 ordenarConfiguracionV15();
+
+// =====================================================
+// REHABPOD V17
+// BLE GENERICO + CANTIDAD VARIABLE DE PODS + MINIMOS POR MODO
+// PEGAR ESTE BLOQUE AL FINAL DE app.js
+// =====================================================
+
+var REHABPOD_MAX_PODS = 4;
+var REHABPOD_CLAVE_CANTIDAD = "rehabpodCantidadPods";
+var cantidadPodsSeleccionada = Number(localStorage.getItem(REHABPOD_CLAVE_CANTIDAD) || 4);
+
+var MINIMO_PODS_POR_MODO = {
+  simple: 1,
+  colores: 2,
+  secuencia: 2,
+  libre: 1,
+  persecucion: 2,
+  doble: 2,
+  prohibido: 2,
+  circuito: 2,
+  contrarreloj: 1,
+  entrenador: 1,
+};
+
+function rehabMinimoPodsModo(modo) {
+  return MINIMO_PODS_POR_MODO[modo] || 1;
+}
+
+function rehabIndicesPodsConectados() {
+  return podsBLE
+    .map((pod, indice) => (pod && pod.conectado ? indice : -1))
+    .filter((indice) => indice >= 0);
+}
+
+function rehabIndicesPodsActivos() {
+  var conectados = rehabIndicesPodsConectados();
+  var cantidad = Math.max(
+    rehabMinimoPodsModo(modoActual),
+    Math.min(Number(cantidadPodsSeleccionada) || 1, REHABPOD_MAX_PODS)
+  );
+  return conectados.slice(0, cantidad);
+}
+
+function rehabEsPodActivo(indice) {
+  return rehabIndicesPodsActivos().includes(indice);
+}
+
+function rehabNumeroVisiblePod(indice) {
+  var activos = rehabIndicesPodsActivos();
+  var posicion = activos.indexOf(indice);
+  return posicion >= 0 ? posicion + 1 : indice + 1;
+}
+
+function rehabElegirPodActivo(excluidos) {
+  excluidos = Array.isArray(excluidos) ? excluidos : [];
+  var disponibles = rehabIndicesPodsActivos().filter(
+    (indice) => !excluidos.includes(indice)
+  );
+
+  if (!disponibles.length) {
+    return -1;
+  }
+
+  return disponibles[Math.floor(Math.random() * disponibles.length)];
+}
+
+function rehabMezclarCopia(array) {
+  return mezclar(array.slice());
+}
+
+// =====================================================
+// INTERFAZ: CONEXION GENERICA
+// Los ESP32 pueden seguir anunciandose como ReactiPod-1, -2, -3 y -4.
+// La app ya no exige que un nombre concreto vaya en un espacio concreto.
+// =====================================================
+
+function rehabActualizarInterfazConexionGenerica() {
+  var filas = document.querySelectorAll(".conexionPod");
+
+  filas.forEach((fila, indice) => {
+    var titulo = fila.querySelector(".datosConexionPod strong");
+    var estado = estadosConexion[indice];
+    var pod = podsBLE[indice];
+
+    if (titulo) {
+      titulo.textContent = `RehabPod ${indice + 1}`;
+    }
+
+    if (estado && pod && pod.conectado) {
+      estado.textContent = pod.nombre
+        ? `Conectado · ${pod.nombre}`
+        : "Conectado";
+    }
+  });
+
+  if (pantallaPods) {
+    var subtitulo = pantallaPods.querySelector(".cabeceraSecundaria p");
+    if (subtitulo) {
+      subtitulo.textContent = "Conecta cualquier RehabPod disponible";
+    }
+  }
+}
+
+// =====================================================
+// INTERFAZ: SELECTOR DE CANTIDAD DE PODS
+// =====================================================
+
+function rehabCrearControlCantidadPods() {
+  var existente = document.getElementById("controlCantidadPodsRehabPod");
+  if (existente) {
+    return existente;
+  }
+
+  var panel = document.createElement("div");
+  panel.id = "controlCantidadPodsRehabPod";
+  panel.className = "tarjeta";
+  panel.style.marginTop = "12px";
+  panel.innerHTML = `
+    <label for="cantidadPodsEntrenamientoRehabPod" style="display:block;font-weight:800;margin-bottom:8px;">
+      Cantidad de Pods para este entrenamiento
+    </label>
+    <select id="cantidadPodsEntrenamientoRehabPod" style="width:100%;">
+    </select>
+    <small id="ayudaCantidadPodsRehabPod" style="display:block;margin-top:8px;line-height:1.4;opacity:.78;">
+    </small>
+  `;
+
+  if (descripcionModo && descripcionModo.parentElement) {
+    descripcionModo.insertAdjacentElement("afterend", panel);
+  } else if (btnComenzar && btnComenzar.parentElement) {
+    btnComenzar.parentElement.insertBefore(panel, btnComenzar);
+  }
+
+  var selector = panel.querySelector("#cantidadPodsEntrenamientoRehabPod");
+  selector.addEventListener("change", () => {
+    cantidadPodsSeleccionada = Number(selector.value) || 1;
+    localStorage.setItem(REHABPOD_CLAVE_CANTIDAD, String(cantidadPodsSeleccionada));
+    rehabActualizarControlCantidadPods();
+    rehabActualizarDescripcionModo();
+    rehabActualizarVisualesPodsActivos();
+  });
+
+  return panel;
+}
+
+function rehabActualizarControlCantidadPods() {
+  var panel = rehabCrearControlCantidadPods();
+  var selector = panel.querySelector("#cantidadPodsEntrenamientoRehabPod");
+  var ayuda = panel.querySelector("#ayudaCantidadPodsRehabPod");
+  var minimo = rehabMinimoPodsModo(modoActual);
+  var conectados = cantidadConectados();
+
+  cantidadPodsSeleccionada = Math.max(
+    minimo,
+    Math.min(Number(cantidadPodsSeleccionada) || minimo, REHABPOD_MAX_PODS)
+  );
+
+  selector.innerHTML = "";
+
+  for (var cantidad = minimo; cantidad <= REHABPOD_MAX_PODS; cantidad++) {
+    var opcion = document.createElement("option");
+    opcion.value = String(cantidad);
+    opcion.textContent = cantidad === 1 ? "1 Pod" : `${cantidad} Pods`;
+    selector.appendChild(opcion);
+  }
+
+  selector.value = String(cantidadPodsSeleccionada);
+  localStorage.setItem(REHABPOD_CLAVE_CANTIDAD, String(cantidadPodsSeleccionada));
+
+  if (ayuda) {
+    ayuda.textContent = `Mínimo para este modo: ${minimo} ${minimo === 1 ? "Pod" : "Pods"} · Conectados ahora: ${conectados} de ${REHABPOD_MAX_PODS}`;
+  }
+}
+
+function rehabActualizarEtiquetasMinimoPods() {
+  document.querySelectorAll("[data-modo]").forEach((tarjeta) => {
+    var modo = tarjeta.dataset.modo;
+    if (!MINIMO_PODS_POR_MODO[modo]) {
+      return;
+    }
+
+    var minimo = rehabMinimoPodsModo(modo);
+    var etiqueta = tarjeta.querySelector(".etiquetaFisico, .rehabMinimoPods");
+
+    if (!etiqueta) {
+      etiqueta = document.createElement("span");
+      etiqueta.className = "rehabMinimoPods";
+      etiqueta.style.cssText =
+        "display:inline-block;margin-top:10px;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:900;letter-spacing:.04em;background:rgba(34,197,94,.13);border:1px solid rgba(34,197,94,.35);color:#86efac;";
+      tarjeta.appendChild(etiqueta);
+    }
+
+    etiqueta.textContent = `MÍN. ${minimo} ${minimo === 1 ? "POD" : "PODS"}`;
+  });
+
+  var tarjetaCircuito = document.querySelector('[data-modo="circuito"]');
+  if (tarjetaCircuito) {
+    var titulo = tarjetaCircuito.querySelector("h3, strong");
+    if (titulo) {
+      titulo.textContent = "Circuito de Pods";
+    }
+  }
+}
+
+function rehabActualizarDescripcionModo() {
+  if (!descripcionModo) {
+    return;
+  }
+
+  var cantidad = Number(cantidadPodsSeleccionada) || rehabMinimoPodsModo(modoActual);
+  var plural = cantidad === 1 ? "Pod seleccionado" : `${cantidad} Pods seleccionados`;
+
+  var descripciones = {
+    simple: `Uno de los ${plural} se encenderá aleatoriamente y cambiará de color entre estímulos. Golpea únicamente el Pod iluminado.`,
+    colores: `Los ${plural} mostrarán colores diferentes. La pantalla te indicará qué color debes buscar y tocar.`,
+    secuencia: `Memoriza y repite una secuencia utilizando los ${plural}. La secuencia crece progresivamente.`,
+    libre: `Golpea libremente cualquiera de los ${plural}. RehabPod registrará el intervalo entre cada golpe.`,
+    persecucion: `Persigue el estímulo entre los ${plural}. Después de cada acierto aparecerá rápidamente un nuevo objetivo.`,
+    doble: `Dos de los ${plural} se encenderán al mismo tiempo. Debes tocar ambos; el tiempo termina al presionar el segundo objetivo correcto.`,
+    prohibido: `Los ${plural} mostrarán colores diferentes. NO toques el color prohibido indicado en pantalla; toca cualquiera de los otros.`,
+    circuito: `Completa los ${plural} una vez por ronda. El orden cambia aleatoriamente y aparece un Pod a la vez.`,
+    contrarreloj: `Durante el tiempo seleccionado, toca tantos objetivos correctos como puedas utilizando los ${plural}.`,
+    entrenador: `El entrenador controla manualmente cuál de los ${plural} se enciende en cada estímulo.`,
+  };
+
+  descripcionModo.textContent = descripciones[modoActual] || descripcionModo.textContent;
+
+  if (modoActual === "circuito" && tituloConfiguracion) {
+    tituloConfiguracion.textContent = "Circuito de Pods";
+  }
+}
+
+function rehabActualizarVisualesPodsActivos() {
+  if (!entrenamientoActivo) {
+    return;
+  }
+
+  var activos = rehabIndicesPodsActivos();
+  var botones = document.querySelectorAll(".pod[data-pod]");
+
+  botones.forEach((boton) => {
+    var indice = Number(boton.dataset.pod);
+    var activo = activos.includes(indice);
+    boton.style.display = activo ? "" : "none";
+
+    var texto = boton.querySelector("strong");
+    if (texto && activo) {
+      texto.textContent = `POD ${rehabNumeroVisiblePod(indice)}`;
+    }
+  });
+}
+
+function rehabRestaurarVisualesPods() {
+  document.querySelectorAll(".pod[data-pod]").forEach((boton) => {
+    boton.style.display = "";
+  });
+}
+
+// =====================================================
+// BLE MANUAL: CUALQUIER POD COMPATIBLE PUEDE OCUPAR CUALQUIER ESPACIO
+// =====================================================
+
+conectarPodNativo = async function (indice) {
+  var pod = podsBLE[indice];
+
+  try {
+    await inicializarBLENativo();
+    estadosConexion[indice].textContent = "Buscando RehabPod...";
+
+    var dispositivo = await BluetoothLe.requestDevice({
+      services: [SERVICE_UUID],
+      optionalServices: [SERVICE_UUID],
+    });
+
+    if (!dispositivo || !dispositivo.deviceId) {
+      throw new Error("No se obtuvo el identificador BLE.");
+    }
+
+    var duplicado = podsBLE.findIndex(
+      (otro, otroIndice) =>
+        otroIndice !== indice &&
+        otro &&
+        otro.conectado &&
+        otro.deviceId === dispositivo.deviceId
+    );
+
+    if (duplicado >= 0) {
+      alert(`Ese Pod ya está conectado como RehabPod ${duplicado + 1}.`);
+      estadosConexion[indice].textContent = "Selecciona otro Pod";
+      return;
+    }
+
+    // Si el mismo deviceId estaba recordado en otro espacio desconectado,
+    // liberamos ese registro para poder asignarlo al espacio elegido.
+    podsBLE.forEach((otro, otroIndice) => {
+      if (
+        otroIndice !== indice &&
+        otro &&
+        !otro.conectado &&
+        otro.deviceId === dispositivo.deviceId
+      ) {
+        otro.deviceId = null;
+        otro.device = null;
+      }
+    });
+
+    pod.nombre = dispositivo.name || pod.nombre || `RehabPod ${indice + 1}`;
+    pod.deviceId = dispositivo.deviceId;
+    pod.device = dispositivo;
+
+    guardarPodRegistrado(indice, dispositivo);
+    estadosConexion[indice].textContent = "Conectando...";
+
+    await limpiarListenersPod(pod);
+
+    try {
+      await BluetoothLe.disconnect({ deviceId: pod.deviceId });
+    } catch (error) {
+      // Normal si Android no lo tenía conectado.
+    }
+
+    await new Promise((resolver) => setTimeout(resolver, 250));
+
+    pod.disconnectListener = await BluetoothLe.addListener(
+      `disconnected|${pod.deviceId}`,
+      () => podDesconectado(indice)
+    );
+
+    await BluetoothLe.connect({ deviceId: pod.deviceId });
+    await prepararNotificacionesPod(indice);
+    marcarPodConectado(indice);
+    await enviarComandoPod(indice, "off");
+
+    rehabActualizarInterfazConexionGenerica();
+  } catch (error) {
+    console.error("Error conectando RehabPod:", error);
+    marcarPodNoConectado(indice, "No conectado");
+    alert("No se pudo conectar el Pod seleccionado.");
+  }
+};
+
+conectarPodWeb = async function (indice) {
+  if (!navigator.bluetooth) {
+    alert("Web Bluetooth no está disponible. Usa Chrome o Edge.");
+    return;
+  }
+
+  var pod = podsBLE[indice];
+
+  try {
+    estadosConexion[indice].textContent = "Buscando RehabPod...";
+
+    var device = await navigator.bluetooth.requestDevice({
+      filters: [{ services: [SERVICE_UUID] }],
+      optionalServices: [SERVICE_UUID],
+    });
+
+    var duplicado = podsBLE.findIndex(
+      (otro, otroIndice) =>
+        otroIndice !== indice &&
+        otro &&
+        otro.conectado &&
+        otro.device &&
+        otro.device.id === device.id
+    );
+
+    if (duplicado >= 0) {
+      alert(`Ese Pod ya está conectado como RehabPod ${duplicado + 1}.`);
+      estadosConexion[indice].textContent = "Selecciona otro Pod";
+      return;
+    }
+
+    pod.nombre = device.name || pod.nombre || `RehabPod ${indice + 1}`;
+    pod.device = device;
+
+    device.addEventListener("gattserverdisconnected", () => {
+      podDesconectado(indice);
+    });
+
+    var servidor = await device.gatt.connect();
+    var servicio = await servidor.getPrimaryService(SERVICE_UUID);
+    pod.commandChar = await servicio.getCharacteristic(COMMAND_UUID);
+    pod.buttonChar = await servicio.getCharacteristic(BUTTON_UUID);
+
+    await pod.buttonChar.startNotifications();
+    pod.buttonChar.addEventListener("characteristicvaluechanged", (evento) => {
+      recibirBotonFisicoWeb(indice, evento);
+    });
+
+    pod.conectado = true;
+    estadosConexion[indice].textContent = `Conectado · ${pod.nombre}`;
+    estadosConexion[indice].classList.add("conectadoTexto");
+    botonesConexion[indice].textContent = "CONECTADO";
+    botonesConexion[indice].classList.add("conectado");
+
+    await enviarComandoPod(indice, "off");
+    actualizarEstadoGeneralPods();
+    rehabActualizarInterfazConexionGenerica();
+  } catch (error) {
+    console.error(error);
+    estadosConexion[indice].textContent = "No conectado";
+    actualizarEstadoGeneralPods();
+  }
+};
+
+// =====================================================
+// RECONECTAR CUALQUIER POD ENCONTRADO POR SERVICE_UUID
+// =====================================================
+
+buscarPodsParaReconectar = async function () {
+  if (!usarBLENativo() || reconexionAutomaticaEnCurso) {
+    return;
+  }
+
+  if (cantidadConectados() >= podsBLE.length) {
+    return;
+  }
+
+  reconexionAutomaticaEnCurso = true;
+  var listenerEscaneo = null;
+
+  try {
+    await inicializarBLENativo();
+    var encontrados = new Map();
+
+    listenerEscaneo = await BluetoothLe.addListener("onScanResult", (resultado) => {
+      var dispositivo = resultado?.device;
+      if (!dispositivo || !dispositivo.deviceId) {
+        return;
+      }
+
+      var nombre = resultado?.localName || dispositivo.name || "RehabPod";
+      encontrados.set(dispositivo.deviceId, {
+        name: nombre,
+        deviceId: dispositivo.deviceId,
+      });
+    });
+
+    await BluetoothLe.requestLEScan({ services: [SERVICE_UUID] });
+    await new Promise((resolver) => setTimeout(resolver, 3000));
+
+    try {
+      await BluetoothLe.stopLEScan();
+    } catch (error) {}
+
+    if (listenerEscaneo) {
+      try {
+        await listenerEscaneo.remove();
+      } catch (error) {}
+      listenerEscaneo = null;
+    }
+
+    for (var dispositivo of encontrados.values()) {
+      var yaConectado = podsBLE.some(
+        (pod) => pod.conectado && pod.deviceId === dispositivo.deviceId
+      );
+      if (yaConectado) {
+        continue;
+      }
+
+      // Primero intenta recuperar el mismo espacio donde ese deviceId ya estaba guardado.
+      var indice = podsBLE.findIndex(
+        (pod) => !pod.conectado && pod.deviceId === dispositivo.deviceId
+      );
+
+      // Si es un Pod nuevo, usa el primer espacio libre.
+      if (indice < 0) {
+        indice = podsBLE.findIndex((pod) => !pod.conectado);
+      }
+
+      if (indice < 0) {
+        break;
+      }
+
+      podsBLE[indice].nombre = dispositivo.name || `RehabPod ${indice + 1}`;
+      await conectarPodEncontrado(indice, dispositivo);
+      await new Promise((resolver) => setTimeout(resolver, 350));
+    }
+  } catch (error) {
+    console.log("Escaneo automático RehabPod:", error);
+  } finally {
+    try {
+      await BluetoothLe.stopLEScan();
+    } catch (error) {}
+
+    if (listenerEscaneo) {
+      try {
+        await listenerEscaneo.remove();
+      } catch (error) {}
+    }
+
+    reconexionAutomaticaEnCurso = false;
+    rehabActualizarInterfazConexionGenerica();
+    actualizarEstadoGeneralPods();
+  }
+};
+
+// =====================================================
+// ESTADO GENERAL DE PODS
+// =====================================================
+
+actualizarEstadoGeneralPods = function () {
+  var cantidad = cantidadConectados();
+  var objetivo = Math.max(1, Number(cantidadPodsSeleccionada) || 1);
+
+  textoEstadoPods.textContent = `${cantidad} de ${REHABPOD_MAX_PODS}`;
+  cantidadPodsConectados.textContent = `${cantidad} / ${REHABPOD_MAX_PODS}`;
+
+  if (podsListosConfiguracion) {
+    podsListosConfiguracion.textContent = `${cantidad} conectados`;
+  }
+
+  indicadorPods.classList.remove("desconectado", "parcial", "conectado");
+
+  if (cantidad === 0) {
+    indicadorPods.classList.add("desconectado");
+  } else if (cantidad < objetivo) {
+    indicadorPods.classList.add("parcial");
+  } else {
+    indicadorPods.classList.add("conectado");
+  }
+
+  var ayuda = document.getElementById("ayudaCantidadPodsRehabPod");
+  if (ayuda) {
+    var minimo = rehabMinimoPodsModo(modoActual);
+    ayuda.textContent = `Mínimo para este modo: ${minimo} ${minimo === 1 ? "Pod" : "Pods"} · Conectados ahora: ${cantidad} de ${REHABPOD_MAX_PODS}`;
+  }
+};
+
+// =====================================================
+// CONFIGURACION DEL MODO
+// Conserva toda la configuracion V16 y añade cantidad/minimos.
+// =====================================================
+
+var rehabConfigurarModoBase = configurarModo;
+configurarModo = function () {
+  rehabConfigurarModoBase();
+  rehabActualizarControlCantidadPods();
+  rehabActualizarDescripcionModo();
+  rehabActualizarEtiquetasMinimoPods();
+};
+
+var rehabObtenerNombreModoBase = obtenerNombreModo;
+obtenerNombreModo = function () {
+  if (modoActual === "circuito") {
+    return "Circuito de Pods";
+  }
+  return rehabObtenerNombreModoBase();
+};
+
+// =====================================================
+// INICIO DEL ENTRENAMIENTO
+// Valida cantidad elegida + minimo del modo.
+// =====================================================
+
+var rehabIniciarEntrenamientoBase = iniciarEntrenamiento;
+iniciarEntrenamiento = function () {
+  var selector = document.getElementById("cantidadPodsEntrenamientoRehabPod");
+  var minimo = rehabMinimoPodsModo(modoActual);
+
+  if (selector) {
+    cantidadPodsSeleccionada = Number(selector.value) || minimo;
+  }
+
+  cantidadPodsSeleccionada = Math.max(
+    minimo,
+    Math.min(cantidadPodsSeleccionada, REHABPOD_MAX_PODS)
+  );
+
+  localStorage.setItem(REHABPOD_CLAVE_CANTIDAD, String(cantidadPodsSeleccionada));
+
+  if (cantidadPodsSeleccionada < minimo) {
+    alert(`Este modo necesita mínimo ${minimo} ${minimo === 1 ? "Pod" : "Pods"}.`);
+    return;
+  }
+
+  var conectados = cantidadConectados();
+  if (conectados < cantidadPodsSeleccionada) {
+    alert(
+      `Seleccionaste ${cantidadPodsSeleccionada} ${cantidadPodsSeleccionada === 1 ? "Pod" : "Pods"}, pero solo hay ${conectados} conectado${conectados === 1 ? "" : "s"}.\n\nConecta ${cantidadPodsSeleccionada - conectados} más o reduce la cantidad.`
+    );
+    return;
+  }
+
+  if (rehabIndicesPodsActivos().length < minimo) {
+    alert(`Este entrenamiento necesita al menos ${minimo} Pods activos.`);
+    return;
+  }
+
+  // La V16 tenía una validación fija de 4 Pods. La anulamos solo durante
+  // esta llamada para conservar intacto todo el resto de iniciarEntrenamiento().
+  var cantidadConectadosReal = cantidadConectados;
+  cantidadConectados = function () {
+    return REHABPOD_MAX_PODS;
+  };
+
+  try {
+    rehabIniciarEntrenamientoBase();
+  } finally {
+    cantidadConectados = cantidadConectadosReal;
+  }
+
+  rehabActualizarVisualesPodsActivos();
+};
+
+if (btnComenzar) {
+  btnComenzar.onclick = iniciarEntrenamiento;
+}
+
+// =====================================================
+// IGNORAR PULSACIONES DE PODS CONECTADOS PERO NO SELECCIONADOS
+// =====================================================
+
+var rehabProcesarPulsacionBase = procesarPulsacion;
+procesarPulsacion = function (indice) {
+  if (entrenamientoActivo && !rehabEsPodActivo(indice)) {
+    console.log(`PRESS ignorado: Pod ${indice + 1} no participa en esta sesión.`);
+    return;
+  }
+
+  rehabProcesarPulsacionBase(indice);
+};
+
+// =====================================================
+// FEEDBACK DE TODOS LOS PODS: SOLO LOS PODS ACTIVOS
+// =====================================================
+
+feedbackTodosPods = async function (comando, colorCSS, duracion = 800) {
+  var activos = rehabIndicesPodsActivos();
+
+  activos.forEach((indice) => encenderVisual(indice, colorCSS));
+
+  await Promise.all(
+    activos.map((indice) => enviarComandoPod(indice, comando))
+  );
+
+  await new Promise((resolver) => setTimeout(resolver, duracion));
+
+  await Promise.all(
+    activos.map((indice) => enviarComandoPod(indice, "off"))
+  );
+
+  activos.forEach((indice) => apagarVisualPod(indice));
+};
+
+// =====================================================
+// REACCION ALEATORIA
+// =====================================================
+
+activarSimple = async function () {
+  fase = "respuesta";
+  objetivoCorrecto = rehabElegirPodActivo();
+
+  if (objetivoCorrecto < 0) {
+    return;
+  }
+
+  var color = obtenerColorEstimulo(objetivoCorrecto);
+  textoFase.textContent = "¡AHORA!";
+  textoObjetivo.textContent = `TOCA POD ${rehabNumeroVisiblePod(objetivoCorrecto)}`;
+  nombreColor.textContent = color.nombre;
+  colorObjetivo.style.background = color.css;
+
+  encenderVisual(objetivoCorrecto, color.css);
+  await enviarComandoPod(objetivoCorrecto, color.comando);
+  iniciarMedicion();
+};
+
+// =====================================================
+// REACCION POR COLORES
+// =====================================================
+
+activarColores = async function () {
+  fase = "respuesta";
+  var activos = rehabIndicesPodsActivos();
+  var usados = [];
+
+  coloresActuales = new Array(podsBLE.length).fill(null);
+
+  activos.forEach((indice) => {
+    var color = obtenerColorAleatorioParaPod(indice, usados);
+    usados.push(color.comando);
+    coloresActuales[indice] = color;
+    encenderVisual(indice, color.css);
+  });
+
+  objetivoCorrecto = rehabElegirPodActivo();
+  var objetivo = coloresActuales[objetivoCorrecto];
+
+  await Promise.all(
+    activos.map((indice) =>
+      enviarComandoPod(indice, coloresActuales[indice].comando)
+    )
+  );
+
+  textoFase.textContent = "¡AHORA!";
+  textoObjetivo.textContent = "TOCA EL COLOR";
+  nombreColor.textContent = objetivo.nombre;
+  colorObjetivo.style.background = objetivo.css;
+  iniciarMedicion();
+};
+
+// =====================================================
+// DOBLE ESTIMULO
+// =====================================================
+
+activarDobleEstimulo = async function () {
+  fase = "dobleRespuesta";
+  var activos = rehabMezclarCopia(rehabIndicesPodsActivos());
+  var primero = activos[0];
+  var segundo = activos[1];
+
+  if (primero === undefined || segundo === undefined) {
+    alert("Doble estímulo necesita al menos 2 Pods activos.");
+    return;
+  }
+
+  objetivosDobles = [primero, segundo];
+  objetivosDoblesPendientes = new Set(objetivosDobles);
+
+  textoFase.textContent = "¡DOBLE!";
+  textoObjetivo.textContent = `POD ${rehabNumeroVisiblePod(primero)} + POD ${rehabNumeroVisiblePod(segundo)}`;
+  nombreColor.textContent = "TOCA LOS DOS";
+
+  var colorPrimero = obtenerColorEstimulo(primero);
+  var colorSegundo = obtenerColorEstimulo(segundo, [colorPrimero.comando]);
+
+  colorObjetivo.style.background = `linear-gradient(135deg, ${colorPrimero.css} 0 48%, ${colorSegundo.css} 52% 100%)`;
+  encenderVisual(primero, colorPrimero.css);
+  encenderVisual(segundo, colorSegundo.css);
+
+  await Promise.all([
+    enviarComandoPod(primero, colorPrimero.comando),
+    enviarComandoPod(segundo, colorSegundo.comando),
+  ]);
+
+  iniciarMedicion();
+};
+
+// =====================================================
+// COLOR PROHIBIDO
+// =====================================================
+
+activarColorProhibido = async function () {
+  fase = "prohibidoRespuesta";
+  var activos = rehabIndicesPodsActivos();
+  var usados = [];
+
+  coloresActuales = new Array(podsBLE.length).fill(null);
+
+  activos.forEach((indice) => {
+    var color = obtenerColorAleatorioParaPod(indice, usados);
+    usados.push(color.comando);
+    coloresActuales[indice] = color;
+    encenderVisual(indice, color.css);
+  });
+
+  indiceColorProhibido = rehabElegirPodActivo();
+  var prohibido = coloresActuales[indiceColorProhibido];
+
+  await Promise.all(
+    activos.map((indice) =>
+      enviarComandoPod(indice, coloresActuales[indice].comando)
+    )
+  );
+
+  textoFase.textContent = "¡CUIDADO!";
+  textoObjetivo.textContent = "NO TOQUES";
+  nombreColor.textContent = prohibido.nombre;
+  colorObjetivo.style.background = prohibido.css;
+  iniciarMedicion();
+};
+
+// =====================================================
+// SECUENCIA / MEMORIA
+// =====================================================
+
+iniciarSecuencia = function () {
+  fase = "secuenciaMostrar";
+
+  var elegido = rehabElegirPodActivo();
+  if (elegido < 0) {
+    return;
+  }
+
+  secuencia.push(elegido);
+  indiceMostrarSecuencia = 0;
+  posicionSecuencia = 0;
+  textoFase.textContent = "Memoriza";
+  textoObjetivo.textContent = "MEMORIZA";
+  nombreColor.textContent = `${secuencia.length} pasos`;
+  colorObjetivo.style.background = "#374151";
+  mostrarElementoSecuencia();
+};
+
+// =====================================================
+// CIRCUITO VARIABLE
+// =====================================================
+
+activarCircuito = async function () {
+  if (!entrenamientoActivo || pausado) {
+    return;
+  }
+
+  circuitoOrden = rehabMezclarCopia(rehabIndicesPodsActivos());
+  circuitoPosicion = 0;
+  circuitoTiempoInicio = performance.now();
+  fase = "circuitoRespuesta";
+  esperandoRespuesta = true;
+
+  textoFase.textContent = "¡CIRCUITO!";
+  mensajeResultado.textContent = `Completa los ${circuitoOrden.length} Pods`;
+
+  await mostrarObjetivoCircuito();
+  iniciarMedicion();
+};
+
+mostrarObjetivoCircuito = async function () {
+  if (circuitoPosicion >= circuitoOrden.length) {
+    return;
+  }
+
+  var indice = circuitoOrden[circuitoPosicion];
+  objetivoCorrecto = indice;
+  var color = obtenerColorEstimulo(indice);
+
+  textoObjetivo.textContent = `TOCA POD ${rehabNumeroVisiblePod(indice)}`;
+  nombreColor.textContent = `${color.nombre} · ${circuitoPosicion + 1}/${circuitoOrden.length}`;
+  colorObjetivo.style.background = color.css;
+
+  encenderVisual(indice, color.css);
+  await enviarComandoPod(indice, color.comando);
+};
+
+respuestaCircuito = async function (indice) {
+  if (!esperandoRespuesta || circuitoPosicion >= circuitoOrden.length) {
+    return;
+  }
+
+  var esperado = circuitoOrden[circuitoPosicion];
+
+  if (indice !== esperado) {
+    errores++;
+    contadorErrores.textContent = errores;
+    mensajeResultado.textContent = `❌ Pod ${rehabNumeroVisiblePod(indice)} incorrecto · busca Pod ${rehabNumeroVisiblePod(esperado)}`;
+    mensajeResultado.className = "mensajeResultado mensajeError";
+    tono(220, 120);
+    return;
+  }
+
+  await enviarComandoPod(indice, "off");
+  apagarVisualPod(indice);
+  circuitoPosicion++;
+  tono(820, 70);
+
+  if (circuitoPosicion < circuitoOrden.length) {
+    mensajeResultado.textContent = `✅ ${circuitoPosicion}/${circuitoOrden.length} · siguiente`;
+    mensajeResultado.className = "mensajeResultado mensajeCorrecto";
+    await mostrarObjetivoCircuito();
+    return;
+  }
+
+  esperandoRespuesta = false;
+  detenerCronometro();
+  fase = "resultado";
+
+  var tiempo =
+    (performance.now() - circuitoTiempoInicio - tiempoPausado) / 1000;
+
+  aciertos++;
+  contadorAciertos.textContent = aciertos;
+  ultimoTiempo.textContent = `${tiempo.toFixed(3)} s`;
+  mensajeResultado.textContent = `✅ CIRCUITO COMPLETO · ${tiempo.toFixed(3)} s`;
+  mensajeResultado.className = "mensajeResultado mensajeCorrecto";
+  tono(1050, 160);
+
+  resultados.push({
+    ronda: rondaActual,
+    correcto: true,
+    tiempo,
+    estado: `Circuito ${circuitoOrden
+      .map((i) => rehabNumeroVisiblePod(i))
+      .join("-")}`,
+  });
+
+  await apagarTodosLosPods();
+  continuar();
+};
+
+// =====================================================
+// PERSECUCION
+// =====================================================
+
+activarPersecucion = async function () {
+  if (!entrenamientoActivo || pausado) {
+    return;
+  }
+
+  fase = "respuesta";
+  var excluir = objetivoCorrecto >= 0 ? [objetivoCorrecto] : [];
+  var nuevoObjetivo = rehabElegirPodActivo(excluir);
+
+  if (nuevoObjetivo < 0) {
+    nuevoObjetivo = rehabElegirPodActivo();
+  }
+
+  objetivoCorrecto = nuevoObjetivo;
+  var color = obtenerColorEstimulo(objetivoCorrecto);
+
+  textoFase.textContent = "¡PERSIGUE!";
+  textoObjetivo.textContent = `TOCA POD ${rehabNumeroVisiblePod(objetivoCorrecto)}`;
+  nombreColor.textContent = color.nombre;
+  colorObjetivo.style.background = color.css;
+
+  encenderVisual(objetivoCorrecto, color.css);
+  await enviarComandoPod(objetivoCorrecto, color.comando);
+  iniciarMedicion();
+};
+
+// =====================================================
+// CONTRARRELOJ
+// =====================================================
+
+activarObjetivoContrarreloj = async function () {
+  if (!entrenamientoActivo || modoActual !== "contrarreloj") {
+    return;
+  }
+
+  await apagarTodosLosPods();
+
+  var excluir = objetivoContrarreloj >= 0 ? [objetivoContrarreloj] : [];
+  var siguiente = rehabElegirPodActivo(excluir);
+  if (siguiente < 0) {
+    siguiente = rehabElegirPodActivo();
+  }
+
+  objetivoContrarreloj = siguiente;
+  var color = obtenerColorEstimulo(objetivoContrarreloj);
+
+  fase = "contrarrelojRespuesta";
+  rondaActual++;
+  textoObjetivo.textContent = `POD ${rehabNumeroVisiblePod(objetivoContrarreloj)}`;
+  nombreColor.textContent = color.nombre;
+  colorObjetivo.style.background = color.css;
+
+  encenderVisual(objetivoContrarreloj, color.css);
+  await enviarComandoPod(objetivoContrarreloj, color.comando);
+  iniciarMedicion();
+};
+
+// =====================================================
+// MODO ENTRENADOR: SOLO MUESTRA/HABILITA LOS PODS ELEGIDOS
+// =====================================================
+
+var rehabHabilitarBotonesEntrenadorBase = habilitarBotonesEntrenador;
+habilitarBotonesEntrenador = function (habilitar) {
+  var panel = document.getElementById("panelEntrenadorActivoReactiPod");
+  if (!panel) {
+    return;
+  }
+
+  var activos = rehabIndicesPodsActivos();
+
+  panel.querySelectorAll(".btnPodEntrenadorActivo").forEach((boton) => {
+    var indice = Number(boton.dataset.entrenadorPod);
+    var activo = activos.includes(indice);
+    boton.style.display = activo ? "" : "none";
+    boton.disabled = !habilitar || !activo;
+
+    if (activo) {
+      boton.textContent = `ACTIVAR POD ${rehabNumeroVisiblePod(indice)}`;
+    }
+  });
+};
+
+var rehabActivarPodEntrenadorBase = activarPodEntrenador;
+activarPodEntrenador = async function (indice) {
+  if (!rehabEsPodActivo(indice)) {
+    return;
+  }
+  await rehabActivarPodEntrenadorBase(indice);
+};
+
+// =====================================================
+// MODO LIBRE
+// La lógica existente ya acepta cualquier indice; procesarPulsacion()
+// filtra los Pods que no participan en esta sesión.
+// =====================================================
+
+// =====================================================
+// RESTAURAR VISUALES AL FINAL / CANCELAR
+// =====================================================
+
+var rehabFinalizarEntrenamientoBase = finalizarEntrenamiento;
+finalizarEntrenamiento = async function () {
+  try {
+    return await rehabFinalizarEntrenamientoBase();
+  } finally {
+    rehabRestaurarVisualesPods();
+  }
+};
+
+var rehabCancelarEntrenamientoBase = cancelarEntrenamiento;
+cancelarEntrenamiento = async function () {
+  try {
+    return await rehabCancelarEntrenamientoBase();
+  } finally {
+    rehabRestaurarVisualesPods();
+  }
+};
+
+if (btnCancelar) {
+  btnCancelar.onclick = cancelarEntrenamiento;
+}
+
+// =====================================================
+// INICIALIZACION V17
+// =====================================================
+
+(function inicializarRehabPodV17() {
+  cantidadPodsSeleccionada = Math.max(
+    1,
+    Math.min(Number(cantidadPodsSeleccionada) || 4, REHABPOD_MAX_PODS)
+  );
+
+  rehabActualizarInterfazConexionGenerica();
+  rehabCrearControlCantidadPods();
+  rehabActualizarControlCantidadPods();
+  rehabActualizarEtiquetasMinimoPods();
+  rehabActualizarDescripcionModo();
+  actualizarEstadoGeneralPods();
+
+  console.log("RehabPod V17: BLE genérico y cantidad variable de Pods activados.");
+})();
+
+// =====================================================
+// REHABPOD V18
+// COLOR FIJO EN MEMORIA + PODS VIRTUALES PARA SIMULACION
+// PEGAR ESTE BLOQUE COMPLETO AL FINAL DE app.js,
+// DESPUES DEL BLOQUE V17.
+// =====================================================
+
+// -----------------------------------------------------
+// 1. AJUSTES V18
+// -----------------------------------------------------
+
+var REHABPOD_CLAVE_MODO_VIRTUAL = "rehabpodModoVirtual";
+var REHABPOD_CLAVE_COLOR_MEMORIA = "rehabpodColorMemoria";
+
+var rehabModoVirtual =
+  localStorage.getItem(REHABPOD_CLAVE_MODO_VIRTUAL) === "true";
+
+var rehabColorMemoria =
+  localStorage.getItem(REHABPOD_CLAVE_COLOR_MEMORIA) || "blue";
+
+// En Memoria NO se permiten rojo ni verde porque quedan reservados para
+// feedback de error/correcto al terminar la secuencia.
+var REHABPOD_COLORES_MEMORIA = [
+  "blue",
+  "yellow",
+  "white",
+  "purple",
+  "cyan",
+  "orange",
+  "pink",
+];
+
+if (!REHABPOD_COLORES_MEMORIA.includes(rehabColorMemoria)) {
+  rehabColorMemoria = "blue";
+}
+
+function rehabObtenerColorMemoria() {
+  return (
+    catalogoColoresPersonalizados[rehabColorMemoria] ||
+    catalogoColoresPersonalizados.blue
+  );
+}
+
+// -----------------------------------------------------
+// 2. SELECTOR DE COLOR PARA SECUENCIA / MEMORIA
+// -----------------------------------------------------
+
+function rehabCrearControlColorMemoria() {
+  var existente = document.getElementById("controlColorMemoriaRehabPod");
+  if (existente) {
+    return existente;
+  }
+
+  var panel = document.createElement("div");
+  panel.id = "controlColorMemoriaRehabPod";
+  panel.className = "tarjeta";
+  panel.style.marginTop = "12px";
+  panel.innerHTML = `
+    <label for="colorMemoriaRehabPod" style="display:block;font-weight:800;margin-bottom:8px;">
+      Color de la secuencia
+    </label>
+
+    <select id="colorMemoriaRehabPod" style="width:100%;">
+      <option value="blue">Azul</option>
+      <option value="yellow">Amarillo</option>
+      <option value="white">Blanco</option>
+      <option value="purple">Morado</option>
+      <option value="cyan">Cian</option>
+      <option value="orange">Naranja</option>
+      <option value="pink">Rosado</option>
+    </select>
+
+    <small style="display:block;margin-top:8px;line-height:1.4;opacity:.78;">
+      Todos los Pods usarán este mismo color durante la secuencia.
+      Verde y rojo se reservan para indicar correcto o incorrecto.
+    </small>
+  `;
+
+  var panelCantidad = document.getElementById("controlCantidadPodsRehabPod");
+
+  if (panelCantidad && panelCantidad.parentElement) {
+    panelCantidad.insertAdjacentElement("afterend", panel);
+  } else if (descripcionModo && descripcionModo.parentElement) {
+    descripcionModo.insertAdjacentElement("afterend", panel);
+  }
+
+  var selector = panel.querySelector("#colorMemoriaRehabPod");
+  selector.value = rehabColorMemoria;
+
+  selector.addEventListener("change", function () {
+    var nuevo = selector.value;
+
+    if (!REHABPOD_COLORES_MEMORIA.includes(nuevo)) {
+      nuevo = "blue";
+    }
+
+    rehabColorMemoria = nuevo;
+    localStorage.setItem(REHABPOD_CLAVE_COLOR_MEMORIA, rehabColorMemoria);
+
+    var color = rehabObtenerColorMemoria();
+    selector.style.borderColor = color.css;
+  });
+
+  var colorInicial = rehabObtenerColorMemoria();
+  selector.style.borderColor = colorInicial.css;
+
+  return panel;
+}
+
+function rehabActualizarControlColorMemoria() {
+  var panel = rehabCrearControlColorMemoria();
+  var mostrar = modoActual === "secuencia";
+
+  panel.style.display = mostrar ? "" : "none";
+
+  if (!mostrar) {
+    return;
+  }
+
+  var selector = panel.querySelector("#colorMemoriaRehabPod");
+  selector.value = rehabColorMemoria;
+
+  var color = rehabObtenerColorMemoria();
+  selector.style.borderColor = color.css;
+}
+
+// Hacemos que el modo Secuencia / Memoria use SIEMPRE el color elegido.
+// Los demás entrenamientos continúan usando sus colores dinámicos normales.
+var rehabV18ObtenerColorEstimuloBase = obtenerColorEstimulo;
+obtenerColorEstimulo = function (indice, excluidos = []) {
+  if (modoActual === "secuencia") {
+    return rehabObtenerColorMemoria();
+  }
+
+  return rehabV18ObtenerColorEstimuloBase(indice, excluidos);
+};
+
+// -----------------------------------------------------
+// 3. CONTROL DE PODS VIRTUALES
+// -----------------------------------------------------
+
+function rehabCrearControlModoVirtual() {
+  var existente = document.getElementById("controlModoVirtualRehabPod");
+  if (existente) {
+    return existente;
+  }
+
+  var panel = document.createElement("div");
+  panel.id = "controlModoVirtualRehabPod";
+  panel.className = "tarjeta";
+  panel.style.marginTop = "12px";
+  panel.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;">
+      <div>
+        <strong style="display:block;">Pods virtuales</strong>
+        <small style="display:block;margin-top:4px;line-height:1.4;opacity:.78;">
+          Simula los golpes tocando los Pods de la pantalla, sin necesitar los dispositivos físicos.
+        </small>
+      </div>
+
+      <label style="display:flex;align-items:center;gap:8px;font-weight:800;white-space:nowrap;cursor:pointer;">
+        <input id="modoVirtualRehabPod" type="checkbox" style="width:20px;height:20px;">
+        ACTIVAR
+      </label>
+    </div>
+
+    <div id="estadoModoVirtualRehabPod" style="margin-top:10px;font-size:12px;font-weight:800;"></div>
+  `;
+
+  var panelCantidad = document.getElementById("controlCantidadPodsRehabPod");
+
+  if (panelCantidad && panelCantidad.parentElement) {
+    panelCantidad.insertAdjacentElement("afterend", panel);
+  } else if (descripcionModo && descripcionModo.parentElement) {
+    descripcionModo.insertAdjacentElement("afterend", panel);
+  }
+
+  var check = panel.querySelector("#modoVirtualRehabPod");
+  check.checked = rehabModoVirtual;
+
+  check.addEventListener("change", function () {
+    rehabModoVirtual = check.checked;
+    localStorage.setItem(
+      REHABPOD_CLAVE_MODO_VIRTUAL,
+      rehabModoVirtual ? "true" : "false"
+    );
+
+    rehabActualizarModoVirtual();
+    rehabActualizarControlCantidadPods();
+    rehabActualizarVisualesPodsActivos();
+    actualizarEstadoGeneralPods();
+  });
+
+  return panel;
+}
+
+function rehabActualizarModoVirtual() {
+  var panel = rehabCrearControlModoVirtual();
+  var check = panel.querySelector("#modoVirtualRehabPod");
+  var estado = panel.querySelector("#estadoModoVirtualRehabPod");
+
+  check.checked = rehabModoVirtual;
+
+  if (rehabModoVirtual) {
+    estado.textContent = "SIMULACIÓN ACTIVADA · toca un Pod en pantalla para simular el golpe";
+    estado.style.color = "#22c55e";
+  } else {
+    estado.textContent = "SIMULACIÓN DESACTIVADA · se usarán los Pods Bluetooth";
+    estado.style.color = "";
+  }
+
+  rehabActualizarAparienciaPodsVirtuales();
+}
+
+// En simulación, consideramos disponibles las 4 posiciones virtuales.
+// La cantidad realmente usada sigue dependiendo del selector 1/2/3/4 Pods.
+var rehabV18IndicesPodsConectadosBase = rehabIndicesPodsConectados;
+rehabIndicesPodsConectados = function () {
+  if (rehabModoVirtual) {
+    return Array.from({ length: REHABPOD_MAX_PODS }, (_, indice) => indice);
+  }
+
+  return rehabV18IndicesPodsConectadosBase();
+};
+
+function rehabActualizarAparienciaPodsVirtuales() {
+  document.querySelectorAll(".pod[data-pod]").forEach(function (podVisual) {
+    if (rehabModoVirtual) {
+      podVisual.style.cursor = "pointer";
+      podVisual.style.userSelect = "none";
+      podVisual.style.touchAction = "manipulation";
+      podVisual.title = "Toca para simular el golpe de este Pod";
+      podVisual.setAttribute("role", "button");
+      podVisual.setAttribute("tabindex", "0");
+    } else {
+      podVisual.style.cursor = "";
+      podVisual.style.userSelect = "";
+      podVisual.style.touchAction = "";
+      podVisual.title = "";
+      podVisual.removeAttribute("role");
+      podVisual.removeAttribute("tabindex");
+    }
+  });
+}
+
+function rehabSimularGolpePod(indice) {
+  if (!rehabModoVirtual) {
+    return;
+  }
+
+  if (!entrenamientoActivo || pausado) {
+    return;
+  }
+
+  if (!rehabEsPodActivo(indice)) {
+    return;
+  }
+
+  // Pequeña animación táctil para que el usuario sienta que el toque fue leído.
+  var podVisual = document.querySelector(`.pod[data-pod="${indice}"]`);
+  if (podVisual) {
+    var transformAnterior = podVisual.style.transform;
+    podVisual.style.transform = "scale(.95)";
+
+    setTimeout(function () {
+      podVisual.style.transform = transformAnterior;
+    }, 90);
+  }
+
+  procesarPulsacion(indice);
+}
+
+function rehabPrepararEventosPodsVirtuales() {
+  document.querySelectorAll(".pod[data-pod]").forEach(function (podVisual) {
+    if (podVisual.dataset.rehabVirtualPreparado === "1") {
+      return;
+    }
+
+    podVisual.dataset.rehabVirtualPreparado = "1";
+
+    podVisual.addEventListener("click", function () {
+      var indice = Number(podVisual.dataset.pod);
+      rehabSimularGolpePod(indice);
+    });
+
+    podVisual.addEventListener("keydown", function (evento) {
+      if (evento.key !== "Enter" && evento.key !== " ") {
+        return;
+      }
+
+      evento.preventDefault();
+      var indice = Number(podVisual.dataset.pod);
+      rehabSimularGolpePod(indice);
+    });
+  });
+
+  rehabActualizarAparienciaPodsVirtuales();
+}
+
+// -----------------------------------------------------
+// 4. INICIO DEL ENTRENAMIENTO EN MODO VIRTUAL
+// -----------------------------------------------------
+
+var rehabV18IniciarEntrenamientoBase = iniciarEntrenamiento;
+iniciarEntrenamiento = function () {
+  if (!rehabModoVirtual) {
+    return rehabV18IniciarEntrenamientoBase();
+  }
+
+  // La V17 valida cuántos Pods Bluetooth están conectados.
+  // Solo durante esta llamada informamos que hay 4 posiciones disponibles.
+  // No alteramos permanentemente el estado Bluetooth real.
+  var cantidadConectadosRealV18 = cantidadConectados;
+
+  cantidadConectados = function () {
+    return REHABPOD_MAX_PODS;
+  };
+
+  try {
+    var resultado = rehabV18IniciarEntrenamientoBase();
+    rehabActualizarAparienciaPodsVirtuales();
+    return resultado;
+  } finally {
+    cantidadConectados = cantidadConectadosRealV18;
+  }
+};
+
+if (btnComenzar) {
+  btnComenzar.onclick = iniciarEntrenamiento;
+}
+
+// -----------------------------------------------------
+// 5. ESTADO GENERAL CUANDO SE USA SIMULACION
+// -----------------------------------------------------
+
+var rehabV18ActualizarEstadoGeneralPodsBase = actualizarEstadoGeneralPods;
+actualizarEstadoGeneralPods = function () {
+  if (!rehabModoVirtual) {
+    rehabV18ActualizarEstadoGeneralPodsBase();
+    return;
+  }
+
+  var objetivo = Math.max(1, Number(cantidadPodsSeleccionada) || 1);
+
+  if (textoEstadoPods) {
+    textoEstadoPods.textContent = `${objetivo} virtuales`;
+  }
+
+  if (cantidadPodsConectados) {
+    cantidadPodsConectados.textContent = `${objetivo} virtuales`;
+  }
+
+  if (podsListosConfiguracion) {
+    podsListosConfiguracion.textContent = `${objetivo} Pods virtuales`;
+  }
+
+  if (indicadorPods) {
+    indicadorPods.classList.remove("desconectado", "parcial", "conectado");
+    indicadorPods.classList.add("conectado");
+  }
+
+  var ayuda = document.getElementById("ayudaCantidadPodsRehabPod");
+  if (ayuda) {
+    var minimo = rehabMinimoPodsModo(modoActual);
+    ayuda.textContent = `Mínimo para este modo: ${minimo} ${
+      minimo === 1 ? "Pod" : "Pods"
+    } · Simulación virtual activa`;
+  }
+};
+
+// -----------------------------------------------------
+// 6. REAPLICAR CONTROLES AL CAMBIAR DE MODO
+// -----------------------------------------------------
+
+var rehabV18ConfigurarModoBase = configurarModo;
+configurarModo = function () {
+  rehabV18ConfigurarModoBase();
+
+  rehabCrearControlModoVirtual();
+  rehabActualizarModoVirtual();
+
+  rehabCrearControlColorMemoria();
+  rehabActualizarControlColorMemoria();
+
+  // Orden recomendado:
+  // Descripción -> Cantidad de Pods -> Pods virtuales -> Color memoria (si aplica)
+  var cantidad = document.getElementById("controlCantidadPodsRehabPod");
+  var virtual = document.getElementById("controlModoVirtualRehabPod");
+  var memoria = document.getElementById("controlColorMemoriaRehabPod");
+
+  if (cantidad && virtual && cantidad.parentElement === virtual.parentElement) {
+    cantidad.insertAdjacentElement("afterend", virtual);
+  }
+
+  if (
+    modoActual === "secuencia" &&
+    virtual &&
+    memoria &&
+    virtual.parentElement === memoria.parentElement
+  ) {
+    virtual.insertAdjacentElement("afterend", memoria);
+  }
+
+  rehabPrepararEventosPodsVirtuales();
+  actualizarEstadoGeneralPods();
+};
+
+// -----------------------------------------------------
+// 7. DESCRIPCION ESPECIFICA DE MEMORIA
+// -----------------------------------------------------
+
+var rehabV18ActualizarDescripcionModoBase = rehabActualizarDescripcionModo;
+rehabActualizarDescripcionModo = function () {
+  rehabV18ActualizarDescripcionModoBase();
+
+  if (modoActual === "secuencia" && descripcionModo) {
+    var cantidad = Number(cantidadPodsSeleccionada) || rehabMinimoPodsModo(modoActual);
+    var color = rehabObtenerColorMemoria();
+
+    descripcionModo.textContent =
+      `Memoriza y repite la secuencia utilizando ${cantidad} ${
+        cantidad === 1 ? "Pod" : "Pods"
+      }. Todos los estímulos usarán el color ${color.nombre.toLowerCase()}. ` +
+      "La secuencia crece progresivamente. Verde indica secuencia correcta y rojo indica error.";
+  }
+};
+
+// -----------------------------------------------------
+// 8. RESTAURAR INTERFAZ AL TERMINAR
+// -----------------------------------------------------
+
+var rehabV18FinalizarEntrenamientoBase = finalizarEntrenamiento;
+finalizarEntrenamiento = async function () {
+  try {
+    return await rehabV18FinalizarEntrenamientoBase();
+  } finally {
+    rehabActualizarAparienciaPodsVirtuales();
+    actualizarEstadoGeneralPods();
+  }
+};
+
+var rehabV18CancelarEntrenamientoBase = cancelarEntrenamiento;
+cancelarEntrenamiento = async function () {
+  try {
+    return await rehabV18CancelarEntrenamientoBase();
+  } finally {
+    rehabActualizarAparienciaPodsVirtuales();
+    actualizarEstadoGeneralPods();
+  }
+};
+
+if (btnCancelar) {
+  btnCancelar.onclick = cancelarEntrenamiento;
+}
+
+// -----------------------------------------------------
+// 9. INICIALIZACION V18
+// -----------------------------------------------------
+
+(function inicializarRehabPodV18() {
+  rehabCrearControlModoVirtual();
+  rehabCrearControlColorMemoria();
+  rehabActualizarModoVirtual();
+  rehabActualizarControlColorMemoria();
+  rehabPrepararEventosPodsVirtuales();
+  rehabActualizarDescripcionModo();
+  actualizarEstadoGeneralPods();
+
+  console.log(
+    "RehabPod V18: color fijo de memoria + simulación de Pods virtuales activados."
+  );
+})();
+// =====================================================
+// REHABPOD V19
+// 2 NUEVOS MODOS:
+// 1) CAZA DE COLOR: busca SIEMPRE el mismo color aunque cambie de Pod.
+// 2) CAMBIO AUTOMATICO: el estimulo cambia de Pod solo, sin tocarlo.
+// PEGAR ESTE BLOQUE COMPLETO AL FINAL DE app.js,
+// DESPUES DEL BLOQUE V18.
+// =====================================================
+
+// -----------------------------------------------------
+// 1. AJUSTES GENERALES V19
+// -----------------------------------------------------
+
+var REHABPOD_CLAVE_COLOR_CAZA = "rehabpodColorCaza";
+var REHABPOD_CLAVE_TIEMPO_AUTOMATICO = "rehabpodTiempoAutomatico";
+
+var rehabColorCaza =
+  localStorage.getItem(REHABPOD_CLAVE_COLOR_CAZA) || "red";
+
+var rehabTiempoAutomaticoMs = Number(
+  localStorage.getItem(REHABPOD_CLAVE_TIEMPO_AUTOMATICO) || 1000
+);
+
+var REHABPOD_COLORES_CAZA = [
+  "red",
+  "green",
+  "blue",
+  "yellow",
+  "white",
+  "purple",
+  "cyan",
+  "orange",
+  "pink",
+];
+
+if (!REHABPOD_COLORES_CAZA.includes(rehabColorCaza)) {
+  rehabColorCaza = "red";
+}
+
+if (![500, 750, 1000, 1500, 2000, 3000].includes(rehabTiempoAutomaticoMs)) {
+  rehabTiempoAutomaticoMs = 1000;
+}
+
+// Minimos de Pods para los nuevos modos.
+MINIMO_PODS_POR_MODO.cazaColor = 2;
+MINIMO_PODS_POR_MODO.automatico = 1;
+
+var rehabTemporizadorAutomatico = null;
+var rehabUltimoPodAutomatico = -1;
+
+function rehabObtenerColorCaza() {
+  return (
+    catalogoColoresPersonalizados[rehabColorCaza] ||
+    catalogoColoresPersonalizados.red
+  );
+}
+
+function rehabColoresCazaSecundarios() {
+  return REHABPOD_COLORES_CAZA
+    .filter(function (clave) {
+      return clave !== rehabColorCaza;
+    })
+    .map(function (clave) {
+      return catalogoColoresPersonalizados[clave];
+    })
+    .filter(Boolean);
+}
+
+// -----------------------------------------------------
+// 2. TARJETAS DE LOS NUEVOS MODOS
+// Se insertan dentro de las categorias ya existentes.
+// -----------------------------------------------------
+
+function rehabV19CrearTarjetaModo(modo) {
+  var tarjeta = document.createElement("button");
+  tarjeta.type = "button";
+  tarjeta.className = "tarjetaEntrenamientoModo";
+  tarjeta.dataset.modo = modo;
+  tarjeta.style.width = "100%";
+  tarjeta.style.textAlign = "left";
+
+  if (modo === "cazaColor") {
+    tarjeta.innerHTML = `
+      <div style="font-size:34px;margin-bottom:8px;">🎯🎨</div>
+      <strong style="display:block;font-size:17px;">Caza de color</strong>
+      <small style="display:block;margin-top:6px;line-height:1.45;opacity:.78;">
+        Busca siempre el mismo color. Después de cada acierto los colores cambian de posición.
+      </small>
+    `;
+  } else {
+    tarjeta.innerHTML = `
+      <div style="font-size:34px;margin-bottom:8px;">🔁⚡</div>
+      <strong style="display:block;font-size:17px;">Cambio automático</strong>
+      <small style="display:block;margin-top:6px;line-height:1.45;opacity:.78;">
+        Un Pod se enciende y cambia automáticamente al siguiente sin necesidad de tocarlo.
+      </small>
+    `;
+  }
+
+  tarjeta.addEventListener("click", function () {
+    seleccionarModo(modo);
+  });
+
+  return tarjeta;
+}
+
+function rehabV19InsertarModoEnCategoria(claveCategoria, modo) {
+  var detalle = document.getElementById("gridDetalleCategoriaV9");
+  var titulo = document.getElementById("detalleTituloV9");
+  if (!detalle || !titulo) {
+    return;
+  }
+
+  var mapaTitulos = {
+    velocidad: "Velocidad",
+    coordinacion: "Coordinación",
+  };
+
+  if (titulo.textContent.trim() !== mapaTitulos[claveCategoria]) {
+    return;
+  }
+
+  if (detalle.querySelector(`[data-modo="${modo}"]`)) {
+    return;
+  }
+
+  detalle.appendChild(rehabV19CrearTarjetaModo(modo));
+}
+
+function rehabV19PrepararCategorias() {
+  var velocidad = document.querySelector('[data-categoria="velocidad"]');
+  var coordinacion = document.querySelector('[data-categoria="coordinacion"]');
+
+  if (velocidad && velocidad.dataset.rehabV19 !== "1") {
+    velocidad.dataset.rehabV19 = "1";
+    velocidad.addEventListener("click", function () {
+      setTimeout(function () {
+        rehabV19InsertarModoEnCategoria("velocidad", "automatico");
+      }, 0);
+    });
+
+    var contadorVelocidad = velocidad.querySelector("small");
+    if (contadorVelocidad) {
+      contadorVelocidad.textContent = "4 entrenamientos";
+    }
+  }
+
+  if (coordinacion && coordinacion.dataset.rehabV19 !== "1") {
+    coordinacion.dataset.rehabV19 = "1";
+    coordinacion.addEventListener("click", function () {
+      setTimeout(function () {
+        rehabV19InsertarModoEnCategoria("coordinacion", "cazaColor");
+      }, 0);
+    });
+
+    var contadorCoordinacion = coordinacion.querySelector("small");
+    if (contadorCoordinacion) {
+      contadorCoordinacion.textContent = "4 entrenamientos";
+    }
+  }
+}
+
+// -----------------------------------------------------
+// 3. CONTROL: COLOR FIJO PARA CAZA DE COLOR
+// -----------------------------------------------------
+
+function rehabV19CrearControlColorCaza() {
+  var existente = document.getElementById("controlColorCazaRehabPod");
+  if (existente) {
+    return existente;
+  }
+
+  var panel = document.createElement("div");
+  panel.id = "controlColorCazaRehabPod";
+  panel.className = "tarjeta";
+  panel.style.marginTop = "12px";
+  panel.innerHTML = `
+    <label for="colorCazaRehabPod" style="display:block;font-weight:800;margin-bottom:8px;">
+      Color que debes buscar
+    </label>
+
+    <select id="colorCazaRehabPod" style="width:100%;">
+      <option value="red">Rojo</option>
+      <option value="green">Verde</option>
+      <option value="blue">Azul</option>
+      <option value="yellow">Amarillo</option>
+      <option value="white">Blanco</option>
+      <option value="purple">Morado</option>
+      <option value="cyan">Cian</option>
+      <option value="orange">Naranja</option>
+      <option value="pink">Rosado</option>
+    </select>
+
+    <small style="display:block;margin-top:8px;line-height:1.4;opacity:.78;">
+      Ese color se mantendrá como objetivo durante todo el entrenamiento.
+      Después de cada acierto cambiará de posición entre los Pods.
+    </small>
+  `;
+
+  var virtual = document.getElementById("controlModoVirtualRehabPod");
+  var cantidad = document.getElementById("controlCantidadPodsRehabPod");
+
+  if (virtual && virtual.parentElement) {
+    virtual.insertAdjacentElement("afterend", panel);
+  } else if (cantidad && cantidad.parentElement) {
+    cantidad.insertAdjacentElement("afterend", panel);
+  } else if (descripcionModo && descripcionModo.parentElement) {
+    descripcionModo.insertAdjacentElement("afterend", panel);
+  }
+
+  var selector = panel.querySelector("#colorCazaRehabPod");
+  selector.value = rehabColorCaza;
+
+  selector.addEventListener("change", function () {
+    rehabColorCaza = selector.value;
+    if (!REHABPOD_COLORES_CAZA.includes(rehabColorCaza)) {
+      rehabColorCaza = "red";
+    }
+
+    localStorage.setItem(REHABPOD_CLAVE_COLOR_CAZA, rehabColorCaza);
+    var color = rehabObtenerColorCaza();
+    selector.style.borderColor = color.css;
+    rehabActualizarDescripcionModo();
+  });
+
+  selector.style.borderColor = rehabObtenerColorCaza().css;
+  return panel;
+}
+
+function rehabV19ActualizarControlColorCaza() {
+  var panel = rehabV19CrearControlColorCaza();
+  var mostrar = modoActual === "cazaColor";
+  panel.style.display = mostrar ? "" : "none";
+
+  if (mostrar) {
+    var selector = panel.querySelector("#colorCazaRehabPod");
+    selector.value = rehabColorCaza;
+    selector.style.borderColor = rehabObtenerColorCaza().css;
+  }
+}
+
+// -----------------------------------------------------
+// 4. CONTROL: TIEMPO DE CAMBIO AUTOMATICO
+// -----------------------------------------------------
+
+function rehabV19CrearControlTiempoAutomatico() {
+  var existente = document.getElementById("controlTiempoAutomaticoRehabPod");
+  if (existente) {
+    return existente;
+  }
+
+  var panel = document.createElement("div");
+  panel.id = "controlTiempoAutomaticoRehabPod";
+  panel.className = "tarjeta";
+  panel.style.marginTop = "12px";
+  panel.innerHTML = `
+    <label for="tiempoAutomaticoRehabPod" style="display:block;font-weight:800;margin-bottom:8px;">
+      Tiempo que permanece encendido cada Pod
+    </label>
+
+    <select id="tiempoAutomaticoRehabPod" style="width:100%;">
+      <option value="500">0.5 segundos</option>
+      <option value="750">0.75 segundos</option>
+      <option value="1000">1 segundo</option>
+      <option value="1500">1.5 segundos</option>
+      <option value="2000">2 segundos</option>
+      <option value="3000">3 segundos</option>
+    </select>
+
+    <small style="display:block;margin-top:8px;line-height:1.4;opacity:.78;">
+      No necesitas tocar el Pod. Al terminar este tiempo se apagará y otro Pod se encenderá automáticamente.
+    </small>
+  `;
+
+  var virtual = document.getElementById("controlModoVirtualRehabPod");
+  var cantidad = document.getElementById("controlCantidadPodsRehabPod");
+
+  if (virtual && virtual.parentElement) {
+    virtual.insertAdjacentElement("afterend", panel);
+  } else if (cantidad && cantidad.parentElement) {
+    cantidad.insertAdjacentElement("afterend", panel);
+  } else if (descripcionModo && descripcionModo.parentElement) {
+    descripcionModo.insertAdjacentElement("afterend", panel);
+  }
+
+  var selector = panel.querySelector("#tiempoAutomaticoRehabPod");
+  selector.value = String(rehabTiempoAutomaticoMs);
+
+  selector.addEventListener("change", function () {
+    rehabTiempoAutomaticoMs = Number(selector.value) || 1000;
+    localStorage.setItem(
+      REHABPOD_CLAVE_TIEMPO_AUTOMATICO,
+      String(rehabTiempoAutomaticoMs)
+    );
+    rehabActualizarDescripcionModo();
+  });
+
+  return panel;
+}
+
+function rehabV19ActualizarControlTiempoAutomatico() {
+  var panel = rehabV19CrearControlTiempoAutomatico();
+  var mostrar = modoActual === "automatico";
+  panel.style.display = mostrar ? "" : "none";
+
+  if (mostrar) {
+    panel.querySelector("#tiempoAutomaticoRehabPod").value = String(
+      rehabTiempoAutomaticoMs
+    );
+  }
+}
+
+// -----------------------------------------------------
+// 5. CONFIGURACION Y NOMBRES DE LOS NUEVOS MODOS
+// -----------------------------------------------------
+
+var rehabV19ConfigurarModoBase = configurarModo;
+configurarModo = function () {
+  rehabV19ConfigurarModoBase();
+
+  if (modoActual === "cazaColor") {
+    tituloConfiguracion.textContent = "Caza de color";
+    iconoConfiguracion.textContent = "🎯🎨";
+  } else if (modoActual === "automatico") {
+    tituloConfiguracion.textContent = "Cambio automático";
+    iconoConfiguracion.textContent = "🔁⚡";
+  }
+
+  rehabV19ActualizarControlColorCaza();
+  rehabV19ActualizarControlTiempoAutomatico();
+  rehabActualizarControlCantidadPods();
+  rehabActualizarEtiquetasMinimoPods();
+  rehabActualizarDescripcionModo();
+};
+
+var rehabV19ActualizarDescripcionBase = rehabActualizarDescripcionModo;
+rehabActualizarDescripcionModo = function () {
+  rehabV19ActualizarDescripcionBase();
+
+  if (!descripcionModo) {
+    return;
+  }
+
+  var cantidad = Number(cantidadPodsSeleccionada) || rehabMinimoPodsModo(modoActual);
+  var plural = cantidad === 1 ? "Pod" : "Pods";
+
+  if (modoActual === "cazaColor") {
+    var color = rehabObtenerColorCaza();
+    descripcionModo.textContent =
+      `Busca siempre el color ${color.nombre.toLowerCase()} entre ${cantidad} ${plural}. ` +
+      "Cuando lo toques correctamente, todos los Pods cambiarán de color y deberás volver a encontrar el mismo color en otra posición.";
+  }
+
+  if (modoActual === "automatico") {
+    descripcionModo.textContent =
+      `Uno de los ${cantidad} ${plural} se encenderá durante ${(rehabTiempoAutomaticoMs / 1000).toFixed(2).replace(/\.00$/, "")} s. ` +
+      "Después se apagará automáticamente y se encenderá otro Pod. No es necesario tocar ningún Pod.";
+  }
+};
+
+var rehabV19ObtenerNombreModoBase = obtenerNombreModo;
+obtenerNombreModo = function () {
+  if (modoActual === "cazaColor") {
+    return "Caza de color";
+  }
+
+  if (modoActual === "automatico") {
+    return "Cambio automático";
+  }
+
+  return rehabV19ObtenerNombreModoBase();
+};
+
+// Introducciones previas al entrenamiento.
+var rehabV19ObtenerGuiaModoBase = obtenerGuiaModoV7;
+obtenerGuiaModoV7 = function () {
+  if (modoActual === "cazaColor") {
+    var color = rehabObtenerColorCaza();
+    return {
+      icono: "🎯🎨",
+      titulo: "Caza de color",
+      descripcion: `Encuentra siempre el color ${color.nombre.toLowerCase()}, aunque cambie de posición entre los Pods.`,
+      pasos: [
+        `Busca el color ${color.nombre.toLowerCase()} entre los Pods iluminados.`,
+        "Tócalo correctamente para completar el estímulo.",
+        "Los colores cambiarán de posición y deberás encontrar nuevamente el mismo color.",
+      ],
+    };
+  }
+
+  if (modoActual === "automatico") {
+    return {
+      icono: "🔁⚡",
+      titulo: "Cambio automático",
+      descripcion: "Los Pods cambian de estímulo automáticamente. Este modo sirve para desplazamientos, seguimiento visual y ejercicios guiados sin necesidad de tocar los Pods.",
+      pasos: [
+        "Observa el Pod que se ilumina.",
+        "Desplázate, apunta, gira o realiza el ejercicio indicado por el entrenador.",
+        "No necesitas tocarlo: después del tiempo configurado cambiará automáticamente a otro Pod.",
+      ],
+    };
+  }
+
+  return rehabV19ObtenerGuiaModoBase();
+};
+
+// -----------------------------------------------------
+// 6. MODO CAZA DE COLOR
+// -----------------------------------------------------
+
+async function rehabV19ActivarCazaColor() {
+  if (!entrenamientoActivo || pausado || modoActual !== "cazaColor") {
+    return;
+  }
+
+  fase = "cazaColorRespuesta";
+  esperandoRespuesta = true;
+
+  var activos = rehabIndicesPodsActivos();
+  if (activos.length < 2) {
+    alert("Caza de color necesita al menos 2 Pods activos.");
+    return;
+  }
+
+  var colorObjetivoCaza = rehabObtenerColorCaza();
+  var otros = rehabMezclarCopia(rehabColoresCazaSecundarios());
+
+  objetivoCorrecto = rehabElegirPodActivo();
+  coloresActuales = new Array(podsBLE.length).fill(null);
+
+  var posicionOtro = 0;
+  activos.forEach(function (indice) {
+    var color;
+
+    if (indice === objetivoCorrecto) {
+      color = colorObjetivoCaza;
+    } else {
+      color = otros[posicionOtro % otros.length];
+      posicionOtro++;
+    }
+
+    coloresActuales[indice] = color;
+    encenderVisual(indice, color.css);
+  });
+
+  await Promise.all(
+    activos.map(function (indice) {
+      return enviarComandoPod(indice, coloresActuales[indice].comando);
+    })
+  );
+
+  textoFase.textContent = "¡BUSCA!";
+  textoObjetivo.textContent = "TOCA SIEMPRE";
+  nombreColor.textContent = colorObjetivoCaza.nombre;
+  colorObjetivo.style.background = colorObjetivoCaza.css;
+  mensajeResultado.textContent = "Encuentra el mismo color aunque cambie de posición";
+  mensajeResultado.className = "mensajeResultado";
+
+  iniciarMedicion();
+}
+
+async function rehabV19RespuestaCazaColor(indice) {
+  if (
+    !entrenamientoActivo ||
+    modoActual !== "cazaColor" ||
+    fase !== "cazaColorRespuesta" ||
+    !esperandoRespuesta
+  ) {
+    return;
+  }
+
+  if (indice !== objetivoCorrecto) {
+    errores++;
+    contadorErrores.textContent = errores;
+    mensajeResultado.textContent = `❌ Ese no es ${rehabObtenerColorCaza().nombre}. Sigue buscando.`;
+    mensajeResultado.className = "mensajeResultado mensajeError";
+    tono(220, 120);
+    return;
+  }
+
+  esperandoRespuesta = false;
+  detenerCronometro();
+  fase = "resultado";
+
+  var tiempo =
+    (performance.now() - tiempoInicio - tiempoPausado) / 1000;
+
+  aciertos++;
+  contadorAciertos.textContent = aciertos;
+  ultimoTiempo.textContent = `${tiempo.toFixed(3)} s`;
+  mensajeResultado.textContent = `✅ ${rehabObtenerColorCaza().nombre} encontrado · ${tiempo.toFixed(3)} s`;
+  mensajeResultado.className = "mensajeResultado mensajeCorrecto";
+  tono(1000, 120);
+
+  resultados.push({
+    ronda: rondaActual,
+    correcto: true,
+    tiempo: tiempo,
+    estado: `Caza ${rehabObtenerColorCaza().nombre} · Pod ${rehabNumeroVisiblePod(indice)}`,
+  });
+
+  await apagarTodosLosPods();
+  continuar();
+}
+
+// Interceptamos el estimulo normal para Caza de color.
+var rehabV19ActivarEstimuloBase = activarEstimulo;
+activarEstimulo = async function () {
+  if (modoActual === "cazaColor") {
+    await rehabV19ActivarCazaColor();
+    return;
+  }
+
+  await rehabV19ActivarEstimuloBase();
+};
+
+// -----------------------------------------------------
+// 7. MODO CAMBIO AUTOMATICO
+// -----------------------------------------------------
+
+function rehabV19LimpiarTemporizadorAutomatico() {
+  clearTimeout(rehabTemporizadorAutomatico);
+  rehabTemporizadorAutomatico = null;
+}
+
+async function rehabV19IniciarRondaAutomatica() {
+  if (!entrenamientoActivo || modoActual !== "automatico") {
+    return;
+  }
+
+  rehabV19LimpiarTemporizadorAutomatico();
+
+  if (pausado) {
+    return;
+  }
+
+  // En finalización por rondas, cada activación cuenta como una ronda.
+  if (tipoFinalGeneral !== "tiempo" && rondaActual >= totalRondasActual) {
+    fase = "resultado";
+    esperandoRespuesta = false;
+    await apagarTodosLosPods();
+    finalizarEntrenamiento();
+    return;
+  }
+
+  rondaActual++;
+
+  if (tipoFinalGeneral !== "tiempo") {
+    textoRonda.textContent = `Cambio ${rondaActual} de ${totalRondasActual}`;
+  }
+
+  await apagarTodosLosPods();
+
+  var excluir = rehabUltimoPodAutomatico >= 0 ? [rehabUltimoPodAutomatico] : [];
+  var indice = rehabElegirPodActivo(excluir);
+
+  if (indice < 0) {
+    indice = rehabElegirPodActivo();
+  }
+
+  if (indice < 0) {
+    return;
+  }
+
+  rehabUltimoPodAutomatico = indice;
+  objetivoCorrecto = indice;
+
+  var color = obtenerColorEstimulo(indice);
+
+  fase = "automatico";
+  esperandoRespuesta = false;
+
+  textoFase.textContent = "CAMBIO AUTOMÁTICO";
+  textoObjetivo.textContent = `POD ${rehabNumeroVisiblePod(indice)}`;
+  nombreColor.textContent = color.nombre;
+  colorObjetivo.style.background = color.css;
+  mensajeResultado.textContent = "No necesitas tocar el Pod";
+  mensajeResultado.className = "mensajeResultado";
+  cronometro.textContent = `${(rehabTiempoAutomaticoMs / 1000).toFixed(2)} s`;
+  ultimoTiempo.textContent = "AUTO";
+
+  encenderVisual(indice, color.css);
+  await enviarComandoPod(indice, color.comando);
+
+  resultados.push({
+    ronda: rondaActual,
+    correcto: true,
+    tiempo: null,
+    estado: `Cambio automático · Pod ${rehabNumeroVisiblePod(indice)}`,
+  });
+
+  // Aquí "aciertos" representa cantidad de estímulos mostrados.
+  aciertos++;
+  contadorAciertos.textContent = aciertos;
+
+  rehabTemporizadorAutomatico = setTimeout(async function () {
+    if (!entrenamientoActivo || modoActual !== "automatico") {
+      return;
+    }
+
+    await enviarComandoPod(indice, "off");
+    apagarVisualPod(indice);
+
+    if (pausado) {
+      return;
+    }
+
+    // Pequeña separación para que el cambio visual sea claro.
+    rehabTemporizadorAutomatico = setTimeout(function () {
+      rehabV19IniciarRondaAutomatica();
+    }, 100);
+  }, rehabTiempoAutomaticoMs);
+}
+
+var rehabV19IniciarRondaBase = iniciarRonda;
+iniciarRonda = async function () {
+  if (modoActual === "automatico") {
+    await rehabV19IniciarRondaAutomatica();
+    return;
+  }
+
+  await rehabV19IniciarRondaBase();
+};
+
+// -----------------------------------------------------
+// 8. PULSACIONES
+// Caza de color sí usa PRESS. Cambio automático los ignora.
+// -----------------------------------------------------
+
+var rehabV19ProcesarPulsacionBase = procesarPulsacion;
+procesarPulsacion = function (indice) {
+  if (modoActual === "automatico" && entrenamientoActivo) {
+    return;
+  }
+
+  if (
+    modoActual === "cazaColor" &&
+    entrenamientoActivo &&
+    fase === "cazaColorRespuesta"
+  ) {
+    rehabV19RespuestaCazaColor(indice);
+    return;
+  }
+
+  rehabV19ProcesarPulsacionBase(indice);
+};
+
+// -----------------------------------------------------
+// 9. PAUSA / REANUDAR EN CAMBIO AUTOMATICO
+// -----------------------------------------------------
+
+var rehabV19AlternarPausaBase = alternarPausa;
+alternarPausa = async function () {
+  var estabaPausado = pausado;
+
+  if (modoActual === "automatico") {
+    rehabV19LimpiarTemporizadorAutomatico();
+  }
+
+  await rehabV19AlternarPausaBase();
+
+  if (
+    modoActual === "automatico" &&
+    entrenamientoActivo &&
+    estabaPausado &&
+    !pausado
+  ) {
+    rehabTemporizadorAutomatico = setTimeout(function () {
+      rehabV19IniciarRondaAutomatica();
+    }, 250);
+  }
+};
+
+if (btnPausar) {
+  btnPausar.onclick = alternarPausa;
+}
+
+// -----------------------------------------------------
+// 10. LIMPIEZA AL TERMINAR O CANCELAR
+// -----------------------------------------------------
+
+var rehabV19FinalizarEntrenamientoBase = finalizarEntrenamiento;
+finalizarEntrenamiento = async function () {
+  rehabV19LimpiarTemporizadorAutomatico();
+  rehabUltimoPodAutomatico = -1;
+  return await rehabV19FinalizarEntrenamientoBase();
+};
+
+var rehabV19CancelarEntrenamientoBase = cancelarEntrenamiento;
+cancelarEntrenamiento = async function () {
+  rehabV19LimpiarTemporizadorAutomatico();
+  rehabUltimoPodAutomatico = -1;
+  return await rehabV19CancelarEntrenamientoBase();
+};
+
+if (btnCancelar) {
+  btnCancelar.onclick = cancelarEntrenamiento;
+}
+
+// -----------------------------------------------------
+// 11. INICIALIZACION V19
+// -----------------------------------------------------
+
+(function inicializarRehabPodV19() {
+  rehabV19CrearControlColorCaza();
+  rehabV19CrearControlTiempoAutomatico();
+  rehabV19ActualizarControlColorCaza();
+  rehabV19ActualizarControlTiempoAutomatico();
+
+  // Las categorias se construyen en V9. Damos un instante por si el DOM
+  // todavía está terminando de organizar las tarjetas.
+  setTimeout(function () {
+    rehabV19PrepararCategorias();
+  }, 0);
+
+  console.log(
+    "RehabPod V19: Caza de color + Cambio automático activados."
+  );
+})();

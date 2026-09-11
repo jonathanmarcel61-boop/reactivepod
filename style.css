@@ -48,7 +48,33 @@
     --radio-m: 14px;
     --radio-l: 20px;
 }
+/* =====================================================
+   TEMA CLARO
+   ===================================================== */
 
+body.tema-claro {
+    --fondo: #f4f6f5;
+
+    --tarjeta: #ffffff;
+    --tarjeta2: #eef2ef;
+    --tarjeta3: #e3e8e5;
+
+    --borde: #d2d9d5;
+
+    --texto: #152019;
+    --texto2: #66736b;
+
+    --acento: #7acb22;
+    --acento-tinta: #10200a;
+
+    background:
+        radial-gradient(
+            circle at 15% -10%,
+            rgba(122, 203, 34, 0.09) 0%,
+            transparent 40%
+        ),
+        var(--fondo);
+}
 body {
     margin: 0;
     min-height: 100vh;
