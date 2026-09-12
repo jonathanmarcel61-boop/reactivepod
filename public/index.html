@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>RehabPod</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+</head>
+
+<body>
+
+
+<!-- ================================================= -->
+<!-- INICIO -->
+<!-- ================================================= -->
+
+<section
+    id="pantallaInicio"
+    class="pantalla activa"
+>
+
+    <div class="contenedorApp">
+
+
+        <!-- CABECERA -->
+
+        <div class="cabeceraPrincipal">
+
+            <div>
+
+                <div class="marca">
+
+                    <div class="logoRehabPod">
+                        R
+                    </div>
+
+                    <div>
+
+                        <h1>
+                            RehabPod
+                        </h1>
+
+                        <p>
+                            Entrenamiento inteligente
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <button
+                id="btnAjustes"
+                class="botonIcono"
+            >
+                ⚙
+            </button>
+
+        </div>
+
+
+        <!-- BIENVENIDA -->
+
+        <div class="tarjeta bienvenida">
+
+            <div>
+
+                <small>
+                    DEPORTISTA ACTIVO
+                </small>
+
+                <h2 id="nombrePerfilInicio">
+                    Jugador 1
+                </h2>
+
+                <p>
+                    Continúa mejorando tu velocidad de reacción.
+                </p>
+
+            </div>
+
+            <button
+                id="btnPerfiles"
+                class="botonSecundarioPequeno"
+            >
+                CAMBIAR
+            </button>
+
+        </div>
+
+
+        <!-- CONEXIÓN -->
+
+        <div class="tarjeta">
+
+            <div class="tituloFila">
+
+                <div>
+
+                    <small class="etiquetaTitulo">
+                        DISPOSITIVOS
+                    </small>
+
+                    <h3>
+                        RehabPods
+                    </h3>
+
+                </div>
+
+
+                <div class="estadoGeneralPods">
+
+                    <span
+                        id="indicadorPods"
+                        class="indicador desconectado"
+                    ></span>
+
+                    <span id="textoEstadoPods">
+                        0 de 4
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="miniPods">
+
+                <div class="miniPod">
+                    1
+                </div>
+
+                <div class="miniPod">
+                    2
+                </div>
+
+                <div class="miniPod">
+                    3
+                </div>
+
+                <div class="miniPod">
+                    4
+                </div>
+
+            </div>
+
+
+            <button
+                id="btnGestionarPods"
+                class="boton botonAzul"
+            >
+                CONECTAR / ADMINISTRAR PODS
+            </button>
+
+        </div>
+
+
+        <!-- BOTÓN PRINCIPAL -->
+
+        <button
+            id="btnEntrenamiento"
+            class="boton botonPrincipal"
+        >
+            ⚡ INICIAR ENTRENAMIENTO
+        </button>
+
+
+        <!-- RESUMEN -->
+
+        <div class="gridResumenInicio">
+
+
+            <div class="tarjeta estadisticaInicio">
+
+                <span>
+                    ⚡
+                </span>
+
+                <small>
+                    MEJOR REACCIÓN
+                </small>
+
+                <strong id="inicioMejorTiempo">
+                    -- s
+                </strong>
+
+            </div>
+
+
+            <div class="tarjeta estadisticaInicio">
+
+                <span>
+                    🎯
+                </span>
+
+                <small>
+                    PRECISIÓN
+                </small>
+
+                <strong id="inicioPrecision">
+                    0 %
+                </strong>
+
+            </div>
+
+
+            <div class="tarjeta estadisticaInicio">
+
+                <span>
+                    🏆
+                </span>
+
+                <small>
+                    SESIONES
+                </small>
+
+                <strong id="inicioSesiones">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="tarjeta estadisticaInicio">
+
+                <span>
+                    🔥
+                </span>
+
+                <small>
+                    RACHA
+                </small>
+
+                <strong id="inicioRacha">
+                    0
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- NAVEGACIÓN INFERIOR -->
+
+        <div class="menuPrincipal">
+
+            <button
+                id="btnInicioMenu"
+                class="menuItem activo"
+            >
+
+                <span>
+                    🏠
+                </span>
+
+                Inicio
+
+            </button>
+
+
+            <button
+                id="btnProgreso"
+                class="menuItem"
+            >
+
+                <span>
+                    📈
+                </span>
+
+                Progreso
+
+            </button>
+
+
+            <button
+                id="btnEstadisticas"
+                class="menuItem"
+            >
+
+                <span>
+                    📊
+                </span>
+
+                Historial
+
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================================================= -->
+<!-- PODS -->
+<!-- ================================================= -->
+
+<section
+    id="pantallaPods"
+    class="pantalla"
+>
+
+    <div class="contenedorApp">
+
+        <div class="cabeceraSecundaria">
+
+            <button
+                id="btnVolverDesdePods"
+                class="botonVolver"
+            >
+                ←
+            </button>
+
+            <div>
+
+                <h2>
+                    RehabPods
+                </h2>
+
+                <p>
+                    Conecta los cuatro dispositivos
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="listaConexionPods">
+
+
+            <div class="conexionPod">
+
+                <div class="numeroPod">
+                    1
+                </div>
+
+                <div class="datosConexionPod">
+
+                    <strong>
+                        ReactiPod-1
+                    </strong>
+
+                    <small id="estadoConexionPod1">
+                        Desconectado
+                    </small>
+
+                </div>
+
+                <button
+                    id="btnConectarPod1"
+                    class="botonConexionPod"
+                    data-pod="0"
+                >
+                    CONECTAR
+                </button>
+
+            </div>
+
+
+            <div class="conexionPod">
+
+                <div class="numeroPod">
+                    2
+                </div>
+
+                <div class="datosConexionPod">
+
+                    <strong>
+                        ReactiPod-2
+                    </strong>
+
+                    <small id="estadoConexionPod2">
+                        Desconectado
+                    </small>
+
+                </div>
+
+                <button
+                    id="btnConectarPod2"
+                    class="botonConexionPod"
+                    data-pod="1"
+                >
+                    CONECTAR
+                </button>
+
+            </div>
+
+
+            <div class="conexionPod">
+
+                <div class="numeroPod">
+                    3
+                </div>
+
+                <div class="datosConexionPod">
+
+                    <strong>
+                        ReactiPod-3
+                    </strong>
+
+                    <small id="estadoConexionPod3">
+                        Desconectado
+                    </small>
+
+                </div>
+
+                <button
+                    id="btnConectarPod3"
+                    class="botonConexionPod"
+                    data-pod="2"
+                >
+                    CONECTAR
+                </button>
+
+            </div>
+
+
+            <div class="conexionPod">
+
+                <div class="numeroPod">
+                    4
+                </div>
+
+                <div class="datosConexionPod">
+
+                    <strong>
+                        ReactiPod-4
+                    </strong>
+
+                    <small id="estadoConexionPod4">
+                        Desconectado
+                    </small>
+
+                </div>
+
+                <button
+                    id="btnConectarPod4"
+                    class="botonConexionPod"
+                    data-pod="3"
+                >
+                    CONECTAR
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="tarjeta resumenConexion">
+
+            <strong id="cantidadPodsConectados">
+                0 / 4
+            </strong>
+
+            <span>
+                Pods conectados
+            </span>
+
+        </div>
+
+
+        <button
+            id="btnApagarTodos"
+            class="boton botonRojo"
+        >
+            APAGAR TODOS LOS PODS
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- ================================================= -->
+<!-- PERFILES -->
+<!-- ================================================= -->
+
+<section
+    id="pantallaPerfiles"
+    class="pantalla"
+>
+
+    <div class="contenedorApp">
+
+        <div class="cabeceraSecundaria">
+
+            <button
+                id="btnVolverPerfiles"
+                class="botonVolver"
+            >
+                ←
+            </button>
+
+            <div>
+
+                <h2>
+                    Deportistas
+                </h2>
+
+                <p>
+                    Administra tus perfiles
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="listaPerfiles"
+            class="listaPerfiles"
+        >
+        </div>
+
+
+        <button
+            id="btnNuevoPerfil"
+            class="boton botonPrincipal"
+        >
+            + NUEVO DEPORTISTA
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- ================================================= -->
+<!-- TIPOS ENTRENAMIENTO -->
+<!-- ================================================= -->
+
+<section
+    id="pantallaTiposEntrenamiento"
+    class="pantalla"
+>
+
+    <div class="contenedorApp">
+
+        <div class="cabeceraSecundaria">
+
+            <button
+                id="btnVolverTipos"
+                class="botonVolver"
+            >
+                ←
+            </button>
+
+            <div>
+
+                <h2>
+                    Entrenamientos
+                </h2>
+
+                <p>
+                    Selecciona una actividad
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="perfilEntrenamientoSeleccion">
+
+            <span>
+                👤
+            </span>
+
+            <div>
+
+                <small>
+                    ENTRENANDO COMO
+                </small>
+
+                <strong id="nombrePerfilTipos">
+                    Jugador 1
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="gridEntrenamientos">
+
+
+            <button
+                class="tarjetaEntrenamientoModo"
+                data-modo="simple"
+            >
+
+                <div class="iconoModo">
+                    ⚡
+                </div>
+
+                <div class="contenidoModo">
+
+                    <h3>
+                        Reacción aleatoria
+                    </h3>
+
+                    <p>
+                        Reacciona rápidamente al Pod que se ilumine.
+                    </p>
+
+                    <span class="etiquetaFisico">
+                        4 PODS
+                    </span>
+
+                </div>
+
+            </button>
+
+
+            <button
+                class="tarjetaEntrenamientoModo"
+                data-modo="colores"
+            >
+
+                <div class="iconoModo">
+                    🎨
+                </div>
+
+                <div class="contenidoModo">
+
+                    <h3>
+                        Reacción por colores
+                    </h3>
+
+                    <p>
+                        Busca y golpea el color indicado.
+                    </p>
+
+                    <span class="etiquetaFisico">
+                        4 PODS
+                    </span>
+
+                </div>
+
+            </button>
+
+
+            <button
+                class="tarjetaEntrenamientoModo"
+                data-modo="secuencia"
+            >
+
+                <div class="iconoModo">
+                    🧠
+                </div>
+
+                <div class="contenidoModo">
+
+                    <h3>
+                        Secuencia / memoria
+                    </h3>
+
+                    <p>
+                        Memoriza y repite una secuencia creciente.
+                    </p>
+
+                    <span class="etiquetaFisico">
+                        4 PODS
+                    </span>
+
+                </div>
+
+            </button>
+
+
+            <button
+                class="tarjetaEntrenamientoModo"
+                data-modo="libre"
+            >
+
+                <div class="iconoModo">
+                    🏃
+                </div>
+
+                <div class="contenidoModo">
+
+                    <h3>
+                        Modo libre
+                    </h3>
+
+                    <p>
+                        Golpea cualquier Pod y registra cada intervalo.
+                    </p>
+
+                    <span class="etiquetaFisico">
+                        4 PODS
+                    </span>
+
+                </div>
+
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================================================= -->
+<!-- CONFIGURACIÓN -->
+<!-- ================================================= -->
+
+<section
+    id="pantallaConfiguracion"
+    class="pantalla"
+>
+
+    <div class="contenedorApp">
+
+        <div class="cabeceraSecundaria">
+
+            <button
+                id="btnVolverEntrenamientos"
+                class="botonVolver"
+            >
+                ←
+            </button>
+
+            <div>
+
+                <h2 id="tituloConfiguracion">
+                    Reacción aleatoria
+                </h2>
+
+                <p id="nombrePerfilConfiguracion">
+                    Jugador 1
+                </p>
+
+            </div>
+
+            <div
+                id="iconoConfiguracion"
+                class="iconoConfiguracion"
+            >
+                ⚡
+            </div>
+
+        </div>
+
+
+        <div
+            id="descripcionModo"
+            class="tarjeta descripcionModo"
+        >
+        </div>
+
+
+        <div class="tarjeta">
+
+            <label for="numeroRondas">
+                Número de rondas
+            </label>
+
+            <select id="numeroRondas">
+
+                <option value="5">
+                    5 rondas
+                </option>
+
+                <option value="10">
+                    10 rondas
+                </option>
+
+                <option value="15">
+                    15 rondas
+                </option>
+
+                <option value="20">
+                    20 rondas
+                </option>
+
+            </select>
+
+
+            <div id="contenedorEspera">
+
+                <label for="esperaAleatoria">
+                    Espera antes del estímulo
+                </label>
+
+                <select id="esperaAleatoria">
+
+                    <option value="1000,2000">
+                        1 - 2 segundos
+                    </option>
+
+                    <option
+                        value="1000,3000"
+                        selected
+                    >
+                        1 - 3 segundos
+                    </option>
+
+                    <option value="2000,4000">
+                        2 - 4 segundos
+                    </option>
+
+                    <option value="3000,5000">
+                        3 - 5 segundos
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div id="contenedorPausa">
+
+                <label for="pausaEntreRondas">
+                    Pausa entre rondas
+                </label>
+
+                <select id="pausaEntreRondas">
+
+                    <option value="800">
+                        0.8 segundos
+                    </option>
+
+                    <option
+                        value="1200"
+                        selected
+                    >
+                        1.2 segundos
+                    </option>
+
+                    <option value="1800">
+                        1.8 segundos
+                    </option>
+
+                    <option value="2500">
+                        2.5 segundos
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="filaOpcion">
+
+                <div>
+
+                    <strong>
+                        Sonidos
+                    </strong>
+
+                    <small>
+                        Feedback durante el entrenamiento
+                    </small>
+
+                </div>
+
+                <input
+                    id="sonidosActivados"
+                    type="checkbox"
+                    checked
+                >
+
+            </div>
+
+
+            <div class="estadoPodsConfiguracion">
+
+                <span>
+                    Pods disponibles
+                </span>
+
+                <strong id="podsListosConfiguracion">
+                    0 / 4
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <button
+            id="btnComenzar"
+            class="boton botonPrincipal"
+        >
+            INICIAR ENTRENAMIENTO
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- ================================================= -->
+<!-- CUENTA REGRESIVA -->
+<!-- ================================================= -->
+
+<section
+    id="pantallaCuenta"
+    class="pantalla"
+>
+
+    <div class="cuentaContenedor">
+
+        <p>
+            PREPÁRATE
+        </p>
+
+        <div id="numeroCuenta">
+            3
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================================================= -->
+<!-- ENTRENAMIENTO ACTIVO -->
+<!-- ================================================= -->
+
+<section
+    id="pantallaEntrenamiento"
+    class="pantalla"
+>
+
+    <div class="contenedorApp">
+
+
+        <div class="cabeceraEntrenamiento">
+
+            <div>
+
+                <small>
+                    ENTRENAMIENTO
+                </small>
+
+                <h2 id="nombreModoActivo">
+                    Reacción aleatoria
+                </h2>
+
+                <div
+                    id="nombrePerfilEntrenamiento"
+                    class="deportistaEntrenamiento"
+                >
+                    👤 Jugador 1
+                </div>
+
+            </div>
+
+
+            <div
+                id="estadoEntrenamiento"
+                class="estadoEntrenamiento"
+            >
+                ACTIVO
+            </div>
+
+        </div>
+
+
+        <div class="tarjeta">
+
+            <div class="filaRonda">
+
+                <span id="textoRonda">
+                    Ronda 1 de 5
+                </span>
+
+                <span id="textoFase">
+                    Esperando...
+                </span>
+
+            </div>
+
+
+            <div class="cronometroCaja">
+
+                <small>
+                    TIEMPO DE REACCIÓN
+                </small>
+
+                <strong id="cronometro">
+                    0.000 s
+                </strong>
+
+            </div>
+
+
+            <div class="zonaObjetivo">
+
+                <p id="textoObjetivo">
+                    ESPERA
+                </p>
+
+                <div
+                    id="colorObjetivo"
+                    class="colorObjetivo"
+                >
+                </div>
+
+                <h2 id="nombreColor">
+                    ---
+                </h2>
+
+            </div>
+
+
+            <div class="pods">
+
+                <button
+                    class="pod"
+                    data-pod="0"
+                >
+
+                    <div
+                        id="luzPod1"
+                        class="luzPod"
+                    >
+                    </div>
+
+                    <strong>
+                        POD 1
+                    </strong>
+
+                </button>
+
+
+                <button
+                    class="pod"
+                    data-pod="1"
+                >
+
+                    <div
+                        id="luzPod2"
+                        class="luzPod"
+                    >
+                    </div>
+
+                    <strong>
+                        POD 2
+                    </strong>
+
+                </button>
+
+
+                <button
+                    class="pod"
+                    data-pod="2"
+                >
+
+                    <div
+                        id="luzPod3"
+                        class="luzPod"
+                    >
+                    </div>
+
+                    <strong>
+                        POD 3
+                    </strong>
+
+                </button>
+
+
+                <button
+                    class="pod"
+                    data-pod="3"
+                >
+
+                    <div
+                        id="luzPod4"
+                        class="luzPod"
+                    >
+                    </div>
+
+                    <strong>
+                        POD 4
+                    </strong>
+
+                </button>
+
+            </div>
+
+
+            <div class="datosEntrenamiento">
+
+                <div>
+
+                    <span>
+                        Aciertos
+                    </span>
+
+                    <strong id="contadorAciertos">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Errores
+                    </span>
+
+                    <strong id="contadorErrores">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Último
+                    </span>
+
+                    <strong id="ultimoTiempo">
+                        -- s
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="mensajeResultado"
+                class="mensajeResultado"
+            >
+            </div>
+
+        </div>
+
+
+        <div class="controlesEntrenamiento">
+
+            <button
+                id="btnPausar"
+                class="boton botonNaranja"
+            >
+                ⏸ PAUSAR
+            </button>
+
+            <button
+                id="btnCancelar"
+                class="boton botonRojo"
+            >
+                ✕ CANCELAR
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================================================= -->
+<!-- RESULTADOS -->
+<!-- ================================================= -->
+
+<section
+    id="pantallaResultados"
+    class="pantalla"
+>
+
+    <div class="contenedorApp">
+
+        <div class="resultadoHero">
+
+            <div class="resultadoIcono">
+                🏆
+            </div>
+
+            <h2>
+                Entrenamiento completado
+            </h2>
+
+            <p id="nombrePerfilResultados">
+                Jugador 1
+            </p>
+
+        </div>
+
+
+        <div class="gridResultados">
+
+            <div class="tarjeta resultadoDato">
+
+                <span>
+                    Rondas
+                </span>
+
+                <strong id="resultadoRondas">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="tarjeta resultadoDato">
+
+                <span>
+                    Aciertos
+                </span>
+
+                <strong id="resultadoAciertos">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="tarjeta resultadoDato">
+
+                <span>
+                    Errores
+                </span>
+
+                <strong id="resultadoErrores">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="tarjeta resultadoDato">
+
+                <span>
+                    Mejor
+                </span>
+
+                <strong id="resultadoMejor">
+                    -- s
+                </strong>
+
+            </div>
+
+
+            <div class="tarjeta resultadoDato">
+
+                <span>
+                    Promedio
+                </span>
+
+                <strong id="resultadoPromedio">
+                    -- s
+                </strong>
+
+            </div>
+
+
+            <div class="tarjeta resultadoDato">
+
+                <span>
+                    Peor
+                </span>
+
+                <strong id="resultadoPeor">
+                    -- s
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="tarjeta">
+
+            <h3>
+                Detalle
+            </h3>
+
+            <div
+                id="listaResultados"
+                class="listaResultados"
+            >
+            </div>
+
+        </div>
+
+
+        <button
+            id="btnNuevoEntrenamiento"
+            class="boton botonPrincipal"
+        >
+            NUEVO ENTRENAMIENTO
+        </button>
+
+
+        <button
+            id="btnResultadosInicio"
+            class="boton botonOscuro"
+        >
+            VOLVER AL INICIO
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- ================================================= -->
+<!-- PROGRESO -->
+<!-- ================================================= -->
+
+<section
+    id="pantallaProgreso"
+    class="pantalla"
+>
+
+    <div class="contenedorApp">
+
+        <div class="cabeceraSecundaria">
+
+            <button
+                id="btnVolverProgreso"
+                class="botonVolver"
+            >
+                ←
+            </button>
+
+            <div>
+
+                <h2>
+                    Progreso
+                </h2>
+
+                <p id="nombrePerfilProgreso">
+                    Jugador 1
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- RESUMEN -->
+
+        <div class="gridProgreso">
+
+            <div class="tarjeta progresoDato">
+
+                <span>
+                    ⚡
+                </span>
+
+                <small>
+                    MEJOR TIEMPO
+                </small>
+
+                <strong id="progresoMejorTiempo">
+                    -- s
+                </strong>
+
+            </div>
+
+
+            <div class="tarjeta progresoDato">
+
+                <span>
+                    📊
+                </span>
+
+                <small>
+                    PROMEDIO
+                </small>
+
+                <strong id="progresoPromedio">
+                    -- s
+                </strong>
+
+            </div>
+
+
+            <div class="tarjeta progresoDato">
+
+                <span>
+                    🎯
+                </span>
+
+                <small>
+                    PRECISIÓN
+                </small>
+
+                <strong id="progresoPrecision">
+                    0 %
+                </strong>
+
+            </div>
+
+
+            <div class="tarjeta progresoDato">
+
+                <span>
+                    🔥
+                </span>
+
+                <small>
+                    RACHA
+                </small>
+
+                <strong id="progresoRacha">
+                    0
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- OBJETIVO -->
+
+        <div class="tarjeta">
+
+            <div class="tituloFila">
+
+                <div>
+
+                    <small class="etiquetaTitulo">
+                        OBJETIVO
+                    </small>
+
+                    <h3>
+                        Tiempo de reacción
+                    </h3>
+
+                </div>
+
+                <button
+                    id="btnEditarObjetivo"
+                    class="botonSecundarioPequeno"
+                >
+                    EDITAR
+                </button>
+
+            </div>
+
+
+            <div class="objetivoNumeros">
+
+                <div>
+
+                    <small>
+                        Mejor actual
+                    </small>
+
+                    <strong id="objetivoActual">
+                        -- s
+                    </strong>
+
+                </div>
+
+                <div>
+
+                    <small>
+                        Meta
+                    </small>
+
+                    <strong id="objetivoMeta">
+                        0.500 s
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="barraProgreso">
+
+                <div
+                    id="rellenoObjetivo"
+                    class="rellenoObjetivo"
+                >
+                </div>
+
+            </div>
+
+
+            <p
+                id="textoObjetivoProgreso"
+                class="textoProgreso"
+            >
+                Realiza entrenamientos para comenzar.
+            </p>
+
+        </div>
+
+
+        <!-- GRÁFICA -->
+
+        <div class="tarjeta">
+
+            <div class="tituloFila">
+
+                <div>
+
+                    <small class="etiquetaTitulo">
+                        EVOLUCIÓN
+                    </small>
+
+                    <h3>
+                        Tiempo promedio
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <canvas
+                id="graficoProgreso"
+                height="230"
+            >
+            </canvas>
+
+
+            <p
+                id="mensajeProgreso"
+                class="mensajeProgreso"
+            >
+            </p>
+
+        </div>
+
+
+        <!-- ACTIVIDAD -->
+
+        <div class="tarjeta">
+
+            <h3>
+                Actividad reciente
+            </h3>
+
+            <div id="actividadReciente">
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================================================= -->
+<!-- ESTADÍSTICAS / HISTORIAL -->
+<!-- ================================================= -->
+
+<section
+    id="pantallaEstadisticas"
+    class="pantalla"
+>
+
+    <div class="contenedorApp">
+
+        <div class="cabeceraSecundaria">
+
+            <button
+                id="btnEstadisticasInicio"
+                class="botonVolver"
+            >
+                ←
+            </button>
+
+            <div>
+
+                <h2>
+                    Historial
+                </h2>
+
+                <p id="nombrePerfilEstadisticas">
+                    Jugador 1
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="gridResultados">
+
+            <div class="tarjeta resultadoDato">
+
+                <span>
+                    Sesiones
+                </span>
+
+                <strong id="totalEntrenamientos">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="tarjeta resultadoDato">
+
+                <span>
+                    Promedio
+                </span>
+
+                <strong id="promedioGeneral">
+                    -- s
+                </strong>
+
+            </div>
+
+
+            <div class="tarjeta resultadoDato">
+
+                <span>
+                    Mejor promedio
+                </span>
+
+                <strong id="mejorPromedio">
+                    -- s
+                </strong>
+
+            </div>
+
+
+            <div class="tarjeta resultadoDato">
+
+                <span>
+                    Aciertos
+                </span>
+
+                <strong id="totalAciertos">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="tarjeta resultadoDato">
+
+                <span>
+                    Errores
+                </span>
+
+                <strong id="totalErrores">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="tarjeta resultadoDato">
+
+                <span>
+                    Precisión
+                </span>
+
+                <strong id="precisionGeneral">
+                    0 %
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="tarjeta">
+
+            <h3>
+                Entrenamientos
+            </h3>
+
+            <div
+                id="historialEntrenamientos"
+                class="historialEntrenamientos"
+            >
+            </div>
+
+        </div>
+
+
+        <button
+            id="btnBorrarHistorial"
+            class="boton botonRojo"
+        >
+            BORRAR HISTORIAL
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- ================================================= -->
+<!-- AJUSTES -->
+<!-- ================================================= -->
+
+<section
+    id="pantallaAjustes"
+    class="pantalla"
+>
+
+    <div class="contenedorApp">
+
+        <div class="cabeceraSecundaria">
+
+            <button
+                id="btnVolverAjustes"
+                class="botonVolver"
+            >
+                ←
+            </button>
+
+            <div>
+
+                <h2>
+                    Ajustes
+                </h2>
+
+                <p>
+                    Preferencias de RehabPod
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="tarjeta">
+
+            <div class="filaAjuste">
+
+                <div>
+
+                    <strong>
+                        Sonidos por defecto
+                    </strong>
+
+                    <small>
+                        Activar feedback sonoro
+                    </small>
+
+                </div>
+
+                <input
+                    id="ajusteSonidos"
+                    type="checkbox"
+                    checked
+                >
+
+            </div>
+            <div class="separador"></div>
+
+            <div class="filaAjuste">
+
+              <div>
+
+              <strong>
+            Apariencia
+        </strong>
+
+        <small>
+            Elige fondo claro u oscuro
+        </small>
+
+    </div>
+
+    <select id="ajusteTema">
+
+        <option value="oscuro">
+                 Oscuro
+                </option>
+
+                 <option value="claro">
+                  Claro
+                 </option>
+
+                  </select>
+
+            </div>
+
+            <div class="separador">
+            </div>
+
+
+            <div class="filaAjuste">
+
+                <div>
+
+                    <strong>
+                        Vibración
+                    </strong>
+
+                    <small>
+                        Disponible más adelante en móvil
+                    </small>
+
+                </div>
+
+                <input
+                    id="ajusteVibracion"
+                    type="checkbox"
+                    disabled
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="tarjeta">
+
+            <small class="etiquetaTitulo">
+                PRIVACIDAD Y DATOS
+            </small>
+
+            <h3>
+                Tus datos
+            </h3>
+
+            <p class="textoSecundario">
+                Puedes descargar todo lo que RehabPod guarda del perfil
+                activo, o eliminarlo por completo de este dispositivo.
+            </p>
+
+            <button
+                id="btnDescargarMisDatos"
+                class="boton botonOscuro"
+            >
+                ⬇️ Descargar mis datos
+            </button>
+
+            <button
+                id="btnEliminarMiCuenta"
+                class="boton botonRojo"
+            >
+                🗑️ Eliminar mi cuenta y mis datos
+            </button>
+
+        </div>
+
+
+        <div class="tarjeta">
+
+            <small class="etiquetaTitulo">
+                SOBRE REHABPOD
+            </small>
+
+            <h3>
+                Versión de desarrollo
+            </h3>
+
+            <p class="textoSecundario">
+                RehabPod v0.3
+            </p>
+
+            <p class="textoSecundario">
+                Aplicación experimental para entrenamiento
+                de reacción, velocidad y coordinación.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<script src="app.js"></script>
+
+</body>
+
+</html>
