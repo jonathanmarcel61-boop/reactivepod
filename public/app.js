@@ -14027,3 +14027,1976 @@ console.log(
 
   window.rehabCloudAbrir = abrirCloud;
 })();
+// =====================================================
+// REHABPOD V28
+// ASIGNAR RUTINAS PROFESIONAL -> USUARIO
+// + GUIA DE EJERCICIO CON VIDEO DENTRO DE LA APP
+//
+// PEGAR TODO ESTE BLOQUE AL FINAL DE app.js, DESPUES DE V27.
+// REQUIERE ejecutar antes:
+// rehabpod_v28_asignaciones_guias.sql
+// =====================================================
+
+(function () {
+  let cloud = null;
+  let sesionUser = null;
+  let perfilCloud = null;
+
+  const MAPA_MODOS = {
+    simple: "Reacción aleatoria",
+    colores: "Reacción por colores",
+    secuencia: "Secuencia / memoria",
+    libre: "Modo libre",
+    persecucion: "Persecución",
+    doble: "Doble estímulo",
+    prohibido: "Color prohibido",
+    circuito: "Circuito de Pods",
+    contrarreloj: "Contrarreloj",
+    entrenador: "Modo entrenador",
+    cazaColor: "Caza de color",
+    automatico: "Cambio automático",
+    stroop: "Palabra vs color"
+  };
+
+  function esc(v) {
+    return String(v ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function modoNombre(modo) {
+    return MAPA_MODOS[modo] || modo || "Ejercicio";
+  }
+
+  function fechaBonita(fecha) {
+    if (!fecha) return "Sin fecha";
+    const d = new Date(fecha + "T12:00:00");
+    if (Number.isNaN(d.getTime())) return fecha;
+    return d.toLocaleDateString();
+  }
+
+  function horaBonita(hora) {
+    if (!hora) return "";
+    return String(hora).slice(0, 5);
+  }
+
+  async function cargarSDK() {
+    if (window.supabase?.createClient) return true;
+
+    await new Promise((resolve, reject) => {
+      const existente = document.getElementById("rehabSupabaseSDK");
+      if (existente) {
+        if (window.supabase?.createClient) return resolve();
+        existente.addEventListener("load", resolve, { once: true });
+        existente.addEventListener("error", reject, { once: true });
+        return;
+      }
+
+      const s = document.createElement("script");
+      s.id = "rehabSupabaseSDK";
+      s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+      s.onload = resolve;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+
+    return !!window.supabase?.createClient;
+  }
+
+  async function cargarConfig() {
+    if (window.REHAB_SUPABASE_CONFIG?.url &&
+        window.REHAB_SUPABASE_CONFIG?.publishableKey) {
+      return true;
+    }
+
+    await new Promise((resolve) => {
+      const existente = document.getElementById("rehabSupabaseConfigPublica");
+      if (existente) {
+        existente.addEventListener("load", resolve, { once: true });
+        existente.addEventListener("error", resolve, { once: true });
+        return;
+      }
+
+      const s = document.createElement("script");
+      s.id = "rehabSupabaseConfigPublica";
+      s.src = "supabase-config.js";
+      s.onload = resolve;
+      s.onerror = resolve;
+      document.head.appendChild(s);
+    });
+
+    return !!window.REHAB_SUPABASE_CONFIG;
+  }
+
+  async function iniciarCloud() {
+    const okConfig = await cargarConfig();
+    if (!okConfig) throw new Error("No se encontró supabase-config.js.");
+
+    await cargarSDK();
+
+    if (!cloud) {
+      cloud = window.supabase.createClient(
+        window.REHAB_SUPABASE_CONFIG.url,
+        window.REHAB_SUPABASE_CONFIG.publishableKey,
+        {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+          }
+        }
+      );
+    }
+
+    const { data } = await cloud.auth.getSession();
+    sesionUser = data?.session?.user || null;
+
+    if (!sesionUser) {
+      perfilCloud = null;
+      return false;
+    }
+
+    const { data: perfil, error } = await cloud
+      .from("rehab_profiles")
+      .select("user_id, full_name, role, specialty, user_code")
+      .eq("user_id", sesionUser.id)
+      .single();
+
+    if (error) throw error;
+
+    perfilCloud = perfil;
+    return true;
+  }
+
+  // -----------------------------------------------------
+  // VIDEO EMBEBIDO
+  // -----------------------------------------------------
+  function videoEmbebible(url) {
+    const original = String(url || "").trim();
+    if (!original) return { tipo: "none", src: "" };
+
+    try {
+      const u = new URL(original);
+      const host = u.hostname.replace(/^www\./, "").toLowerCase();
+
+      if (host === "youtu.be") {
+        const id = u.pathname.split("/").filter(Boolean)[0];
+        if (id) return { tipo: "iframe", src: `https://www.youtube.com/embed/${encodeURIComponent(id)}` };
+      }
+
+      if (host.endsWith("youtube.com")) {
+        let id = u.searchParams.get("v");
+
+        if (!id) {
+          const partes = u.pathname.split("/").filter(Boolean);
+          if (partes[0] === "shorts" || partes[0] === "embed") {
+            id = partes[1];
+          }
+        }
+
+        if (id) return { tipo: "iframe", src: `https://www.youtube.com/embed/${encodeURIComponent(id)}` };
+      }
+
+      if (host.endsWith("vimeo.com")) {
+        const id = u.pathname.split("/").filter(Boolean).find(x => /^\d+$/.test(x));
+        if (id) return { tipo: "iframe", src: `https://player.vimeo.com/video/${encodeURIComponent(id)}` };
+      }
+
+      if (/\.(mp4|webm|ogg)(\?.*)?$/i.test(original)) {
+        return { tipo: "video", src: original };
+      }
+
+      return { tipo: "link", src: original };
+    } catch (e) {
+      return { tipo: "link", src: original };
+    }
+  }
+
+  function htmlVideo(url) {
+    const v = videoEmbebible(url);
+
+    if (v.tipo === "iframe") {
+      return `
+        <div class="rehabV28VideoWrap">
+          <iframe
+            src="${esc(v.src)}"
+            title="Video del ejercicio"
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen>
+          </iframe>
+        </div>
+      `;
+    }
+
+    if (v.tipo === "video") {
+      return `
+        <div class="rehabV28VideoWrap">
+          <video controls playsinline preload="metadata">
+            <source src="${esc(v.src)}">
+          </video>
+        </div>
+      `;
+    }
+
+    if (v.tipo === "link") {
+      return `
+        <div class="rehabV28Aviso">
+          Este proveedor no permite garantizar video embebido dentro de la app.
+          <br><br>
+          <a class="rehabV28Btn secundario" href="${esc(v.src)}" target="_blank" rel="noopener noreferrer">
+            ▶ ABRIR VIDEO
+          </a>
+        </div>
+      `;
+    }
+
+    return `<div class="rehabV28Aviso">Este ejercicio todavía no tiene video.</div>`;
+  }
+
+  // -----------------------------------------------------
+  // UI GENERAL
+  // -----------------------------------------------------
+  function estilos() {
+    if (document.getElementById("rehabV28Estilos")) return;
+
+    const st = document.createElement("style");
+    st.id = "rehabV28Estilos";
+    st.textContent = `
+      .rehabV28HomeBtn{
+        display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+        min-height:48px;margin-top:10px;border-radius:14px;cursor:pointer;
+        border:1px solid rgba(14,165,233,.30);background:rgba(14,165,233,.09);
+        color:inherit;font-weight:900
+      }
+      .rehabV28Overlay{
+        position:fixed;inset:0;z-index:100300;background:rgba(2,6,23,.80);
+        backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:16px
+      }
+      .rehabV28Overlay[hidden]{display:none!important}
+      .rehabV28Modal{
+        width:min(960px,100%);max-height:94vh;overflow:auto;border-radius:24px;padding:20px;
+        background:var(--fondo-tarjeta,#111827);color:inherit;
+        border:1px solid rgba(148,163,184,.22);box-shadow:0 25px 80px rgba(0,0,0,.44)
+      }
+      .tema-claro .rehabV28Modal{background:#fff}
+      .rehabV28Head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:15px}
+      .rehabV28Cerrar{width:42px;height:42px;border-radius:12px;border:1px solid rgba(148,163,184,.25);
+        background:rgba(148,163,184,.08);color:inherit;font-size:20px;cursor:pointer}
+      .rehabV28Card{border:1px solid rgba(148,163,184,.20);border-radius:17px;padding:14px;
+        margin:10px 0;background:rgba(148,163,184,.045)}
+      .rehabV28Grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+      .rehabV28Campo{display:grid;gap:6px;margin-bottom:11px}
+      .rehabV28Campo label{font-size:.79rem;font-weight:900;opacity:.76}
+      .rehabV28Campo input,.rehabV28Campo select,.rehabV28Campo textarea{
+        width:100%;box-sizing:border-box;padding:10px 11px;border-radius:11px;
+        border:1px solid rgba(148,163,184,.28);background:rgba(148,163,184,.07);
+        color:inherit;font:inherit
+      }
+      .rehabV28Campo textarea{min-height:85px;resize:vertical}
+      .rehabV28Btn{
+        appearance:none;border:0;border-radius:12px;padding:10px 14px;font-weight:900;
+        cursor:pointer;background:#0284c7;color:white;display:inline-flex;align-items:center;
+        justify-content:center;gap:7px;text-decoration:none
+      }
+      .rehabV28Btn.secundario{
+        background:rgba(148,163,184,.14);color:inherit;border:1px solid rgba(148,163,184,.22)
+      }
+      .rehabV28Btn.peligro{background:#b91c1c}
+      .rehabV28Acciones{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+      .rehabV28Aviso{padding:12px;border-radius:13px;background:rgba(14,165,233,.08);
+        border:1px solid rgba(14,165,233,.18);line-height:1.5}
+      .rehabV28Asignacion{display:grid;gap:7px}
+      .rehabV28Asignacion small{opacity:.70}
+      .rehabV28VideoWrap{
+        width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000;
+        margin:12px 0
+      }
+      .rehabV28VideoWrap iframe,.rehabV28VideoWrap video{
+        width:100%;height:100%;border:0;display:block
+      }
+      .rehabV28Dato{
+        padding:10px 12px;border-radius:12px;background:rgba(148,163,184,.06);
+        border:1px solid rgba(148,163,184,.16);margin:8px 0;line-height:1.5
+      }
+      .rehabV28EjercicioTitulo{font-weight:950;font-size:1.05rem}
+      .rehabV28Badge{
+        display:inline-flex;padding:5px 8px;border-radius:999px;background:rgba(14,165,233,.10);
+        border:1px solid rgba(14,165,233,.20);font-size:.75rem;font-weight:900;margin:4px 4px 4px 0
+      }
+      @media(max-width:700px){.rehabV28Grid{grid-template-columns:1fr}.rehabV28Modal{padding:15px}}
+    `;
+    document.head.appendChild(st);
+  }
+
+  function crearBotonHome() {
+    if (document.getElementById("rehabV28HomeBtn")) return;
+
+    const ref =
+      document.getElementById("rehabV27BtnCloud") ||
+      document.getElementById("rehabV24BtnHistorial") ||
+      document.getElementById("btnEntrenamiento");
+
+    if (!ref) return;
+
+    const b = document.createElement("button");
+    b.id = "rehabV28HomeBtn";
+    b.type = "button";
+    b.className = "rehabV28HomeBtn";
+    b.textContent = "📨 RUTINAS ASIGNADAS";
+    b.onclick = abrirPrincipal;
+
+    ref.insertAdjacentElement("afterend", b);
+  }
+
+  function crearModal() {
+    if (document.getElementById("rehabV28Overlay")) return;
+
+    const ov = document.createElement("div");
+    ov.id = "rehabV28Overlay";
+    ov.className = "rehabV28Overlay";
+    ov.hidden = true;
+
+    ov.innerHTML = `
+      <div class="rehabV28Modal">
+        <div class="rehabV28Head">
+          <div>
+            <div style="font-size:.72rem;opacity:.65;font-weight:900">REHABPOD CLOUD</div>
+            <h2 id="rehabV28Titulo" style="margin:0">Rutinas asignadas</h2>
+          </div>
+          <button id="rehabV28Cerrar" class="rehabV28Cerrar" type="button">×</button>
+        </div>
+        <div id="rehabV28Contenido"></div>
+      </div>
+    `;
+
+    document.body.appendChild(ov);
+
+    document.getElementById("rehabV28Cerrar").onclick = cerrar;
+    ov.addEventListener("click", e => {
+      if (e.target === ov) cerrar();
+    });
+  }
+
+  function abrir() {
+    document.getElementById("rehabV28Overlay").hidden = false;
+  }
+
+  function cerrar() {
+    document.getElementById("rehabV28Overlay").hidden = true;
+  }
+
+  function mensaje(texto) {
+    const el = document.getElementById("rehabV28Mensaje");
+    if (!el) return;
+    el.style.display = "block";
+    el.textContent = texto;
+  }
+
+  // -----------------------------------------------------
+  // ABRIR SEGUN ROL
+  // -----------------------------------------------------
+  async function abrirPrincipal() {
+    abrir();
+    const c = document.getElementById("rehabV28Contenido");
+    c.innerHTML = `<div class="rehabV28Aviso">Conectando con RehabPod Cloud...</div>`;
+
+    try {
+      const ok = await iniciarCloud();
+
+      if (!ok) {
+        c.innerHTML = `
+          <div class="rehabV28Aviso">
+            Primero inicia sesión desde <strong>☁️ CUENTA Y NUBE</strong>.
+          </div>
+        `;
+        return;
+      }
+
+      if (perfilCloud.role === "professional") {
+        await renderProfesional();
+      } else {
+        await renderUsuario();
+      }
+    } catch (error) {
+      console.error(error);
+      c.innerHTML = `<div class="rehabV28Aviso">Error: ${esc(error.message)}</div>`;
+    }
+  }
+
+  // -----------------------------------------------------
+  // PROFESIONAL
+  // -----------------------------------------------------
+  async function obtenerUsuariosVinculados() {
+    const { data: links, error } = await cloud
+      .from("rehab_professional_users")
+      .select("user_id, status")
+      .eq("professional_id", sesionUser.id)
+      .eq("status", "active");
+
+    if (error) throw error;
+    if (!links?.length) return [];
+
+    const ids = links.map(x => x.user_id);
+
+    const { data: perfiles, error: e2 } = await cloud
+      .from("rehab_profiles")
+      .select("user_id, full_name, specialty")
+      .in("user_id", ids);
+
+    if (e2) throw e2;
+
+    return (perfiles || []).sort((a,b) =>
+      String(a.full_name || "").localeCompare(String(b.full_name || ""))
+    );
+  }
+
+  async function obtenerMisRutinas() {
+    const { data, error } = await cloud
+      .from("rehab_routines")
+      .select("id, name, category, rest_seconds, created_at, updated_at")
+      .eq("owner_id", sesionUser.id)
+      .order("updated_at", { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function renderProfesional() {
+    document.getElementById("rehabV28Titulo").textContent = "Asignar rutinas";
+
+    const c = document.getElementById("rehabV28Contenido");
+    const [usuarios, rutinas] = await Promise.all([
+      obtenerUsuariosVinculados(),
+      obtenerMisRutinas()
+    ]);
+
+    c.innerHTML = `
+      <div class="rehabV28Card">
+        <h3 style="margin-top:0">📨 Asignar rutina a un usuario</h3>
+
+        ${!usuarios.length ? `
+          <div class="rehabV28Aviso">
+            Todavía no tienes usuarios vinculados. Vincúlalos desde <strong>☁️ CUENTA Y NUBE</strong>.
+          </div>
+        ` : ""}
+
+        ${!rutinas.length ? `
+          <div class="rehabV28Aviso">
+            Todavía no tienes rutinas sincronizadas. Primero usa
+            <strong>☁️ SINCRONIZAR MIS RUTINAS</strong>.
+          </div>
+        ` : ""}
+
+        <div class="rehabV28Grid">
+          <div class="rehabV28Campo">
+            <label>Usuario</label>
+            <select id="rehabV28Usuario" ${!usuarios.length ? "disabled" : ""}>
+              ${usuarios.map(u => `<option value="${esc(u.user_id)}">${esc(u.full_name || "Usuario")}</option>`).join("")}
+            </select>
+          </div>
+
+          <div class="rehabV28Campo">
+            <label>Rutina</label>
+            <select id="rehabV28Rutina" ${!rutinas.length ? "disabled" : ""}>
+              ${rutinas.map(r => `<option value="${esc(r.id)}">${esc(r.name)}</option>`).join("")}
+            </select>
+          </div>
+
+          <div class="rehabV28Campo">
+            <label>Fecha</label>
+            <input id="rehabV28Fecha" type="date">
+          </div>
+
+          <div class="rehabV28Campo">
+            <label>Hora (opcional)</label>
+            <input id="rehabV28Hora" type="time">
+          </div>
+        </div>
+
+        <div class="rehabV28Campo">
+          <label>Indicaciones generales para el usuario</label>
+          <textarea id="rehabV28Notas" placeholder="Ej. Realizar con calzado deportivo, descansar si aparece dolor, completar 2 veces..."></textarea>
+        </div>
+
+        <div class="rehabV28Acciones">
+          <button id="rehabV28Asignar" class="rehabV28Btn" type="button"
+            ${(!usuarios.length || !rutinas.length) ? "disabled" : ""}>
+            ENVIAR RUTINA
+          </button>
+        </div>
+      </div>
+
+      <div class="rehabV28Card">
+        <h3 style="margin-top:0">🎥 Videos e indicaciones de mis rutinas</h3>
+        <p style="opacity:.75">
+          Aquí puedes añadir el video y explicar exactamente cómo colocar los Pods antes de enviar la rutina.
+        </p>
+        <div id="rehabV28RutinasGuia">
+          ${rutinas.length ? rutinas.map(r => `
+            <div class="rehabV28Dato">
+              <strong>${esc(r.name)}</strong>
+              <div class="rehabV28Acciones">
+                <button class="rehabV28Btn secundario" data-guia-rutina="${esc(r.id)}" type="button">
+                  ✏️ EDITAR GUÍA
+                </button>
+              </div>
+            </div>
+          `).join("") : "No hay rutinas en la nube."}
+        </div>
+      </div>
+
+      <div class="rehabV28Card">
+        <h3 style="margin-top:0">📋 Asignaciones enviadas</h3>
+        <div id="rehabV28Enviadas">Cargando...</div>
+      </div>
+
+      <div id="rehabV28Mensaje" class="rehabV28Aviso" style="display:none"></div>
+    `;
+
+    const fecha = document.getElementById("rehabV28Fecha");
+    if (fecha) fecha.value = new Date().toISOString().slice(0,10);
+
+    const btnAsignar = document.getElementById("rehabV28Asignar");
+    if (btnAsignar) btnAsignar.onclick = guardarAsignacion;
+
+    document.querySelectorAll("[data-guia-rutina]").forEach(btn => {
+      btn.onclick = () => editarGuiaRutina(btn.dataset.guiaRutina);
+    });
+
+    await cargarAsignacionesProfesional();
+  }
+
+  async function guardarAsignacion() {
+    const user_id = document.getElementById("rehabV28Usuario")?.value;
+    const routine_id = document.getElementById("rehabV28Rutina")?.value;
+    const scheduled_date = document.getElementById("rehabV28Fecha")?.value;
+    const scheduled_time = document.getElementById("rehabV28Hora")?.value || null;
+    const professional_notes = document.getElementById("rehabV28Notas")?.value.trim() || null;
+
+    if (!user_id || !routine_id || !scheduled_date) {
+      mensaje("Selecciona usuario, rutina y fecha.");
+      return;
+    }
+
+    const { error } = await cloud
+      .from("rehab_assignments")
+      .insert({
+        routine_id,
+        professional_id: sesionUser.id,
+        user_id,
+        scheduled_date,
+        scheduled_time,
+        professional_notes,
+        status: "pending"
+      });
+
+    if (error) {
+      mensaje("No se pudo asignar: " + error.message);
+      return;
+    }
+
+    mensaje("Rutina enviada correctamente.");
+    document.getElementById("rehabV28Notas").value = "";
+    await cargarAsignacionesProfesional();
+  }
+
+  async function cargarAsignacionesProfesional() {
+    const host = document.getElementById("rehabV28Enviadas");
+    if (!host) return;
+
+    const { data: asignaciones, error } = await cloud
+      .from("rehab_assignments")
+      .select("id, routine_id, user_id, scheduled_date, scheduled_time, professional_notes, status, created_at")
+      .eq("professional_id", sesionUser.id)
+      .order("scheduled_date", { ascending: false });
+
+    if (error) {
+      host.textContent = "No se pudieron cargar.";
+      return;
+    }
+
+    if (!asignaciones?.length) {
+      host.textContent = "Todavía no has enviado rutinas.";
+      return;
+    }
+
+    const routineIds = [...new Set(asignaciones.map(a => a.routine_id).filter(Boolean))];
+    const userIds = [...new Set(asignaciones.map(a => a.user_id).filter(Boolean))];
+
+    const [rutinasResp, usersResp] = await Promise.all([
+      routineIds.length
+        ? cloud.from("rehab_routines").select("id, name").in("id", routineIds)
+        : Promise.resolve({ data: [] }),
+      userIds.length
+        ? cloud.from("rehab_profiles").select("user_id, full_name").in("user_id", userIds)
+        : Promise.resolve({ data: [] })
+    ]);
+
+    const rutinas = new Map((rutinasResp.data || []).map(r => [r.id, r.name]));
+    const usuarios = new Map((usersResp.data || []).map(u => [u.user_id, u.full_name]));
+
+    host.innerHTML = asignaciones.map(a => `
+      <div class="rehabV28Dato rehabV28Asignacion">
+        <strong>${esc(rutinas.get(a.routine_id) || "Rutina")}</strong>
+        <span>👤 ${esc(usuarios.get(a.user_id) || "Usuario")}</span>
+        <span>📅 ${esc(fechaBonita(a.scheduled_date))}${a.scheduled_time ? " · " + esc(horaBonita(a.scheduled_time)) : ""}</span>
+        <small>Estado: ${esc(a.status || "pending")}</small>
+        ${a.professional_notes ? `<small>📝 ${esc(a.professional_notes)}</small>` : ""}
+      </div>
+    `).join("");
+  }
+
+  // -----------------------------------------------------
+  // EDITOR DE GUIAS
+  // -----------------------------------------------------
+  async function editarGuiaRutina(routineId) {
+    const [{ data: rutina, error: er1 }, { data: ejercicios, error: er2 }] = await Promise.all([
+      cloud.from("rehab_routines")
+        .select("id, name, category, rest_seconds")
+        .eq("id", routineId)
+        .single(),
+      cloud.from("rehab_routine_exercises")
+        .select("id, position, mode, difficulty, finish_type, finish_value, video_url, instructions, pod_distance, pod_setup")
+        .eq("routine_id", routineId)
+        .order("position", { ascending: true })
+    ]);
+
+    if (er1 || er2) {
+      mensaje("No se pudo abrir la guía.");
+      return;
+    }
+
+    const c = document.getElementById("rehabV28Contenido");
+    document.getElementById("rehabV28Titulo").textContent = "Editar guía";
+
+    c.innerHTML = `
+      <div class="rehabV28Aviso">
+        <strong>${esc(rutina.name)}</strong><br>
+        Estos datos se mostrarán al Usuario debajo del video.
+      </div>
+
+      <div id="rehabV28EditorEjercicios">
+        ${(ejercicios || []).map((e, i) => `
+          <div class="rehabV28Card" data-editor-ejercicio="${esc(e.id)}">
+            <div class="rehabV28EjercicioTitulo">${i+1}. ${esc(modoNombre(e.mode))}</div>
+            <span class="rehabV28Badge">${esc(e.difficulty || "media")}</span>
+            <span class="rehabV28Badge">${esc(e.finish_type || "rondas")}: ${esc(e.finish_value ?? "")}</span>
+
+            <div class="rehabV28Campo">
+              <label>Enlace del video</label>
+              <input data-campo="video_url" type="url" value="${esc(e.video_url || "")}"
+                placeholder="https://youtube.com/...">
+            </div>
+
+            <div class="rehabV28Campo">
+              <label>Distancia recomendada entre Pods</label>
+              <input data-campo="pod_distance" type="text" value="${esc(e.pod_distance || "")}"
+                placeholder="Ej. 1,5 m entre cada Pod">
+            </div>
+
+            <div class="rehabV28Campo">
+              <label>Cómo colocar los Pods</label>
+              <textarea data-campo="pod_setup"
+                placeholder="Ej. 4 Pods formando un cuadrado; el usuario se coloca en el centro.">${esc(e.pod_setup || "")}</textarea>
+            </div>
+
+            <div class="rehabV28Campo">
+              <label>Indicaciones del ejercicio</label>
+              <textarea data-campo="instructions"
+                placeholder="Ej. Mantener semiflexión de rodillas, tocar el Pod iluminado y volver al centro.">${esc(e.instructions || "")}</textarea>
+            </div>
+
+            ${e.video_url ? htmlVideo(e.video_url) : ""}
+          </div>
+        `).join("")}
+      </div>
+
+      <div class="rehabV28Acciones">
+        <button id="rehabV28GuardarGuia" class="rehabV28Btn" type="button">💾 GUARDAR GUÍA</button>
+        <button id="rehabV28VolverProfesional" class="rehabV28Btn secundario" type="button">VOLVER</button>
+      </div>
+
+      <div id="rehabV28Mensaje" class="rehabV28Aviso" style="display:none"></div>
+    `;
+
+    document.getElementById("rehabV28GuardarGuia").onclick = guardarGuia;
+    document.getElementById("rehabV28VolverProfesional").onclick = renderProfesional;
+  }
+
+  async function guardarGuia() {
+    const cards = [...document.querySelectorAll("[data-editor-ejercicio]")];
+
+    try {
+      for (const card of cards) {
+        const id = card.dataset.editorEjercicio;
+        const valor = nombre => card.querySelector(`[data-campo="${nombre}"]`)?.value.trim() || null;
+
+        const { error } = await cloud
+          .from("rehab_routine_exercises")
+          .update({
+            video_url: valor("video_url"),
+            pod_distance: valor("pod_distance"),
+            pod_setup: valor("pod_setup"),
+            instructions: valor("instructions")
+          })
+          .eq("id", id);
+
+        if (error) throw error;
+      }
+
+      mensaje("Guía guardada correctamente.");
+    } catch (error) {
+      mensaje("Error guardando la guía: " + error.message);
+    }
+  }
+
+  // -----------------------------------------------------
+  // USUARIO
+  // -----------------------------------------------------
+  async function renderUsuario() {
+    document.getElementById("rehabV28Titulo").textContent = "Mis rutinas asignadas";
+
+    const c = document.getElementById("rehabV28Contenido");
+    c.innerHTML = `
+      <div class="rehabV28Aviso">
+        Aquí aparecen las rutinas que un Profesional te ha enviado.
+      </div>
+      <div id="rehabV28ListaUsuario" style="margin-top:12px">Cargando...</div>
+    `;
+
+    const { data: asignaciones, error } = await cloud
+      .from("rehab_assignments")
+      .select("id, routine_id, professional_id, scheduled_date, scheduled_time, professional_notes, status, created_at")
+      .eq("user_id", sesionUser.id)
+      .order("scheduled_date", { ascending: true });
+
+    const host = document.getElementById("rehabV28ListaUsuario");
+
+    if (error) {
+      host.textContent = "No se pudieron cargar las rutinas.";
+      return;
+    }
+
+    if (!asignaciones?.length) {
+      host.innerHTML = `<div class="rehabV28Card">Todavía no tienes rutinas asignadas.</div>`;
+      return;
+    }
+
+    const routineIds = [...new Set(asignaciones.map(a => a.routine_id).filter(Boolean))];
+    const proIds = [...new Set(asignaciones.map(a => a.professional_id).filter(Boolean))];
+
+    const [rutinasResp, prosResp] = await Promise.all([
+      cloud.from("rehab_routines")
+        .select("id, name, category, rest_seconds")
+        .in("id", routineIds),
+      cloud.from("rehab_profiles")
+        .select("user_id, full_name")
+        .in("user_id", proIds)
+    ]);
+
+    const rutinas = new Map((rutinasResp.data || []).map(r => [r.id, r]));
+    const pros = new Map((prosResp.data || []).map(p => [p.user_id, p.full_name]));
+
+    host.innerHTML = asignaciones.map(a => {
+      const r = rutinas.get(a.routine_id);
+      return `
+        <div class="rehabV28Card">
+          <h3 style="margin:0 0 8px">${esc(r?.name || "Rutina")}</h3>
+          <div>👤 ${esc(pros.get(a.professional_id) || "Profesional")}</div>
+          <div>📅 ${esc(fechaBonita(a.scheduled_date))}${a.scheduled_time ? " · " + esc(horaBonita(a.scheduled_time)) : ""}</div>
+          ${a.professional_notes ? `<div class="rehabV28Dato">📝 ${esc(a.professional_notes)}</div>` : ""}
+          <div class="rehabV28Acciones">
+            <button class="rehabV28Btn" data-ver-asignacion="${esc(a.id)}" type="button">
+              ▶ VER RUTINA
+            </button>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    document.querySelectorAll("[data-ver-asignacion]").forEach(btn => {
+      btn.onclick = () => verAsignacionUsuario(btn.dataset.verAsignacion);
+    });
+  }
+
+  async function verAsignacionUsuario(assignmentId) {
+    const { data: a, error: ea } = await cloud
+      .from("rehab_assignments")
+      .select("id, routine_id, professional_id, scheduled_date, scheduled_time, professional_notes, status")
+      .eq("id", assignmentId)
+      .eq("user_id", sesionUser.id)
+      .single();
+
+    if (ea) {
+      alert("No se pudo abrir la asignación.");
+      return;
+    }
+
+    const [rutinaResp, ejerciciosResp, proResp] = await Promise.all([
+      cloud.from("rehab_routines")
+        .select("id, name, category, rest_seconds")
+        .eq("id", a.routine_id)
+        .single(),
+      cloud.from("rehab_routine_exercises")
+        .select("id, position, mode, difficulty, finish_type, finish_value, video_url, instructions, pod_distance, pod_setup")
+        .eq("routine_id", a.routine_id)
+        .order("position", { ascending: true }),
+      cloud.from("rehab_profiles")
+        .select("user_id, full_name")
+        .eq("user_id", a.professional_id)
+        .single()
+    ]);
+
+    if (rutinaResp.error || ejerciciosResp.error) {
+      alert("No se pudo cargar la rutina.");
+      return;
+    }
+
+    const rutina = rutinaResp.data;
+    const ejercicios = ejerciciosResp.data || [];
+    const profesional = proResp.data;
+
+    document.getElementById("rehabV28Titulo").textContent = rutina.name;
+    const c = document.getElementById("rehabV28Contenido");
+
+    c.innerHTML = `
+      <div class="rehabV28Aviso">
+        <strong>${esc(rutina.name)}</strong><br>
+        Profesional: ${esc(profesional?.full_name || "Profesional")}<br>
+        Fecha: ${esc(fechaBonita(a.scheduled_date))}
+        ${a.scheduled_time ? " · " + esc(horaBonita(a.scheduled_time)) : ""}
+        ${rutina.rest_seconds ? `<br>Descanso entre ejercicios: ${esc(rutina.rest_seconds)} s` : ""}
+      </div>
+
+      ${a.professional_notes ? `
+        <div class="rehabV28Dato">
+          <strong>Indicaciones generales</strong><br>
+          ${esc(a.professional_notes)}
+        </div>
+      ` : ""}
+
+      <div style="margin-top:14px">
+        ${ejercicios.map((e, i) => `
+          <div class="rehabV28Card">
+            <div class="rehabV28EjercicioTitulo">${i+1}. ${esc(modoNombre(e.mode))}</div>
+            <span class="rehabV28Badge">Dificultad: ${esc(e.difficulty || "media")}</span>
+            <span class="rehabV28Badge">${esc(e.finish_type || "rondas")}: ${esc(e.finish_value ?? "")}</span>
+
+            ${htmlVideo(e.video_url)}
+
+            ${e.pod_distance ? `
+              <div class="rehabV28Dato">
+                <strong>📏 Distancia entre Pods</strong><br>
+                ${esc(e.pod_distance)}
+              </div>
+            ` : ""}
+
+            ${e.pod_setup ? `
+              <div class="rehabV28Dato">
+                <strong>🔵 Colocación de los Pods</strong><br>
+                ${esc(e.pod_setup).replaceAll("\n","<br>")}
+              </div>
+            ` : ""}
+
+            ${e.instructions ? `
+              <div class="rehabV28Dato">
+                <strong>📋 Cómo realizar el ejercicio</strong><br>
+                ${esc(e.instructions).replaceAll("\n","<br>")}
+              </div>
+            ` : ""}
+          </div>
+        `).join("")}
+      </div>
+
+      <div class="rehabV28Acciones">
+        <button id="rehabV28VolverUsuario" class="rehabV28Btn secundario" type="button">← VOLVER A MIS RUTINAS</button>
+      </div>
+    `;
+
+    document.getElementById("rehabV28VolverUsuario").onclick = renderUsuario;
+  }
+
+  // -----------------------------------------------------
+  // ARRANQUE
+  // -----------------------------------------------------
+  function iniciar() {
+    estilos();
+    crearModal();
+    crearBotonHome();
+    console.log("RehabPod V28: asignaciones + guías con video activadas.");
+  }
+
+  setTimeout(iniciar, 320);
+
+  window.rehabV28Abrir = abrirPrincipal;
+})();
+// =====================================================
+// REHABPOD V29
+// EJECUCION AUTOMATICA DE RUTINAS ASIGNADAS
+//
+// PEGAR TODO ESTE BLOQUE AL FINAL DE app.js, DESPUES DE V28.
+//
+// FUNCIONES:
+// - Agrega COMENZAR RUTINA dentro del detalle V28.
+// - Ejecuta automaticamente ejercicio 1 -> descanso -> ejercicio 2 -> ...
+// - Respeta modo, dificultad, rondas/tiempo y descanso de la rutina.
+// - Muestra cuenta regresiva antes de cada ejercicio.
+// - Guarda resumen local en rehabpodHistorialRutinas.
+// - Marca la asignacion como completed en Supabase.
+// - Guarda una sesion general en rehab_routine_sessions.
+// - Compatible con Pods fisicos y modo virtual.
+//
+// NOTA:
+// - "Modo entrenador" NO puede ejecutarse automaticamente porque requiere
+//   que una persona elija manualmente el Pod desde la pantalla.
+// =====================================================
+
+(function () {
+  const V29_CLAVE_HISTORIAL = "rehabpodHistorialRutinas";
+
+  let v29Cloud = null;
+  let v29AuthUser = null;
+
+  let v29RutinaActiva = false;
+  let v29Asignacion = null;
+  let v29Rutina = null;
+  let v29Ejercicios = [];
+  let v29Indice = 0;
+  let v29ResultadosEjercicios = [];
+  let v29InicioRutinaMs = 0;
+  let v29AssignmentIdCapturado = null;
+  let v29TimeoutDescanso = null;
+  let v29IntervaloDescanso = null;
+  let v29CancelandoRutina = false;
+
+  const V29_NOMBRES = {
+    simple: "Reacción aleatoria",
+    colores: "Reacción por colores",
+    secuencia: "Secuencia / memoria",
+    libre: "Modo libre",
+    persecucion: "Persecución",
+    doble: "Doble estímulo",
+    prohibido: "Color prohibido",
+    circuito: "Circuito de Pods",
+    contrarreloj: "Contrarreloj",
+    entrenador: "Modo entrenador",
+    cazaColor: "Caza de color",
+    automatico: "Cambio automático",
+    stroop: "Palabra vs color"
+  };
+
+  function v29Esc(texto) {
+    return String(texto ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function v29NombreModo(modo) {
+    return V29_NOMBRES[modo] || modo || "Ejercicio";
+  }
+
+  function v29Esperar(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // -----------------------------------------------------
+  // SUPABASE
+  // -----------------------------------------------------
+  async function v29CargarSDK() {
+    if (window.supabase?.createClient) return;
+
+    await new Promise((resolve, reject) => {
+      const existente = document.getElementById("rehabSupabaseSDK");
+
+      if (existente) {
+        if (window.supabase?.createClient) {
+          resolve();
+          return;
+        }
+
+        existente.addEventListener("load", resolve, { once: true });
+        existente.addEventListener("error", reject, { once: true });
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.id = "rehabSupabaseSDK";
+      script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  async function v29CargarConfig() {
+    if (window.REHAB_SUPABASE_CONFIG?.url &&
+        window.REHAB_SUPABASE_CONFIG?.publishableKey) {
+      return;
+    }
+
+    await new Promise((resolve) => {
+      const existente = document.getElementById("rehabSupabaseConfigPublica");
+
+      if (existente) {
+        existente.addEventListener("load", resolve, { once: true });
+        existente.addEventListener("error", resolve, { once: true });
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.id = "rehabSupabaseConfigPublica";
+      script.src = "supabase-config.js";
+      script.onload = resolve;
+      script.onerror = resolve;
+      document.head.appendChild(script);
+    });
+  }
+
+  async function v29IniciarCloud() {
+    await v29CargarConfig();
+
+    if (!window.REHAB_SUPABASE_CONFIG?.url ||
+        !window.REHAB_SUPABASE_CONFIG?.publishableKey) {
+      throw new Error("No se encontró supabase-config.js.");
+    }
+
+    await v29CargarSDK();
+
+    if (!v29Cloud) {
+      v29Cloud = window.supabase.createClient(
+        window.REHAB_SUPABASE_CONFIG.url,
+        window.REHAB_SUPABASE_CONFIG.publishableKey,
+        {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+          }
+        }
+      );
+    }
+
+    const { data } = await v29Cloud.auth.getSession();
+    v29AuthUser = data?.session?.user || null;
+
+    if (!v29AuthUser) {
+      throw new Error("Primero inicia sesión en CUENTA Y NUBE.");
+    }
+  }
+
+  // -----------------------------------------------------
+  // ESTILOS
+  // -----------------------------------------------------
+  function v29AgregarEstilos() {
+    if (document.getElementById("rehabV29Estilos")) return;
+
+    const st = document.createElement("style");
+    st.id = "rehabV29Estilos";
+
+    st.textContent = `
+      .rehabV29BtnInicio{
+        appearance:none;border:0;border-radius:13px;padding:12px 16px;font-weight:950;
+        cursor:pointer;background:#16a34a;color:#fff;display:inline-flex;align-items:center;
+        justify-content:center;gap:8px;text-decoration:none
+      }
+
+      .rehabV29Overlay{
+        position:fixed;inset:0;z-index:100500;background:rgba(2,6,23,.88);
+        backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;
+        padding:18px;color:#fff
+      }
+
+      .rehabV29Overlay[hidden]{display:none!important}
+
+      .rehabV29Card{
+        width:min(520px,100%);border-radius:26px;padding:24px 20px;text-align:center;
+        background:linear-gradient(160deg,#111c30,#07101f);
+        border:1px solid rgba(148,163,184,.20);
+        box-shadow:0 28px 90px rgba(0,0,0,.50)
+      }
+
+      .rehabV29Progreso{
+        height:8px;background:#1e293b;border-radius:999px;overflow:hidden;margin:17px 0
+      }
+
+      .rehabV29Progreso span{
+        display:block;height:100%;background:#22c55e;border-radius:999px
+      }
+
+      .rehabV29Cuenta{
+        width:112px;height:112px;border-radius:50%;display:flex;align-items:center;
+        justify-content:center;margin:18px auto;font-size:46px;font-weight:950;
+        border:5px solid rgba(34,197,94,.50);background:rgba(34,197,94,.10)
+      }
+
+      .rehabV29Acciones{
+        display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:16px
+      }
+
+      .rehabV29Btn{
+        appearance:none;border:0;border-radius:12px;padding:10px 14px;font-weight:900;
+        cursor:pointer;background:#2563eb;color:#fff
+      }
+
+      .rehabV29Btn.sec{
+        background:#1e293b;color:#e2e8f0;border:1px solid #334155
+      }
+
+      .rehabV29Resumen{
+        text-align:left;margin:14px 0;padding:12px;border-radius:14px;
+        background:rgba(148,163,184,.07);border:1px solid rgba(148,163,184,.15)
+      }
+
+      .rehabV29Fila{
+        display:flex;justify-content:space-between;gap:12px;padding:7px 0;
+        border-bottom:1px solid rgba(148,163,184,.12)
+      }
+
+      .rehabV29Fila:last-child{border-bottom:0}
+    `;
+
+    document.head.appendChild(st);
+  }
+
+  function v29CrearOverlay() {
+    if (document.getElementById("rehabV29Overlay")) return;
+
+    const ov = document.createElement("div");
+    ov.id = "rehabV29Overlay";
+    ov.className = "rehabV29Overlay";
+    ov.hidden = true;
+    ov.innerHTML = `<div id="rehabV29Card" class="rehabV29Card"></div>`;
+
+    document.body.appendChild(ov);
+  }
+
+  function v29AbrirOverlay(html) {
+    const ov = document.getElementById("rehabV29Overlay");
+    const card = document.getElementById("rehabV29Card");
+
+    card.innerHTML = html;
+    ov.hidden = false;
+  }
+
+  function v29CerrarOverlay() {
+    const ov = document.getElementById("rehabV29Overlay");
+    if (ov) ov.hidden = true;
+  }
+
+  // -----------------------------------------------------
+  // CAPTURAR LA ASIGNACION V28 Y AGREGAR COMENZAR RUTINA
+  // -----------------------------------------------------
+  function v29PrepararIntegracionV28() {
+    document.addEventListener("click", function (evento) {
+      const boton = evento.target.closest?.("[data-ver-asignacion]");
+      if (!boton) return;
+
+      v29AssignmentIdCapturado = boton.dataset.verAsignacion || null;
+    }, true);
+
+    const observer = new MutationObserver(function () {
+      const volver = document.getElementById("rehabV28VolverUsuario");
+      if (!volver || !v29AssignmentIdCapturado) return;
+
+      if (document.getElementById("rehabV29ComenzarRutina")) return;
+
+      const btn = document.createElement("button");
+      btn.id = "rehabV29ComenzarRutina";
+      btn.type = "button";
+      btn.className = "rehabV29BtnInicio";
+      btn.innerHTML = "▶ COMENZAR RUTINA";
+
+      btn.onclick = function () {
+        v29PrepararRutina(v29AssignmentIdCapturado);
+      };
+
+      const acciones = volver.parentElement;
+      acciones.insertBefore(btn, volver);
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  // -----------------------------------------------------
+  // CARGAR RUTINA
+  // -----------------------------------------------------
+  async function v29PrepararRutina(assignmentId) {
+    try {
+      await v29IniciarCloud();
+
+      v29AbrirOverlay(`
+        <div style="font-size:42px">☁️</div>
+        <h2>Preparando rutina...</h2>
+        <p style="color:#cbd5e1">Cargando ejercicios y comprobando Pods.</p>
+      `);
+
+      const { data: asignacion, error: ea } = await v29Cloud
+        .from("rehab_assignments")
+        .select("id, routine_id, user_id, professional_id, scheduled_date, scheduled_time, professional_notes, status")
+        .eq("id", assignmentId)
+        .eq("user_id", v29AuthUser.id)
+        .single();
+
+      if (ea) throw ea;
+
+      const [{ data: rutina, error: er }, { data: ejercicios, error: ee }] =
+        await Promise.all([
+          v29Cloud
+            .from("rehab_routines")
+            .select("id, name, category, rest_seconds")
+            .eq("id", asignacion.routine_id)
+            .single(),
+
+          v29Cloud
+            .from("rehab_routine_exercises")
+            .select("id, position, mode, difficulty, finish_type, finish_value, video_url, instructions, pod_distance, pod_setup")
+            .eq("routine_id", asignacion.routine_id)
+            .order("position", { ascending: true })
+        ]);
+
+      if (er) throw er;
+      if (ee) throw ee;
+
+      if (!ejercicios?.length) {
+        throw new Error("Esta rutina no contiene ejercicios.");
+      }
+
+      const contieneEntrenador = ejercicios.some(e => e.mode === "entrenador");
+
+      if (contieneEntrenador) {
+        v29AbrirOverlay(`
+          <div style="font-size:46px">🧑‍🏫</div>
+          <h2>Modo entrenador requiere control manual</h2>
+          <p style="color:#cbd5e1;line-height:1.5">
+            Esta rutina contiene <strong>Modo entrenador</strong>.
+            Ese modo necesita que una persona seleccione manualmente los Pods
+            y no puede formar parte de una ejecución automática.
+          </p>
+          <div class="rehabV29Acciones">
+            <button class="rehabV29Btn sec" id="rehabV29CerrarAviso">VOLVER</button>
+          </div>
+        `);
+
+        document.getElementById("rehabV29CerrarAviso").onclick = v29CerrarOverlay;
+        return;
+      }
+
+      const maxMinimo = Math.max(
+        ...ejercicios.map(e => {
+          try {
+            return typeof rehabMinimoPodsModo === "function"
+              ? rehabMinimoPodsModo(e.mode)
+              : 1;
+          } catch (_) {
+            return 1;
+          }
+        })
+      );
+
+      let disponibles = 0;
+
+      try {
+        disponibles = typeof rehabIndicesPodsConectados === "function"
+          ? rehabIndicesPodsConectados().length
+          : cantidadConectados();
+      } catch (_) {
+        disponibles = cantidadConectados();
+      }
+
+      if (disponibles < maxMinimo) {
+        v29AbrirOverlay(`
+          <div style="font-size:46px">🔵</div>
+          <h2>Faltan Pods</h2>
+          <p style="color:#cbd5e1;line-height:1.5">
+            Esta rutina necesita al menos <strong>${maxMinimo} Pods</strong>,
+            pero ahora hay <strong>${disponibles}</strong> disponibles.
+          </p>
+          <p style="color:#94a3b8">
+            Conecta más Pods o activa el modo virtual para realizar la prueba.
+          </p>
+          <div class="rehabV29Acciones">
+            <button class="rehabV29Btn sec" id="rehabV29CerrarPods">VOLVER</button>
+          </div>
+        `);
+
+        document.getElementById("rehabV29CerrarPods").onclick = v29CerrarOverlay;
+        return;
+      }
+
+      v29Asignacion = asignacion;
+      v29Rutina = rutina;
+      v29Ejercicios = ejercicios;
+      v29Indice = 0;
+      v29ResultadosEjercicios = [];
+      v29InicioRutinaMs = Date.now();
+      v29RutinaActiva = true;
+      v29CancelandoRutina = false;
+
+      v29MostrarInicioRutina();
+    } catch (error) {
+      console.error("V29 preparar rutina:", error);
+
+      v29AbrirOverlay(`
+        <div style="font-size:46px">⚠️</div>
+        <h2>No se pudo iniciar</h2>
+        <p style="color:#cbd5e1">${v29Esc(error.message)}</p>
+        <div class="rehabV29Acciones">
+          <button class="rehabV29Btn sec" id="rehabV29CerrarError">VOLVER</button>
+        </div>
+      `);
+
+      document.getElementById("rehabV29CerrarError").onclick = v29CerrarOverlay;
+    }
+  }
+
+  function v29MostrarInicioRutina() {
+    const descanso = Math.max(0, Number(v29Rutina?.rest_seconds || 0));
+
+    v29AbrirOverlay(`
+      <div style="font-size:52px">🏁</div>
+      <h2 style="margin-bottom:6px">${v29Esc(v29Rutina.name)}</h2>
+      <p style="color:#cbd5e1;margin-top:0">
+        ${v29Ejercicios.length} ejercicio${v29Ejercicios.length === 1 ? "" : "s"}
+        · ${descanso} s de descanso entre ejercicios
+      </p>
+
+      <div class="rehabV29Resumen">
+        ${v29Ejercicios.map((e, i) => `
+          <div class="rehabV29Fila">
+            <span>${i + 1}. ${v29Esc(v29NombreModo(e.mode))}</span>
+            <strong>${v29Esc(e.difficulty || "media")}</strong>
+          </div>
+        `).join("")}
+      </div>
+
+      <div class="rehabV29Acciones">
+        <button id="rehabV29ConfirmarInicio" class="rehabV29Btn">COMENZAR</button>
+        <button id="rehabV29CancelarAntes" class="rehabV29Btn sec">CANCELAR</button>
+      </div>
+    `);
+
+    document.getElementById("rehabV29ConfirmarInicio").onclick = function () {
+      v29IniciarEjercicioActual();
+    };
+
+    document.getElementById("rehabV29CancelarAntes").onclick = function () {
+      v29AbortarRutina(false);
+    };
+  }
+
+  // -----------------------------------------------------
+  // CONFIGURAR EJERCICIO EN EL MOTOR EXISTENTE
+  // -----------------------------------------------------
+  function v29AsegurarOpcion(select, valor, etiqueta) {
+    if (!select) return;
+
+    valor = String(valor);
+
+    if (![...select.options].some(o => o.value === valor)) {
+      const op = document.createElement("option");
+      op.value = valor;
+      op.textContent = etiqueta || valor;
+      select.appendChild(op);
+    }
+
+    select.value = valor;
+  }
+
+  function v29ConfigurarEjercicio(ejercicio) {
+    modoActual = ejercicio.mode || "simple";
+
+    ajustesApp.dificultad = ejercicio.difficulty || "media";
+    dificultadActual = ajustesApp.dificultad;
+
+    try {
+      guardarAjustes();
+    } catch (_) {}
+
+    try {
+      configurarModo();
+    } catch (error) {
+      console.warn("V29 configurarModo:", error);
+    }
+
+    const valor = Math.max(1, Number(ejercicio.finish_value || 5));
+    const finalizarPor = ejercicio.finish_type === "tiempo" ? "tiempo" : "rondas";
+
+    // Modos normales
+    const tipoGeneral = document.getElementById("tipoFinalGeneralReactiPod");
+    const rondasGeneral = document.getElementById("rondasGeneralReactiPod");
+    const tiempoGeneral = document.getElementById("duracionGeneralReactiPod");
+
+    if (tipoGeneral) {
+      tipoGeneral.value = finalizarPor;
+    }
+
+    if (finalizarPor === "rondas") {
+      v29AsegurarOpcion(rondasGeneral, valor, `${valor} rondas`);
+      if (numeroRondas) numeroRondas.value = String(valor);
+    } else {
+      v29AsegurarOpcion(tiempoGeneral, valor, `${valor} segundos`);
+    }
+
+    // Contrarreloj siempre funciona por tiempo
+    if (modoActual === "contrarreloj") {
+      const duracionContrarreloj = document.getElementById("duracionContrarrelojReactiPod");
+      v29AsegurarOpcion(duracionContrarreloj, valor, `${valor} segundos`);
+    }
+
+    // Cantidad de Pods: usamos todos los disponibles sin bajar del minimo del modo
+    let minimo = 1;
+
+    try {
+      minimo = rehabMinimoPodsModo(modoActual);
+    } catch (_) {}
+
+    let disponibles = 4;
+
+    try {
+      disponibles = rehabIndicesPodsConectados().length;
+    } catch (_) {
+      try {
+        disponibles = cantidadConectados();
+      } catch (_) {}
+    }
+
+    cantidadPodsSeleccionada = Math.max(minimo, Math.min(4, disponibles));
+
+    const selectorCantidad = document.getElementById("cantidadPodsEntrenamientoRehabPod");
+
+    if (selectorCantidad) {
+      selectorCantidad.value = String(cantidadPodsSeleccionada);
+    }
+
+    try {
+      pintarControlesExperiencia();
+    } catch (_) {}
+  }
+
+  async function v29IniciarEjercicioActual() {
+    if (!v29RutinaActiva) return;
+
+    const ejercicio = v29Ejercicios[v29Indice];
+
+    if (!ejercicio) {
+      await v29FinalizarRutinaCompleta();
+      return;
+    }
+
+    clearTimeout(v29TimeoutDescanso);
+    clearInterval(v29IntervaloDescanso);
+
+    v29ConfigurarEjercicio(ejercicio);
+
+    const progreso = ((v29Indice) / v29Ejercicios.length) * 100;
+
+    v29AbrirOverlay(`
+      <div style="font-size:.76rem;letter-spacing:1px;color:#94a3b8;font-weight:900">
+        EJERCICIO ${v29Indice + 1} DE ${v29Ejercicios.length}
+      </div>
+
+      <div class="rehabV29Progreso">
+        <span style="width:${progreso}%"></span>
+      </div>
+
+      <div style="font-size:48px;margin-top:10px">⚡</div>
+      <h2 style="margin-bottom:6px">${v29Esc(v29NombreModo(ejercicio.mode))}</h2>
+
+      <p style="color:#cbd5e1;margin-top:0">
+        Dificultad: <strong>${v29Esc(ejercicio.difficulty || "media")}</strong><br>
+        ${
+          ejercicio.mode === "contrarreloj"
+            ? `Tiempo: <strong>${Number(ejercicio.finish_value || 30)} s</strong>`
+            : ejercicio.finish_type === "tiempo"
+              ? `Tiempo: <strong>${Number(ejercicio.finish_value || 60)} s</strong>`
+              : `Rondas: <strong>${Number(ejercicio.finish_value || 5)}</strong>`
+        }
+      </p>
+
+      <div class="rehabV29Cuenta">3</div>
+
+      <p style="color:#94a3b8">
+        RehabPod continuará automáticamente.
+      </p>
+
+      <div class="rehabV29Acciones">
+        <button id="rehabV29CancelarRutina" class="rehabV29Btn sec">CANCELAR RUTINA</button>
+      </div>
+    `);
+
+    document.getElementById("rehabV29CancelarRutina").onclick = function () {
+      v29AbortarRutina(true);
+    };
+
+    // Esta cuenta solo prepara visualmente; el motor ya tiene su propio 3-2-1.
+    let n = 3;
+    const cuenta = document.querySelector("#rehabV29Card .rehabV29Cuenta");
+
+    const intervalo = setInterval(() => {
+      n--;
+
+      if (n > 0) {
+        if (cuenta) cuenta.textContent = n;
+        return;
+      }
+
+      clearInterval(intervalo);
+
+      v29CerrarOverlay();
+
+      try {
+        iniciarEntrenamiento();
+      } catch (error) {
+        console.error("V29 iniciar entrenamiento:", error);
+        v29AbortarPorError(error);
+      }
+    }, 650);
+  }
+
+  // -----------------------------------------------------
+  // EVITAR INTRO MANUAL ENTRE EJERCICIOS
+  // iniciarEntrenamiento() normalmente abre la introduccion.
+  // En rutina automatica saltamos esa pantalla y vamos al 3-2-1 del motor.
+  // -----------------------------------------------------
+  var v29MostrarIntroduccionBase = mostrarIntroduccionEntrenamiento;
+
+  mostrarIntroduccionEntrenamiento = function () {
+    if (v29RutinaActiva) {
+      iniciarCuenta();
+      return;
+    }
+
+    return v29MostrarIntroduccionBase();
+  };
+
+  // -----------------------------------------------------
+  // INTERCEPTAR FIN DE CADA EJERCICIO
+  // -----------------------------------------------------
+  var v29FinalizarEntrenamientoBase = finalizarEntrenamiento;
+
+  finalizarEntrenamiento = async function () {
+    if (!v29RutinaActiva) {
+      return await v29FinalizarEntrenamientoBase();
+    }
+
+    const ejercicio = v29Ejercicios[v29Indice];
+
+    const tiempos = resultados
+      .filter(r => typeof r.tiempo === "number" && Number.isFinite(r.tiempo))
+      .map(r => r.tiempo);
+
+    const promedio = tiempos.length
+      ? tiempos.reduce((a, b) => a + b, 0) / tiempos.length
+      : null;
+
+    const mejor = tiempos.length ? Math.min(...tiempos) : null;
+    const peor = tiempos.length ? Math.max(...tiempos) : null;
+
+    const resumenEjercicio = {
+      ejercicioId: ejercicio?.id || null,
+      modo: ejercicio?.mode || modoActual,
+      nombre: v29NombreModo(ejercicio?.mode || modoActual),
+      dificultad: ejercicio?.difficulty || dificultadActual,
+      aciertos: Number(aciertos || 0),
+      errores: Number(errores || 0),
+      rondas: Array.isArray(resultados) ? resultados.length : 0,
+      promedio,
+      mejor,
+      peor
+    };
+
+    // Quitamos la celebracion individual: la celebracion importante sera al final
+    // de toda la rutina. El motor sigue realizando su limpieza normal.
+    const celebracionOriginal = mostrarCelebracionFinal;
+
+    try {
+      mostrarCelebracionFinal = async function () {};
+      await v29FinalizarEntrenamientoBase();
+    } finally {
+      mostrarCelebracionFinal = celebracionOriginal;
+    }
+
+    v29ResultadosEjercicios.push(resumenEjercicio);
+    v29Indice++;
+
+    if (!v29RutinaActiva) return;
+
+    if (v29Indice >= v29Ejercicios.length) {
+      await v29FinalizarRutinaCompleta();
+      return;
+    }
+
+    v29MostrarDescanso();
+  };
+
+  // -----------------------------------------------------
+  // DESCANSO
+  // -----------------------------------------------------
+  function v29MostrarDescanso() {
+    clearTimeout(v29TimeoutDescanso);
+    clearInterval(v29IntervaloDescanso);
+
+    let restante = Math.max(0, Number(v29Rutina?.rest_seconds || 0));
+    const siguiente = v29Ejercicios[v29Indice];
+
+    if (restante <= 0) {
+      v29IniciarEjercicioActual();
+      return;
+    }
+
+    const porcentaje = (v29Indice / v29Ejercicios.length) * 100;
+
+    v29AbrirOverlay(`
+      <div style="font-size:44px">⏸️</div>
+      <h2>Descanso</h2>
+
+      <div class="rehabV29Progreso">
+        <span style="width:${porcentaje}%"></span>
+      </div>
+
+      <div style="color:#94a3b8;font-size:.82rem;font-weight:900">
+        SIGUIENTE EJERCICIO
+      </div>
+
+      <h3>${v29Esc(v29NombreModo(siguiente.mode))}</h3>
+
+      <div id="rehabV29DescansoCuenta" class="rehabV29Cuenta">${restante}</div>
+
+      <p style="color:#cbd5e1">La siguiente actividad comenzará automáticamente.</p>
+
+      <div class="rehabV29Acciones">
+        <button id="rehabV29SaltarDescanso" class="rehabV29Btn">SALTAR DESCANSO</button>
+        <button id="rehabV29CancelarDescanso" class="rehabV29Btn sec">CANCELAR RUTINA</button>
+      </div>
+    `);
+
+    const cuenta = document.getElementById("rehabV29DescansoCuenta");
+
+    v29IntervaloDescanso = setInterval(() => {
+      restante--;
+
+      if (cuenta) {
+        cuenta.textContent = Math.max(0, restante);
+      }
+
+      if (restante <= 0) {
+        clearInterval(v29IntervaloDescanso);
+      }
+    }, 1000);
+
+    v29TimeoutDescanso = setTimeout(() => {
+      clearInterval(v29IntervaloDescanso);
+      v29IniciarEjercicioActual();
+    }, restante * 1000);
+
+    document.getElementById("rehabV29SaltarDescanso").onclick = function () {
+      clearTimeout(v29TimeoutDescanso);
+      clearInterval(v29IntervaloDescanso);
+      v29IniciarEjercicioActual();
+    };
+
+    document.getElementById("rehabV29CancelarDescanso").onclick = function () {
+      v29AbortarRutina(false);
+    };
+  }
+
+  // -----------------------------------------------------
+  // CANCELACION
+  // -----------------------------------------------------
+  var v29CancelarEntrenamientoBase = cancelarEntrenamiento;
+
+  cancelarEntrenamiento = async function () {
+    if (!v29RutinaActiva) {
+      return await v29CancelarEntrenamientoBase();
+    }
+
+    const estabaActiva = entrenamientoActivo;
+
+    await v29CancelarEntrenamientoBase();
+
+    // Si sigue activo, el usuario respondio "No" al confirm.
+    if (estabaActiva && entrenamientoActivo) {
+      return;
+    }
+
+    v29AbortarRutina(false);
+  };
+
+  function v29AbortarRutina(detenerEjercicioActual) {
+    if (v29CancelandoRutina) return;
+
+    v29CancelandoRutina = true;
+    v29RutinaActiva = false;
+
+    clearTimeout(v29TimeoutDescanso);
+    clearInterval(v29IntervaloDescanso);
+
+    if (detenerEjercicioActual && entrenamientoActivo) {
+      entrenamientoActivo = false;
+      esperandoRespuesta = false;
+
+      try { clearTimeout(temporizador); } catch (_) {}
+      try { detenerTemporizadorGeneral(); } catch (_) {}
+      try { apagarTodosLosPods(); } catch (_) {}
+    }
+
+    v29AbrirOverlay(`
+      <div style="font-size:48px">⏹️</div>
+      <h2>Rutina detenida</h2>
+      <p style="color:#cbd5e1">
+        La rutina no se marcó como completada. Puedes volver a iniciarla más tarde.
+      </p>
+      <div class="rehabV29Acciones">
+        <button id="rehabV29CerrarCancelada" class="rehabV29Btn sec">CERRAR</button>
+      </div>
+    `);
+
+    document.getElementById("rehabV29CerrarCancelada").onclick = function () {
+      v29CerrarOverlay();
+
+      try {
+        mostrarPantalla(pantallaInicio);
+      } catch (_) {}
+
+      v29ResetEstado();
+    };
+  }
+
+  function v29AbortarPorError(error) {
+    v29RutinaActiva = false;
+
+    v29AbrirOverlay(`
+      <div style="font-size:48px">⚠️</div>
+      <h2>No se pudo continuar</h2>
+      <p style="color:#cbd5e1">${v29Esc(error?.message || "Error inesperado")}</p>
+      <div class="rehabV29Acciones">
+        <button id="rehabV29CerrarErrorRutina" class="rehabV29Btn sec">CERRAR</button>
+      </div>
+    `);
+
+    document.getElementById("rehabV29CerrarErrorRutina").onclick = function () {
+      v29CerrarOverlay();
+      v29ResetEstado();
+    };
+  }
+
+  // -----------------------------------------------------
+  // FINAL DE TODA LA RUTINA
+  // -----------------------------------------------------
+  async function v29FinalizarRutinaCompleta() {
+    if (!v29RutinaActiva) return;
+
+    v29RutinaActiva = false;
+
+    const duracionSeg = Math.max(
+      0,
+      Math.round((Date.now() - v29InicioRutinaMs) / 1000)
+    );
+
+    const totalAciertos = v29ResultadosEjercicios.reduce(
+      (s, e) => s + Number(e.aciertos || 0),
+      0
+    );
+
+    const totalErrores = v29ResultadosEjercicios.reduce(
+      (s, e) => s + Number(e.errores || 0),
+      0
+    );
+
+    const intentos = totalAciertos + totalErrores;
+
+    const precision = intentos > 0
+      ? (totalAciertos / intentos) * 100
+      : 100;
+
+    const completados = v29ResultadosEjercicios.length;
+    const total = v29Ejercicios.length;
+    const porcentaje = total > 0 ? (completados / total) * 100 : 0;
+
+    // Historial local V24
+    try {
+      const raw = localStorage.getItem(V29_CLAVE_HISTORIAL);
+      const historialLeido = raw ? JSON.parse(raw) : [];
+      const historial = Array.isArray(historialLeido) ? historialLeido : [];
+
+      let perfil = { id: "perfil_local", nombre: "Perfil local" };
+
+      try {
+        if (typeof obtenerPerfilActivo === "function") {
+          perfil = obtenerPerfilActivo();
+        }
+      } catch (_) {}
+
+      historial.push({
+        id: "sesion_rutina_auto_" + Date.now(),
+        timestamp: Date.now(),
+        fecha: new Date().toLocaleString(),
+        perfilId: perfil.id,
+        perfilNombre: perfil.nombre || "Perfil",
+        rutinaId: v29Rutina.id,
+        rutinaNombre: v29Rutina.name,
+        categoria: v29Rutina.category || "",
+        totalEjercicios: total,
+        ejerciciosCompletados: completados,
+        ejerciciosCompletadosIds: v29ResultadosEjercicios
+          .map(e => e.ejercicioId)
+          .filter(Boolean),
+        porcentajeCompletado: porcentaje,
+        duracionSeg,
+        precision,
+        notas: "Rutina asignada completada automáticamente.",
+        origen: "automatico",
+        assignmentId: v29Asignacion.id,
+        resultadosEjercicios: v29ResultadosEjercicios
+      });
+
+      localStorage.setItem(
+        V29_CLAVE_HISTORIAL,
+        JSON.stringify(historial)
+      );
+    } catch (error) {
+      console.warn("V29 historial local:", error);
+    }
+
+    // Nube
+    let nubeOk = true;
+
+    try {
+      await v29IniciarCloud();
+
+      const { error: sessionError } = await v29Cloud
+        .from("rehab_routine_sessions")
+        .insert({
+          assignment_id: v29Asignacion.id,
+          user_id: v29AuthUser.id,
+          routine_id: v29Rutina.id,
+          routine_name: v29Rutina.name,
+          completed_percent: porcentaje,
+          duration_seconds: duracionSeg,
+          precision: precision,
+          notes: "Rutina completada desde ejecución automática RehabPod."
+        });
+
+      if (sessionError) throw sessionError;
+
+      const { error: assignmentError } = await v29Cloud
+        .from("rehab_assignments")
+        .update({ status: "completed" })
+        .eq("id", v29Asignacion.id)
+        .eq("user_id", v29AuthUser.id);
+
+      if (assignmentError) throw assignmentError;
+    } catch (error) {
+      nubeOk = false;
+      console.error("V29 guardado nube:", error);
+    }
+
+    const min = Math.floor(duracionSeg / 60);
+    const seg = duracionSeg % 60;
+
+    v29AbrirOverlay(`
+      <div style="font-size:58px">🏆</div>
+      <h2>¡Rutina completada!</h2>
+      <p style="color:#cbd5e1">${v29Esc(v29Rutina.name)}</p>
+
+      <div class="rehabV29Progreso">
+        <span style="width:100%"></span>
+      </div>
+
+      <div class="rehabV29Resumen">
+        <div class="rehabV29Fila">
+          <span>Ejercicios</span>
+          <strong>${completados}/${total}</strong>
+        </div>
+        <div class="rehabV29Fila">
+          <span>Precisión</span>
+          <strong>${precision.toFixed(1)}%</strong>
+        </div>
+        <div class="rehabV29Fila">
+          <span>Aciertos</span>
+          <strong>${totalAciertos}</strong>
+        </div>
+        <div class="rehabV29Fila">
+          <span>Errores</span>
+          <strong>${totalErrores}</strong>
+        </div>
+        <div class="rehabV29Fila">
+          <span>Tiempo total</span>
+          <strong>${min}:${String(seg).padStart(2, "0")}</strong>
+        </div>
+      </div>
+
+      <p style="color:${nubeOk ? "#86efac" : "#fbbf24"}">
+        ${
+          nubeOk
+            ? "☁️ Resultado guardado en RehabPod Cloud."
+            : "⚠️ La rutina terminó, pero no se pudo guardar el resultado en la nube."
+        }
+      </p>
+
+      <div class="rehabV29Acciones">
+        <button id="rehabV29FinInicio" class="rehabV29Btn">VOLVER AL INICIO</button>
+      </div>
+    `);
+
+    document.getElementById("rehabV29FinInicio").onclick = function () {
+      v29CerrarOverlay();
+
+      try {
+        mostrarPantalla(pantallaInicio);
+        actualizarResumenInicio();
+      } catch (_) {}
+
+      v29ResetEstado();
+    };
+  }
+
+  function v29ResetEstado() {
+    v29RutinaActiva = false;
+    v29Asignacion = null;
+    v29Rutina = null;
+    v29Ejercicios = [];
+    v29Indice = 0;
+    v29ResultadosEjercicios = [];
+    v29InicioRutinaMs = 0;
+    v29CancelandoRutina = false;
+
+    clearTimeout(v29TimeoutDescanso);
+    clearInterval(v29IntervaloDescanso);
+
+    v29TimeoutDescanso = null;
+    v29IntervaloDescanso = null;
+  }
+
+  // -----------------------------------------------------
+  // INICIO V29
+  // -----------------------------------------------------
+  function v29Iniciar() {
+    v29AgregarEstilos();
+    v29CrearOverlay();
+    v29PrepararIntegracionV28();
+
+    console.log("RehabPod V29: ejecución automática de rutinas activada.");
+  }
+
+  setTimeout(v29Iniciar, 420);
+
+  window.rehabV29Estado = function () {
+    return {
+      activa: v29RutinaActiva,
+      rutina: v29Rutina?.name || null,
+      indice: v29Indice,
+      total: v29Ejercicios.length
+    };
+  };
+})();
