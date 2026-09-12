@@ -13546,6 +13546,124 @@ console.log(
 })();
 
 // =====================================================
+// REHABPOD V30
+// CLIENTE SUPABASE UNICO COMPARTIDO POR V27 + V28 + V29
+// =====================================================
+
+window.rehabSupabaseClient = window.rehabSupabaseClient || null;
+window.rehabSupabasePromise = window.rehabSupabasePromise || null;
+
+window.rehabGetSupabaseClient = async function () {
+  if (window.rehabSupabaseClient) {
+    return window.rehabSupabaseClient;
+  }
+
+  if (window.rehabSupabasePromise) {
+    return await window.rehabSupabasePromise;
+  }
+
+  window.rehabSupabasePromise = (async function () {
+    // Cargar la configuracion publica una sola vez.
+    if (
+      !window.REHAB_SUPABASE_CONFIG?.url ||
+      !window.REHAB_SUPABASE_CONFIG?.publishableKey
+    ) {
+      await new Promise((resolve, reject) => {
+        const existente = document.getElementById("rehabSupabaseConfigPublica");
+
+        if (existente) {
+          if (
+            window.REHAB_SUPABASE_CONFIG?.url &&
+            window.REHAB_SUPABASE_CONFIG?.publishableKey
+          ) {
+            resolve();
+            return;
+          }
+
+          existente.addEventListener("load", resolve, { once: true });
+          existente.addEventListener(
+            "error",
+            () => reject(new Error("No se pudo cargar supabase-config.js.")),
+            { once: true }
+          );
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.id = "rehabSupabaseConfigPublica";
+        script.src = "supabase-config.js";
+        script.onload = resolve;
+        script.onerror = () =>
+          reject(new Error("No se pudo cargar supabase-config.js."));
+        document.head.appendChild(script);
+      });
+    }
+
+    if (
+      !window.REHAB_SUPABASE_CONFIG?.url ||
+      !window.REHAB_SUPABASE_CONFIG?.publishableKey
+    ) {
+      throw new Error("Configuracion publica de Supabase incompleta.");
+    }
+
+    // Cargar supabase-js una sola vez.
+    if (!window.supabase?.createClient) {
+      await new Promise((resolve, reject) => {
+        const existente = document.getElementById("rehabSupabaseSDK");
+
+        if (existente) {
+          if (window.supabase?.createClient) {
+            resolve();
+            return;
+          }
+
+          existente.addEventListener("load", resolve, { once: true });
+          existente.addEventListener(
+            "error",
+            () => reject(new Error("No se pudo cargar Supabase JS.")),
+            { once: true }
+          );
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.id = "rehabSupabaseSDK";
+        script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        script.onload = resolve;
+        script.onerror = () =>
+          reject(new Error("No se pudo cargar Supabase JS."));
+        document.head.appendChild(script);
+      });
+    }
+
+    if (!window.supabase?.createClient) {
+      throw new Error("Supabase JS no esta disponible.");
+    }
+
+    window.rehabSupabaseClient = window.supabase.createClient(
+      window.REHAB_SUPABASE_CONFIG.url,
+      window.REHAB_SUPABASE_CONFIG.publishableKey,
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+        },
+      }
+    );
+
+    return window.rehabSupabaseClient;
+  })();
+
+  try {
+    return await window.rehabSupabasePromise;
+  } catch (error) {
+    window.rehabSupabasePromise = null;
+    throw error;
+  }
+};
+
+// =====================================================
 // REHABPOD V27
 // CUENTAS GENERALES: PROFESIONAL / USUARIO + SUPABASE
 //
@@ -13678,25 +13796,8 @@ console.log(
   }
 
   async function inicializarCloud() {
-    const tieneConfig = await cargarConfigPublica();
-    if (!tieneConfig || !configurado()) return false;
-
     try {
-      await cargarSupabaseSDK();
-
-      if (!rehabCloud) {
-        rehabCloud = window.supabase.createClient(
-          window.REHAB_SUPABASE_CONFIG.url,
-          window.REHAB_SUPABASE_CONFIG.publishableKey,
-          {
-            auth: {
-              persistSession: true,
-              autoRefreshToken: true,
-              detectSessionInUrl: true,
-            },
-          }
-        );
-      }
+      rehabCloud = await window.rehabGetSupabaseClient();
 
       const { data } = await rehabCloud.auth.getSession();
       rehabCloudUser = data?.session?.user || null;
@@ -13710,6 +13811,9 @@ console.log(
       return true;
     } catch (error) {
       console.error("RehabPod Cloud:", error);
+      rehabCloud = null;
+      rehabCloudUser = null;
+      rehabCloudProfile = null;
       return false;
     }
   }
@@ -14393,24 +14497,7 @@ console.log(
   }
 
   async function iniciarCloud() {
-    const okConfig = await cargarConfig();
-    if (!okConfig) throw new Error("No se encontró supabase-config.js.");
-
-    await cargarSDK();
-
-    if (!cloud) {
-      cloud = window.supabase.createClient(
-        window.REHAB_SUPABASE_CONFIG.url,
-        window.REHAB_SUPABASE_CONFIG.publishableKey,
-        {
-          auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-            detectSessionInUrl: true,
-          },
-        }
-      );
-    }
+    cloud = await window.rehabGetSupabaseClient();
 
     const { data } = await cloud.auth.getSession();
     sesionUser = data?.session?.user || null;
@@ -15405,36 +15492,13 @@ console.log(
   }
 
   async function v29IniciarCloud() {
-    await v29CargarConfig();
-
-    if (
-      !window.REHAB_SUPABASE_CONFIG?.url ||
-      !window.REHAB_SUPABASE_CONFIG?.publishableKey
-    ) {
-      throw new Error("No se encontró supabase-config.js.");
-    }
-
-    await v29CargarSDK();
-
-    if (!v29Cloud) {
-      v29Cloud = window.supabase.createClient(
-        window.REHAB_SUPABASE_CONFIG.url,
-        window.REHAB_SUPABASE_CONFIG.publishableKey,
-        {
-          auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-            detectSessionInUrl: true,
-          },
-        }
-      );
-    }
+    v29Cloud = await window.rehabGetSupabaseClient();
 
     const { data } = await v29Cloud.auth.getSession();
     v29AuthUser = data?.session?.user || null;
 
     if (!v29AuthUser) {
-      throw new Error("Primero inicia sesión en CUENTA Y NUBE.");
+      throw new Error("Primero inicia sesion en CUENTA Y NUBE.");
     }
   }
 
@@ -15535,6 +15599,17 @@ console.log(
   function v29CerrarOverlay() {
     const ov = document.getElementById("rehabV29Overlay");
     if (ov) ov.hidden = true;
+  }
+
+  // Cierra las ventanas de Cloud que quedan debajo del overlay V29.
+  // Asi, al empezar el ejercicio, la pantalla de entrenamiento queda visible.
+  function v29CerrarVentanasCloud() {
+    const ids = ["rehabV28Overlay", "rehabV27Overlay"];
+
+    ids.forEach((id) => {
+      const ov = document.getElementById(id);
+      if (ov) ov.hidden = true;
+    });
   }
 
   // -----------------------------------------------------
@@ -15746,6 +15821,7 @@ console.log(
     `);
 
     document.getElementById("rehabV29ConfirmarInicio").onclick = function () {
+      v29CerrarVentanasCloud();
       v29IniciarEjercicioActual();
     };
 
