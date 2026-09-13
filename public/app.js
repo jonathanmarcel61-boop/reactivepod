@@ -179,7 +179,6 @@ const btnVolverTipos = document.getElementById("btnVolverTipos");
 // CONFIGURACION
 // =====================================================
 
-
 const tituloConfiguracion = document.getElementById("tituloConfiguracion");
 
 const iconoConfiguracion = document.getElementById("iconoConfiguracion");
@@ -907,7 +906,6 @@ const nombrePerfilEstadisticas = document.getElementById("nombrePerfilEstadistic
 
 const totalEntrenamientos = document.getElementById("totalEntrenamientos");
 
-
 const promedioGeneral = document.getElementById("promedioGeneral");
 
 const mejorPromedio = document.getElementById("mejorPromedio");
@@ -1088,8 +1086,6 @@ function mostrarPantalla(pantalla) {
 
     pantallaPods,
 
-
-
     pantallaPerfiles,
 
     pantallaTiposEntrenamiento,
@@ -1107,9 +1103,11 @@ function mostrarPantalla(pantalla) {
     pantallaEstadisticas,
 
     pantallaAjustes,
+
+    pantallaCuentaCloud,
   ];
 
-  pantallas.forEach((p) => p.classList.remove("activa"));
+  pantallas.forEach((p) => p && p.classList.remove("activa"));
 
   pantalla.classList.add("activa");
 }
@@ -1243,7 +1241,6 @@ async function conectarPodNativo(indice) {
       await BluetoothLe.disconnect({
         deviceId: pod.deviceId,
       });
-
     } catch (error) {
       // Es normal si no estaba conectado.
     }
@@ -1270,7 +1267,6 @@ async function conectarPodNativo(indice) {
 
     console.log(`✅ ${pod.nombre} conectado manualmente`);
   } catch (error) {
-
     console.error(`Error conectando ${pod.nombre}:`, error);
 
     marcarPodNoConectado(indice, "No conectado");
@@ -1399,7 +1395,6 @@ async function limpiarListenersPod(pod) {
     try {
       await pod.notificationListener.remove();
     } catch (error) {
-
       console.warn(error);
     }
 
@@ -1452,7 +1447,6 @@ async function prepararNotificacionesPod(indice) {
     characteristic: BUTTON_UUID,
   });
 }
-
 
 function marcarPodConectado(indice) {
   const pod = podsBLE[indice];
@@ -1555,7 +1549,6 @@ async function conectarPodEncontrado(indice, dispositivo) {
 
       () => {
         podDesconectado(indice);
-
       }
     );
 
@@ -1815,7 +1808,6 @@ function recibirBotonFisicoWeb(indice, evento) {
 // DATOS
 // =====================================================
 
-
 function cargarDatos() {
   try {
     const guardado = localStorage.getItem(CLAVE_DATOS);
@@ -1995,7 +1987,6 @@ function mostrarPerfiles() {
                     >
                         ${
                           perfil.foto
-
                             ? `
                                 <img
                                     src="${perfil.foto}"
@@ -2334,7 +2325,6 @@ function mostrarGateTerminos() {
 
   document.body.appendChild(overlay);
 
-
   const check = document.getElementById("checkTerminosRehabPod");
   const btnContinuar = document.getElementById("btnAceptarTerminosRehabPod");
 
@@ -2360,7 +2350,6 @@ function mostrarGateTerminos() {
     guardarAjustes();
 
     overlay.remove();
-
   });
 }
 
@@ -2489,7 +2478,6 @@ function mostrarModalConsentimiento(nombre, alConfirmar, alCancelar) {
     btnAceptar.disabled = !check.checked;
     btnAceptar.style.opacity = check.checked ? "1" : ".5";
     btnAceptar.style.cursor = check.checked ? "pointer" : "not-allowed";
-
   });
 
   function cerrar() {
@@ -2542,7 +2530,6 @@ function crearPerfil() {
 
   const repetido = datosApp.perfiles.some(
     (perfil) => perfil.nombre.toLowerCase() === nombre.toLowerCase()
-
   );
 
   if (repetido) {
@@ -2646,7 +2633,6 @@ function calcularResumenPerfil() {
 
   const mejorTiempo = mejores.length ? Math.min(...mejores) : null;
 
-
   const promedio = promedios.length
     ? promedios.reduce(
         (suma, valor) => suma + valor,
@@ -2725,7 +2711,6 @@ function calcularRacha(historial) {
         continue;
       }
 
-
       break;
     }
   }
@@ -2801,7 +2786,6 @@ const catalogoColoresPersonalizados = {
     comando: "orange",
     css: "#f97316",
   },
-
 
   pink: {
     nombre: "ROSADO",
@@ -3087,7 +3071,6 @@ function crearControlesExperienciaEntrenamiento() {
   if (referencia === pantallaConfiguracion) {
     pantallaConfiguracion.appendChild(panel);
   } else {
-
     referencia.parentElement.insertBefore(panel, referencia);
   }
 
@@ -3270,7 +3253,6 @@ function crearControlesExperienciaEntrenamiento() {
       "yellow",
       "white",
 
-
       "purple",
       "cyan",
       "orange",
@@ -3426,7 +3408,6 @@ function ordenarConfiguracionV14() {
   // Los controles propios del ejercicio quedan debajo de la descripción.
   bloqueDescripcion.insertAdjacentElement("afterend", panel);
 
-
   // El botón de inicio permanece al final. La dificultad ya está al final del panel.
   if (bloqueInicio && bloqueInicio !== panel) {
     pantallaConfiguracion.appendChild(bloqueInicio);
@@ -3581,7 +3562,6 @@ function crearTarjetasNuevosModos() {
 }
 
 function crearTarjetaCircuito() {
-
   if (document.querySelector('[data-modo="circuito"]')) {
     return;
   }
@@ -3633,7 +3613,6 @@ function crearTarjetaContrarreloj() {
 
 function crearTarjetaEntrenador() {
   if (document.querySelector('[data-modo="entrenador"]')) return;
-
 
   const contenedor = document.querySelector(".tarjetaEntrenamientoModo")?.parentElement;
   const base = document.querySelector(".tarjetaEntrenamientoModo");
@@ -3816,7 +3795,6 @@ function tono(frecuencia, duracion) {
   );
 }
 
-
 // =====================================================
 // ENTRENAMIENTO
 // =====================================================
@@ -3893,7 +3871,6 @@ function iniciarEntrenamiento() {
   fase = "idle";
 
   tiempoPausado = 0;
-
 
   contadorAciertos.textContent = "0";
 
@@ -3997,7 +3974,6 @@ function iniciarCuenta() {
           if (modoActual === "libre") {
             iniciarLibre();
           } else if (modoActual === "contrarreloj") {
-
             iniciarContrarreloj();
           } else if (modoActual === "entrenador") {
             iniciarEntrenador();
@@ -4049,7 +4025,6 @@ function iniciarTemporizadorGeneralSiAplica() {
   actualizar();
   intervaloGeneral = setInterval(actualizar, 100);
   temporizadorFinGeneral = setTimeout(() => {
-
     if (!entrenamientoActivo) return;
     esperandoRespuesta = false;
     fase = "resultado";
@@ -4361,7 +4336,6 @@ async function activarColorProhibido() {
 
   colorObjetivo.style.background = prohibido.css;
 
-
   iniciarMedicion();
 }
 
@@ -4540,7 +4514,6 @@ async function respuestaCircuito(indice) {
   await apagarTodosLosPods();
 
   continuar();
-
 }
 
 // =====================================================
@@ -4671,7 +4644,6 @@ function actualizarCronometro() {
 function detenerCronometro() {
   if (animacionCronometro) {
     cancelAnimationFrame(animacionCronometro);
-
   }
 
   animacionCronometro = null;
@@ -4827,7 +4799,6 @@ function habilitarBotonesEntrenador(habilitar) {
   panel.querySelectorAll(".btnPodEntrenadorActivo").forEach((boton) => {
     boton.disabled = !habilitar;
   });
-
 }
 
 async function iniciarEntrenador() {
@@ -4903,7 +4874,6 @@ async function activarPodEntrenador(indice) {
   encenderVisual(indice, color.css);
   await enviarComandoPod(indice, color.comando);
   iniciarMedicion();
-
 }
 
 async function respuestaEntrenador(indice) {
@@ -4983,7 +4953,6 @@ async function terminarEntrenadorTiempo() {
 // =====================================================
 
 function procesarPulsacion(indice) {
-
   if (!entrenamientoActivo || pausado) {
     return;
   }
@@ -5085,7 +5054,6 @@ async function respuestaNormal(indice) {
     await respuestaPersecucion(indice);
 
     return;
-
   }
 
   esperandoRespuesta = false;
@@ -5295,7 +5263,6 @@ async function respuestaSecuencia(indice) {
     temporizador = setTimeout(iniciarRonda, pausaRondasMs);
 
     return;
-
   }
 
   posicionSecuencia++;
@@ -5608,7 +5575,6 @@ function obtenerFraseFinal() {
 async function mostrarCelebracionFinal() {
   let overlay = document.getElementById("celebracionReactiPod");
 
-
   if (overlay) {
     overlay.remove();
   }
@@ -5631,7 +5597,6 @@ async function mostrarCelebracionFinal() {
         opacity:0;
         transition:opacity .25s ease;
     `;
-
 
   const frase = obtenerFraseFinal();
 
@@ -5814,7 +5779,6 @@ function mostrarResultados() {
 
   resultadoAciertos.textContent = aciertos;
 
-
   resultadoErrores.textContent = errores;
 
   const tiempos = resultados
@@ -5919,7 +5883,6 @@ function mostrarEstadisticas() {
 
   promedioGeneral.textContent =
     resumen.promedio === null ? "-- s" : `${resumen.promedio.toFixed(3)} s`;
-
 
   mejorPromedio.textContent =
     resumen.mejorPromedio === null ? "-- s" : `${resumen.mejorPromedio.toFixed(3)} s`;
@@ -6075,7 +6038,6 @@ function actualizarObjetivo() {
 }
 
 function editarObjetivo() {
-
   const perfil = obtenerPerfilActivo();
 
   const actual = perfil.objetivo || 0.5;
@@ -6177,7 +6139,6 @@ function dibujarGrafico() {
 
   const ancho = graficoProgreso.clientWidth;
 
-
   const alto = 230;
 
   const escala = window.devicePixelRatio || 1;
@@ -6231,7 +6192,6 @@ function dibujarGrafico() {
   const margenInferior = 35;
 
   const areaAncho = ancho - margenIzquierda - margenDerecha;
-
 
   const areaAlto = alto - margenSuperior - margenInferior;
 
@@ -6543,7 +6503,6 @@ sonidosActivados.addEventListener(
 // =====================================================
 
 function construirExportacionPerfil(perfil) {
-
   return JSON.stringify(
     {
       exportado_el: new Date().toISOString(),
@@ -6721,7 +6680,6 @@ function mostrarModalDatosPerfil(perfil) {
         alert("Datos copiados al portapapeles.");
       } catch (error) {
         console.error(error);
-
 
         document.getElementById("areaDatosPerfilRehabPod").select();
 
@@ -7449,7 +7407,6 @@ function organizarModosPorCategoriaV8() {
 
   const categorias = [
     {
-
       clave: "velocidad",
       icono: "⚡",
       titulo: "Velocidad",
@@ -7631,7 +7588,6 @@ function iniciarFeedbackVisualV8() {
               { transform: "scale(1)", opacity: 1 },
             ]
           : [
-
               { transform: "translateX(0)" },
               { transform: "translateX(-8px)" },
 
@@ -7945,7 +7901,6 @@ function ordenarEntrenadorActivoV15() {
   const zonaObjetivoRef = nombreColor ? nombreColor.closest(".zonaObjetivo") : null;
 
   if (zonaObjetivoRef && zonaObjetivoRef.nextElementSibling !== panel) {
-
     zonaObjetivoRef.insertAdjacentElement("afterend", panel);
   }
 
@@ -8175,7 +8130,6 @@ function rehabActualizarEtiquetasMinimoPods() {
       return;
     }
 
-
     var minimo = rehabMinimoPodsModo(modo);
     var etiqueta = tarjeta.querySelector(".etiquetaFisico, .rehabMinimoPods");
 
@@ -8256,7 +8210,6 @@ function rehabRestaurarVisualesPods() {
 // =====================================================
 // BLE MANUAL: CUALQUIER POD COMPATIBLE PUEDE OCUPAR CUALQUIER ESPACIO
 // =====================================================
-
 
 conectarPodNativo = async function (indice) {
   var pod = podsBLE[indice];
@@ -8356,7 +8309,6 @@ conectarPodWeb = async function (indice) {
     var duplicado = podsBLE.findIndex(
       (otro, otroIndice) =>
         otroIndice !== indice &&
-
         otro &&
         otro.conectado &&
         otro.device &&
@@ -8412,7 +8364,6 @@ buscarPodsParaReconectar = async function () {
   }
 
   if (cantidadConectados() >= podsBLE.length) {
-
     return;
   }
 
@@ -8538,7 +8489,6 @@ configurarModo = function () {
   rehabActualizarControlCantidadPods();
   rehabActualizarDescripcionModo();
   rehabActualizarEtiquetasMinimoPods();
-
 };
 
 var rehabObtenerNombreModoBase = obtenerNombreModo;
@@ -8719,7 +8669,6 @@ activarDobleEstimulo = async function () {
 
   var colorPrimero = obtenerColorEstimulo(primero);
   var colorSegundo = obtenerColorEstimulo(segundo, [colorPrimero.comando]);
-
 
   colorObjetivo.style.background = `linear-gradient(135deg, ${colorPrimero.css} 0 48%, ${colorSegundo.css} 52% 100%)`;
   encenderVisual(primero, colorPrimero.css);
@@ -9447,7 +9396,6 @@ rehabActualizarDescripcionModo = function () {
     var cantidad = Number(cantidadPodsSeleccionada) || rehabMinimoPodsModo(modoActual);
     var color = rehabObtenerColorMemoria();
 
-
     descripcionModo.textContent =
       `Memoriza y repite la secuencia utilizando ${cantidad} ${
         cantidad === 1 ? "Pod" : "Pods"
@@ -9657,7 +9605,6 @@ function rehabV19PrepararCategorias() {
     var contadorCoordinacion = coordinacion.querySelector("small");
     if (contadorCoordinacion) {
       contadorCoordinacion.textContent = "4 entrenamientos";
-
     }
   }
 }
@@ -9809,7 +9756,6 @@ function rehabV19ActualizarControlTiempoAutomatico() {
     panel.querySelector("#tiempoAutomaticoRehabPod").value = String(
       rehabTiempoAutomaticoMs
     );
-
   }
 }
 
@@ -9968,7 +9914,6 @@ async function rehabV19RespuestaCazaColor(indice) {
     !entrenamientoActivo ||
     modoActual !== "cazaColor" ||
     fase !== "cazaColorRespuesta" ||
-
     !esperandoRespuesta
   ) {
     return;
@@ -10172,7 +10117,6 @@ alternarPausa = async function () {
 };
 
 if (btnPausar) {
-
   btnPausar.onclick = alternarPausa;
 }
 
@@ -10279,7 +10223,6 @@ function rehabDescripcionDificultadEspecifica(modo, dificultad) {
       facil: "Fácil · Sesión libre con ritmo cómodo y sin una secuencia obligatoria.",
       media: "Media · Sesión libre para mantener un ritmo continuo.",
       dificil:
-
         "Difícil · Busca mantener golpes rápidos y continuos; la app conserva el registro de tiempos.",
       personalizada: "Personal · Sesión libre con la configuración general elegida.",
     },
@@ -10354,7 +10297,6 @@ function rehabDescripcionDificultadEspecifica(modo, dificultad) {
       dificil:
         "Difícil · La regla cambia en cada ronda y la palabra siempre aparece escrita con un color diferente para generar interferencia Stroop.",
       personalizada: "Personal · Regla aleatoria con tus tiempos personalizados.",
-
     },
   };
   var grupo = mapa[modo] || mapa.simple;
@@ -10435,7 +10377,6 @@ activarColorProhibido = async function () {
       : "Evita el color prohibido";
   mensajeResultado.className = "mensajeResultado";
   iniciarMedicion();
-
 };
 
 respuestaColorProhibido = async function (indice) {
@@ -10536,7 +10477,6 @@ activarCircuito = async function () {
   await mostrarObjetivoCircuito();
   iniciarMedicion();
 };
-
 
 // -----------------------------------------------------
 // 6. CAZA DE COLOR: OBJETIVO FIJO / CADA 3 / CADA RONDA
@@ -10747,7 +10687,6 @@ procesarPulsacion = function (indice) {
 // -----------------------------------------------------
 var rehabV20ConfigurarModoBase = configurarModo;
 configurarModo = function () {
-
   rehabV20ConfigurarModoBase();
   if (modoActual === "stroop") {
     tituloConfiguracion.textContent = "Palabra vs color";
@@ -10900,7 +10839,6 @@ async function rehabV21FeedbackPod(
 // =====================================================
 iluminarPodPresionado = async function (indice, duracion = 300) {
   await rehabV21FeedbackPod(indice, true, duracion);
-
 };
 
 // =====================================================
@@ -11805,7 +11743,7 @@ console.log(
         overflow:auto;
         border-radius:24px;
         border:1px solid rgba(148,163,184,.22);
-        background:var(--fondo-tarjeta, #111827);
+        background:var(--tarjeta);
         color:inherit;
         padding:20px;
 
@@ -11868,8 +11806,8 @@ console.log(
         padding:11px 15px;
         cursor:pointer;
         font-weight:800;
-        background:#2563eb;
-        color:white;
+        background:var(--acento);
+        color:var(--acento-tinta);
       }
 
       .rehabV23Btn.secundario {
@@ -12149,7 +12087,6 @@ console.log(
       </div>
     `;
 
-
     document.getElementById("rehabV23Nueva").addEventListener("click", function () {
       rehabV23AbrirEditor(null);
     });
@@ -12172,7 +12109,6 @@ console.log(
       card.className = "rehabV23RutinaCard";
 
       const ejercicios = Array.isArray(rutina.ejercicios) ? rutina.ejercicios : [];
-
 
       card.innerHTML = `
         <div class="rehabV23RutinaTop">
@@ -12304,7 +12240,6 @@ console.log(
         <select id="rehabV23DescansoRutina">
           ${[0, 15, 30, 45, 60, 90, 120]
             .map(function (seg) {
-
               const actual = rutina ? Number(rutina.descansoSeg || 0) : 30;
               return `<option value="${seg}" ${actual === seg ? "selected" : ""}>${seg === 0 ? "Sin descanso" : seg + " segundos"}</option>`;
             })
@@ -12535,7 +12470,6 @@ console.log(
     rehabV23CrearModal();
 
     console.log("RehabPod V23: logo y rutinas activados.");
-
   }
 
   setTimeout(rehabV23Iniciar, 120);
@@ -12616,7 +12550,6 @@ console.log(
     } catch (error) {}
 
     return {
-
       id: "perfil_local",
       nombre: "Perfil local",
     };
@@ -12670,7 +12603,7 @@ console.log(
         overflow:auto;
         border-radius:24px;
         border:1px solid rgba(148,163,184,.22);
-        background:var(--fondo-tarjeta,#111827);
+        background:var(--tarjeta);
         color:inherit;
         padding:20px;
         box-shadow:0 25px 80px rgba(0,0,0,.42);
@@ -12745,8 +12678,8 @@ console.log(
         border-radius:12px;
         padding:10px 14px;
         cursor:pointer;
-        background:#2563eb;
-        color:#fff;
+        background:var(--acento);
+        color:var(--acento-tinta);
         font-weight:800;
       }
 
@@ -13445,7 +13378,6 @@ console.log(
     }
   }
 
-
   function guardarRutinas(rutinas) {
     localStorage.setItem(CLAVE_RUTINAS, JSON.stringify(rutinas));
   }
@@ -13491,7 +13423,7 @@ console.log(
       .rehabV25Overlay[hidden]{display:none!important}
       .rehabV25Modal{
         width:min(850px,100%);max-height:92vh;overflow:auto;border-radius:24px;
-        border:1px solid rgba(148,163,184,.22);background:var(--fondo-tarjeta,#111827);
+        border:1px solid rgba(148,163,184,.22);background:var(--tarjeta);
         color:inherit;padding:20px;box-shadow:0 25px 80px rgba(0,0,0,.42)
       }
       .tema-claro .rehabV25Modal{background:#fff}
@@ -13507,7 +13439,7 @@ console.log(
         border:1px solid rgba(148,163,184,.27);background:rgba(148,163,184,.07);color:inherit}
       .rehabV25Acciones{display:flex;gap:9px;flex-wrap:wrap;margin-top:10px}
       .rehabV25Btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;
-        background:#2563eb;color:#fff}
+        background:var(--acento);color:var(--acento-tinta)}
       .rehabV25Btn.sec{background:rgba(148,163,184,.15);color:inherit;border:1px solid rgba(148,163,184,.22)}
       .rehabV25VideoBtn{display:inline-flex;gap:6px;align-items:center;margin-top:8px;padding:8px 11px;border-radius:10px;
         background:rgba(59,130,246,.11);border:1px solid rgba(59,130,246,.23);color:inherit;text-decoration:none;font-weight:800}
@@ -13551,7 +13483,6 @@ console.log(
 
     const contenido = document.getElementById("rehabV25Contenido");
     const ejercicios = Array.isArray(rutina.ejercicios) ? rutina.ejercicios : [];
-
 
     contenido.innerHTML = `
       <div style="opacity:.78;margin-bottom:12px">
@@ -13707,7 +13638,6 @@ window.rehabGetSupabaseClient = async function () {
           ) {
             resolve();
             return;
-
           }
 
           existente.addEventListener("load", resolve, { once: true });
@@ -13723,8 +13653,7 @@ window.rehabGetSupabaseClient = async function () {
         script.id = "rehabSupabaseConfigPublica";
         script.src = "supabase-config.js";
         script.onload = resolve;
-        script.onerror = () =>
-          reject(new Error("No se pudo cargar supabase-config.js."));
+        script.onerror = () => reject(new Error("No se pudo cargar supabase-config.js."));
         document.head.appendChild(script);
       });
     }
@@ -13760,8 +13689,7 @@ window.rehabGetSupabaseClient = async function () {
         script.id = "rehabSupabaseSDK";
         script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
         script.onload = resolve;
-        script.onerror = () =>
-          reject(new Error("No se pudo cargar Supabase JS."));
+        script.onerror = () => reject(new Error("No se pudo cargar Supabase JS."));
         document.head.appendChild(script);
       });
     }
@@ -13986,7 +13914,7 @@ window.rehabGetSupabaseClient = async function () {
         display:flex;align-items:center;justify-content:center;padding:18px}
       .rehabV27Overlay[hidden]{display:none!important}
       .rehabV27Modal{width:min(900px,100%);max-height:92vh;overflow:auto;border-radius:24px;
-        border:1px solid rgba(148,163,184,.22);background:var(--fondo-tarjeta,#111827);color:inherit;
+        border:1px solid rgba(148,163,184,.22);background:var(--tarjeta);color:inherit;
         padding:20px;box-shadow:0 25px 80px rgba(0,0,0,.42)}
       .tema-claro .rehabV27Modal{background:#fff}
       .rehabV27Cabecera{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
@@ -14019,7 +13947,6 @@ window.rehabGetSupabaseClient = async function () {
     document.getElementById("rehabV26BtnCloud")?.remove();
 
     if (document.getElementById("rehabV27BtnCloud")) return;
-
 
     const ref =
       document.getElementById("rehabV24BtnHistorial") ||
@@ -14175,7 +14102,6 @@ window.rehabGetSupabaseClient = async function () {
     rehabCloudUser = data.user;
     await cargarPerfilCloud();
     await renderPanelCuenta();
-
   }
 
   async function registrar() {
@@ -14354,7 +14280,6 @@ window.rehabGetSupabaseClient = async function () {
   }
 
   async function vincularUsuario() {
-
     const codigo = document.getElementById("rehabV27CodigoUsuario").value.trim();
     if (!codigo) {
       panelMensaje("Escribe el código del usuario.");
@@ -14487,7 +14412,6 @@ window.rehabGetSupabaseClient = async function () {
         const ejercicios = Array.isArray(rutina.ejercicios) ? rutina.ejercicios : [];
         if (ejercicios.length) {
           const rows = ejercicios.map((ej, index) => ({
-
             routine_id: routineId,
             position: index + 1,
             mode: ej.modo,
@@ -14808,7 +14732,7 @@ window.rehabGetSupabaseClient = async function () {
       .rehabV28Overlay[hidden]{display:none!important}
       .rehabV28Modal{
         width:min(960px,100%);max-height:94vh;overflow:auto;border-radius:24px;padding:20px;
-        background:var(--fondo-tarjeta,#111827);color:inherit;
+        background:var(--tarjeta);color:inherit;
         border:1px solid rgba(148,163,184,.22);box-shadow:0 25px 80px rgba(0,0,0,.44)
       }
       .tema-claro .rehabV28Modal{background:#fff}
@@ -14955,7 +14879,6 @@ window.rehabGetSupabaseClient = async function () {
       c.innerHTML = `<div class="rehabV28Aviso">Error: ${esc(error.message)}</div>`;
     }
   }
-
 
   // -----------------------------------------------------
   // PROFESIONAL
@@ -15111,7 +15034,6 @@ window.rehabGetSupabaseClient = async function () {
 
     document.querySelectorAll("[data-guia-rutina]").forEach((btn) => {
       btn.onclick = () => editarGuiaRutina(btn.dataset.guiaRutina);
-
     });
 
     await cargarAsignacionesProfesional();
@@ -15424,7 +15346,6 @@ window.rehabGetSupabaseClient = async function () {
       })
       .join("");
 
-
     document.querySelectorAll("[data-ver-asignacion]").forEach((btn) => {
       btn.onclick = () => verAsignacionUsuario(btn.dataset.verAsignacion);
     });
@@ -15672,7 +15593,6 @@ window.rehabGetSupabaseClient = async function () {
   }
 
   async function v29CargarConfig() {
-
     if (
       window.REHAB_SUPABASE_CONFIG?.url &&
       window.REHAB_SUPABASE_CONFIG?.publishableKey
@@ -15761,7 +15681,7 @@ window.rehabGetSupabaseClient = async function () {
 
       .rehabV29Btn{
         appearance:none;border:0;border-radius:12px;padding:10px 14px;font-weight:900;
-        cursor:pointer;background:#2563eb;color:#fff
+        cursor:pointer;background:var(--acento);color:var(--acento-tinta)
       }
 
       .rehabV29Btn.sec{
@@ -15854,7 +15774,6 @@ window.rehabGetSupabaseClient = async function () {
         v29AssignmentIdCapturado = boton.dataset.verAsignacion || null;
       },
       true
-
     );
 
     const observer = new MutationObserver(function () {
@@ -16359,7 +16278,6 @@ window.rehabGetSupabaseClient = async function () {
       </div>
     `);
 
-
     const cuenta = document.getElementById("rehabV29DescansoCuenta");
 
     v29IntervaloDescanso = setInterval(() => {
@@ -16514,7 +16432,6 @@ window.rehabGetSupabaseClient = async function () {
 
       try {
         if (typeof obtenerPerfilActivo === "function") {
-
           perfil = obtenerPerfilActivo();
         }
       } catch (_) {}
@@ -16784,7 +16701,6 @@ window.rehabGetSupabaseClient = async function () {
   }
 
   function v31AgregarEstilos() {
-
     if (document.getElementById("rehabV31Estilos")) return;
 
     const st = document.createElement("style");
@@ -16803,7 +16719,7 @@ window.rehabGetSupabaseClient = async function () {
       .rehabV31Overlay[hidden]{display:none!important}
       .rehabV31Modal{
         width:min(980px,100%);max-height:94vh;overflow:auto;border-radius:24px;padding:20px;
-        background:var(--fondo-tarjeta,#111827);color:inherit;
+        background:var(--tarjeta);color:inherit;
         border:1px solid rgba(148,163,184,.22);box-shadow:0 25px 80px rgba(0,0,0,.44)
       }
       .tema-claro .rehabV31Modal{background:#fff}
@@ -16934,9 +16850,7 @@ window.rehabGetSupabaseClient = async function () {
     const total = sesiones.length;
 
     const precision =
-      total > 0
-        ? sesiones.reduce((s, x) => s + v31Numero(x.precision), 0) / total
-        : 0;
+      total > 0 ? sesiones.reduce((s, x) => s + v31Numero(x.precision), 0) / total : 0;
 
     const duracion =
       total > 0
@@ -16973,7 +16887,6 @@ window.rehabGetSupabaseClient = async function () {
       </div>
     `;
   }
-
 
   function v31HtmlEvolucion(sesiones) {
     const ultimas = [...sesiones].slice(0, 8).reverse();
@@ -17127,11 +17040,13 @@ window.rehabGetSupabaseClient = async function () {
   }
 
   function v39OpcionesRutinas(sesiones) {
-    const nombres = [...new Set(
-      sesiones.map((s) => String(s.routine_name || "Rutina")).filter(Boolean)
-    )].sort((a,b) => a.localeCompare(b));
+    const nombres = [
+      ...new Set(sesiones.map((s) => String(s.routine_name || "Rutina")).filter(Boolean)),
+    ].sort((a, b) => a.localeCompare(b));
 
-    return nombres.map((n) => `<option value="${v31Esc(n)}">${v31Esc(n)}</option>`).join("");
+    return nombres
+      .map((n) => `<option value="${v31Esc(n)}">${v31Esc(n)}</option>`)
+      .join("");
   }
 
   function v39HtmlFiltros(sesiones, prefijo) {
@@ -17163,13 +17078,21 @@ window.rehabGetSupabaseClient = async function () {
 
   function v39HtmlTendencia(sesiones) {
     if (sesiones.length < 2) return "";
-    const orden = [...sesiones].sort((a,b) => new Date(a.performed_at) - new Date(b.performed_at));
+    const orden = [...sesiones].sort(
+      (a, b) => new Date(a.performed_at) - new Date(b.performed_at)
+    );
     const mitad = Math.max(1, Math.floor(orden.length / 2));
     const anterior = orden.slice(0, mitad);
     const reciente = orden.slice(mitad);
-    const prom = (arr) => arr.length ? arr.reduce((s,x) => s + v31Numero(x.precision),0)/arr.length : 0;
+    const prom = (arr) =>
+      arr.length ? arr.reduce((s, x) => s + v31Numero(x.precision), 0) / arr.length : 0;
     const dif = prom(reciente) - prom(anterior);
-    const texto = Math.abs(dif) < 0.5 ? "Precisión estable" : dif > 0 ? `Precisión +${dif.toFixed(1)} puntos` : `Precisión ${dif.toFixed(1)} puntos`;
+    const texto =
+      Math.abs(dif) < 0.5
+        ? "Precisión estable"
+        : dif > 0
+          ? `Precisión +${dif.toFixed(1)} puntos`
+          : `Precisión ${dif.toFixed(1)} puntos`;
     return `<div class="rehabV39Tendencia"><span class="rehabV39Punto"></span><strong>${texto}</strong> respecto a sesiones anteriores</div>`;
   }
 
@@ -17294,7 +17217,6 @@ window.rehabGetSupabaseClient = async function () {
                 `<option value="${v31Esc(u.user_id)}" ${
                   u.user_id === seleccionado.user_id ? "selected" : ""
                 }>${v31Esc(u.full_name || "Usuario")} · ${v31Esc(
-
                   u.specialty || "sin especialidad"
                 )}</option>`
             )
@@ -17392,7 +17314,6 @@ window.rehabGetSupabaseClient = async function () {
   };
 })();
 
-
 // =====================================================
 // REHABPOD V32
 // ESTADOS DE RUTINAS ASIGNADAS
@@ -17450,7 +17371,6 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
     if (
       typeof btnEstadisticas !== "undefined" &&
       btnEstadisticas &&
-
       !btnEstadisticas.dataset.v34Cuenta
     ) {
       btnEstadisticas.style.display = "none";
@@ -17488,7 +17408,10 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
       if (typeof mostrarProgreso === "function") {
         mostrarProgreso();
       }
-      if (typeof mostrarPantalla === "function" && typeof pantallaProgreso !== "undefined") {
+      if (
+        typeof mostrarPantalla === "function" &&
+        typeof pantallaProgreso !== "undefined"
+      ) {
         mostrarPantalla(pantallaProgreso);
       }
     } catch (error) {
@@ -17626,12 +17549,10 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
 
   async function v33Iniciar() {
     v33MejorarEtiquetaProgreso();
-    v33OcultarHistorialAntiguo();
     v33OcultarBotonProgresoCloudDuplicado();
-    v33ConfigurarBotonProgreso();
-    // V36.2: no usamos un MutationObserver global sobre document.body.
-    // Los botones V23/V27/V28/V31 ya existen cuando V33 inicia (700 ms).
-    // Esto evita ciclos y congelamientos de la interfaz.
+    // V36.2 / Nav final: ya no ocultamos Historial ni reasignamos el botón
+    // Progreso aquí; la navegación inferior final se configura una sola
+    // vez, de forma síncrona, al final de este archivo.
 
     await v33PrepararSesion();
     await v33ActualizarRutinasAsignadas();
@@ -17733,7 +17654,7 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
       .rehabV34Overlay[hidden]{display:none!important}
       .rehabV34Modal{
         width:min(680px,100%);max-height:94vh;overflow:auto;border-radius:24px;padding:20px;
-        background:var(--fondo-tarjeta,#111827);color:inherit;
+        background:var(--tarjeta);color:inherit;
         border:1px solid rgba(148,163,184,.22);box-shadow:0 25px 80px rgba(0,0,0,.44)
       }
       .tema-claro .rehabV34Modal{background:#fff}
@@ -17757,7 +17678,7 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
       .rehabV34Dato span:first-child{opacity:.68}
       .rehabV34Btn{
         appearance:none;border:0;border-radius:11px;padding:10px 13px;font-weight:900;
-        cursor:pointer;background:#2563eb;color:#fff
+        cursor:pointer;background:var(--acento);color:var(--acento-tinta)
       }
       .rehabV34Btn.sec{
         background:rgba(148,163,184,.14);color:inherit;border:1px solid rgba(148,163,184,.24)
@@ -17890,9 +17811,7 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
       return `<div class="rehabV34Aviso">No se encontró el perfil local activo.</div>`;
     }
 
-    const avatar = perfil.foto
-      ? `<img src="${v34Esc(perfil.foto)}" alt="Perfil">`
-      : "👤";
+    const avatar = perfil.foto ? `<img src="${v34Esc(perfil.foto)}" alt="Perfil">` : "👤";
 
     return `
       <div class="rehabV34Card">
@@ -18236,10 +18155,7 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
     });
   }
 
-  async function v34AbrirCuenta(
-    contentId = "rehabV34Contenido",
-    abrirModal = true
-  ) {
+  async function v34AbrirCuenta(contentId = "rehabV34Contenido", abrirModal = true) {
     if (abrirModal) v34Abrir();
 
     const c = document.getElementById(contentId);
@@ -18297,8 +18213,8 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
     v34AgregarEstilos();
     v34CrearModal();
     v34SimplificarInicio();
-    v34PrepararBotonCuentaInferior();
-    // V36.2: eliminado observer global de V34 para evitar bloqueo del DOM.
+    // V34.2 / Nav final: ya no reasignamos btnEstadisticas como "Cuenta";
+    // Cuenta tiene su propio botón dedicado (ver navegación final).
 
     console.log(
       "RehabPod V34.1: Cuenta/Perfil + ajustes + desvinculación activados (fix interfaz)."
@@ -18314,217 +18230,6 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
 })();
 
 // =====================================================
-// REHABPOD V35
-// PROGRESO Y CUENTA COMO PANTALLAS, NO MODALES
-//
-// Barra inferior:
-//   Inicio | Progreso | Cuenta
-//
-// - Progreso Cloud se renderiza dentro de una pantalla real.
-// - Si no hay sesión Cloud, se conserva el Progreso local existente.
-// - Cuenta se renderiza dentro de una pantalla real.
-// - Los modales V31/V34 se conservan internamente por compatibilidad,
-//   pero la navegación inferior ya no los utiliza.
-// =====================================================
-
-(function () {
-  let v35PantallaProgreso = null;
-  let v35PantallaCuenta = null;
-
-  function v35ContenedorPantallas() {
-    return pantallaInicio?.parentElement || document.body;
-  }
-
-  function v35CrearEstilos() {
-    if (document.getElementById("rehabV35Estilos")) return;
-
-    const st = document.createElement("style");
-    st.id = "rehabV35Estilos";
-    st.textContent = `
-      .rehabV35Pantalla{
-        padding-bottom:92px;
-      }
-      .rehabV35Cabecera{
-        display:flex;align-items:center;justify-content:space-between;gap:12px;
-        margin-bottom:16px
-      }
-      .rehabV35Titulo{
-        margin:0;font-size:1.45rem
-      }
-      .rehabV35Subtitulo{
-        margin-top:4px;opacity:.62;font-size:.83rem
-      }
-      .rehabV35Contenido{
-        width:100%;
-      }
-      .rehabV35Volver{
-        appearance:none;border:1px solid rgba(148,163,184,.20);
-        background:rgba(148,163,184,.08);color:inherit;border-radius:12px;
-        padding:9px 12px;font-weight:850;cursor:pointer
-      }
-    `;
-    document.head.appendChild(st);
-  }
-
-  function v35CrearPantallas() {
-    const contenedor = v35ContenedorPantallas();
-
-    if (!document.getElementById("pantallaProgresoV35")) {
-      v35PantallaProgreso = document.createElement("section");
-      v35PantallaProgreso.id = "pantallaProgresoV35";
-      v35PantallaProgreso.className = "pantalla rehabV35Pantalla";
-      v35PantallaProgreso.innerHTML = `
-        <div class="rehabV35Cabecera">
-          <div>
-            <h2 id="rehabV35TituloProgreso" class="rehabV35Titulo">Progreso</h2>
-            <div class="rehabV35Subtitulo">Evolución, sesiones e historial</div>
-          </div>
-        </div>
-        <div id="rehabV35ContenidoProgreso" class="rehabV35Contenido"></div>
-      `;
-      contenedor.appendChild(v35PantallaProgreso);
-    } else {
-      v35PantallaProgreso = document.getElementById("pantallaProgresoV35");
-
-    }
-
-    if (!document.getElementById("pantallaCuentaV35")) {
-      v35PantallaCuenta = document.createElement("section");
-      v35PantallaCuenta.id = "pantallaCuentaV35";
-      v35PantallaCuenta.className = "pantalla rehabV35Pantalla";
-      v35PantallaCuenta.innerHTML = `
-        <div class="rehabV35Cabecera">
-          <div>
-            <h2 class="rehabV35Titulo">Cuenta</h2>
-            <div class="rehabV35Subtitulo">Perfil, nube y ajustes</div>
-          </div>
-        </div>
-        <div id="rehabV35ContenidoCuenta" class="rehabV35Contenido"></div>
-      `;
-      contenedor.appendChild(v35PantallaCuenta);
-    } else {
-      v35PantallaCuenta = document.getElementById("pantallaCuentaV35");
-    }
-  }
-
-  function v35Mostrar(pantalla) {
-    document.querySelectorAll(".pantalla").forEach((p) => {
-      p.classList.remove("activa");
-    });
-
-    pantalla.classList.add("activa");
-    window.scrollTo({ top: 0, behavior: "auto" });
-  }
-
-  async function v35HaySesionCloud() {
-    if (typeof window.rehabGetSupabaseClient !== "function") return false;
-
-    try {
-      const cloud = await window.rehabGetSupabaseClient();
-      const { data } = await cloud.auth.getSession();
-      return !!data?.session?.user;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  async function v35AbrirProgreso() {
-    // Sin cuenta Cloud, usamos la pantalla local que ya existía.
-    const cloudActiva = await v35HaySesionCloud();
-
-    if (!cloudActiva || typeof window.rehabV31RenderEnPantalla !== "function") {
-      try {
-        mostrarProgreso();
-        mostrarPantalla(pantallaProgreso);
-      } catch (error) {
-        console.error("V35 progreso local:", error);
-      }
-      return;
-    }
-
-    v35Mostrar(v35PantallaProgreso);
-
-    const contenido = document.getElementById("rehabV35ContenidoProgreso");
-    contenido.innerHTML = `<div class="rehabV31Aviso">Cargando progreso...</div>`;
-
-    try {
-      await window.rehabV31RenderEnPantalla(
-        "rehabV35ContenidoProgreso",
-        "rehabV35TituloProgreso"
-      );
-    } catch (error) {
-      console.error("V35 progreso:", error);
-      contenido.innerHTML = `
-        <div class="rehabV31Aviso">
-          No se pudo cargar el progreso: ${String(error.message || error)}
-        </div>
-      `;
-    }
-  }
-
-  async function v35AbrirCuenta() {
-    v35Mostrar(v35PantallaCuenta);
-
-    const contenido = document.getElementById("rehabV35ContenidoCuenta");
-    contenido.innerHTML = `<div class="rehabV34Aviso">Cargando cuenta...</div>`;
-
-    try {
-      if (typeof window.rehabV34RenderEnPantalla === "function") {
-        await window.rehabV34RenderEnPantalla("rehabV35ContenidoCuenta");
-      } else {
-        contenido.innerHTML = `
-          <div class="rehabV34Aviso">
-            No se pudo cargar la sección Cuenta.
-          </div>
-        `;
-      }
-    } catch (error) {
-      console.error("V35 Cuenta:", error);
-      contenido.innerHTML = `
-        <div class="rehabV34Aviso">
-          No se pudo cargar la cuenta: ${String(error.message || error)}
-        </div>
-      `;
-    }
-  }
-
-  function v35ConfigurarNavegacion() {
-    if (typeof btnProgreso !== "undefined" && btnProgreso) {
-      btnProgreso.onclick = v35AbrirProgreso;
-    }
-
-    if (typeof btnEstadisticas !== "undefined" && btnEstadisticas) {
-      btnEstadisticas.dataset.v34Cuenta = "1";
-      btnEstadisticas.style.display = "";
-      btnEstadisticas.removeAttribute("aria-hidden");
-      btnEstadisticas.onclick = v35AbrirCuenta;
-    }
-  }
-
-  function v35OcultarModalesSiQuedaronAbiertos() {
-    const p = document.getElementById("rehabV31Overlay");
-    const c = document.getElementById("rehabV34Overlay");
-    if (p) p.hidden = true;
-    if (c) c.hidden = true;
-  }
-
-  function v35Iniciar() {
-    v35CrearEstilos();
-    v35CrearPantallas();
-    v35ConfigurarNavegacion();
-    v35OcultarModalesSiQuedaronAbiertos();
-
-    console.log(
-      "RehabPod V35: Progreso y Cuenta ahora funcionan como pantallas."
-    );
-  }
-
-  setTimeout(v35Iniciar, 1150);
-
-  window.rehabV35AbrirProgreso = v35AbrirProgreso;
-  window.rehabV35AbrirCuenta = v35AbrirCuenta;
-})();
-
 // =====================================================
 // REHABPOD V36
 // LIMPIEZA FINAL DE INICIO + CONFIRMACION SEGURA AL DESVINCULAR
@@ -18542,7 +18247,6 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
   function v36AgregarEstilos() {
     if (document.getElementById("rehabV36Estilos")) return;
 
-
     const st = document.createElement("style");
     st.id = "rehabV36Estilos";
     st.textContent = `
@@ -18557,7 +18261,7 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
 
       .rehabV36ConfirmCard{
         width:min(440px,100%);border-radius:24px;padding:22px 18px;
-        background:var(--fondo-tarjeta,#111827);color:inherit;
+        background:var(--tarjeta);color:inherit;
         border:1px solid rgba(239,68,68,.28);
         box-shadow:0 28px 90px rgba(0,0,0,.50);text-align:center
       }
@@ -18649,11 +18353,10 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
         return;
       }
 
-      texto.innerHTML =
-        `¿Deseas desvincular a <strong>${String(nombre || "esta cuenta")
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")}</strong>?`;
+      texto.innerHTML = `¿Deseas desvincular a <strong>${String(nombre || "esta cuenta")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")}</strong>?`;
 
       ov.hidden = false;
 
@@ -18676,12 +18379,7 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
   function v36OcultarResumenDuplicado() {
     // Las cuatro métricas del inicio ya existen en Progreso.
     // Ocultamos sus tarjetas completas para dejar Inicio más limpio.
-    const ids = [
-      "inicioMejorTiempo",
-      "inicioPrecision",
-      "inicioSesiones",
-      "inicioRacha",
-    ];
+    const ids = ["inicioMejorTiempo", "inicioPrecision", "inicioSesiones", "inicioRacha"];
 
     ids.forEach((id) => {
       const el = document.getElementById(id);
@@ -18697,14 +18395,12 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
       ) {
         // Conservamos el contenedor grid; ocultamos solo la tarjeta.
         tarjeta.classList.add("rehabV36Oculto");
-
       }
     });
   }
 
   function v36LimpiarTextoInicio() {
-    const btnPods =
-      typeof btnGestionarPods !== "undefined" ? btnGestionarPods : null;
+    const btnPods = typeof btnGestionarPods !== "undefined" ? btnGestionarPods : null;
 
     // FIX V36.1:
     // El MutationObserver ejecuta esta función cuando cambia el DOM.
@@ -18771,409 +18467,112 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
 })();
 
 // =====================================================
-// REHABPOD V37
-// NAVEGACION INFERIOR PERSISTENTE
+// NAVEGACIÓN INFERIOR FINAL
+// Inicio | Progreso | Historial | Cuenta
 //
-// - La barra Inicio / Progreso / Cuenta permanece visible
-//   al cambiar de pantalla.
-// - No depende de que la barra antigua esté dentro de pantallaInicio.
-// - Evita tener que recargar la página para volver.
-// - Mantiene V35/V36.2 sin modificar su lógica estable.
-// =====================================================
-
-(function () {
-  let v37TabActual = "inicio";
-
-  function v37AgregarEstilos() {
-    if (document.getElementById("rehabV37Estilos")) return;
-
-    const st = document.createElement("style");
-    st.id = "rehabV37Estilos";
-    st.textContent = `
-      #rehabV37Nav{
-        position:fixed;
-        left:50%;
-        transform:translateX(-50%);
-        bottom:12px;
-        z-index:100500;
-        width:min(900px,calc(100% - 24px));
-        display:grid;
-        grid-template-columns:repeat(3,1fr);
-        gap:6px;
-        padding:7px;
-        border-radius:18px;
-        background:rgba(12,18,16,.96);
-        border:1px solid rgba(148,163,184,.20);
-        box-shadow:0 12px 35px rgba(0,0,0,.28);
-        backdrop-filter:blur(12px);
-      }
-
-      .tema-claro #rehabV37Nav{
-        background:rgba(250,250,250,.97);
-      }
-
-      .rehabV37Tab{
-        appearance:none;
-        border:0;
-        min-height:58px;
-        border-radius:13px;
-        background:transparent;
-        color:inherit;
-        cursor:pointer;
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        justify-content:center;
-        gap:4px;
-        font:inherit;
-        opacity:.64;
-        transition:background .16s ease,opacity .16s ease,transform .16s ease;
-      }
-
-      .rehabV37Tab:hover{
-        opacity:.90;
-      }
-
-      .rehabV37Tab:active{
-        transform:scale(.98);
-      }
-
-      .rehabV37Tab.activo{
-        opacity:1;
-        background:rgba(132,204,22,.16);
-      }
-
-      .rehabV37Icono{
-        font-size:20px;
-        line-height:1;
-      }
-
-      .rehabV37Texto{
-        font-size:.76rem;
-        font-weight:850;
-      }
-
-      /* Espacio para que el contenido no quede debajo de la barra fija. */
-      body{
-        padding-bottom:92px!important;
-      }
-    `;
-
-    document.head.appendChild(st);
-  }
-
-  function v37OcultarNavegacionAnterior() {
-    // Ocultamos solamente los botones inferiores antiguos.
-    // Sus funciones siguen disponibles internamente.
-    const botones = [];
-
-    if (typeof btnInicio !== "undefined" && btnInicio) botones.push(btnInicio);
-    if (typeof btnProgreso !== "undefined" && btnProgreso) botones.push(btnProgreso);
-    if (typeof btnEstadisticas !== "undefined" && btnEstadisticas) botones.push(btnEstadisticas);
-
-    botones.forEach((b) => {
-      const posibleBarra = b.parentElement;
-
-      if (
-        posibleBarra &&
-        botones.filter((x) => x && x.parentElement === posibleBarra).length >= 2
-      ) {
-        posibleBarra.style.display = "none";
-        posibleBarra.setAttribute("aria-hidden", "true");
-      } else {
-        b.style.display = "none";
-        b.setAttribute("aria-hidden", "true");
-      }
-    });
-  }
-
-  function v37Marcar(tab) {
-    v37TabActual = tab;
-
-    document.querySelectorAll("#rehabV37Nav [data-v37-tab]").forEach((btn) => {
-      const activo = btn.dataset.v37Tab === tab;
-      btn.classList.toggle("activo", activo);
-      btn.setAttribute("aria-current", activo ? "page" : "false");
-    });
-  }
-
-  function v37IrInicio() {
-    try {
-      if (typeof mostrarInicio === "function") {
-        mostrarInicio();
-      }
-
-      if (
-        typeof mostrarPantalla === "function" &&
-        typeof pantallaInicio !== "undefined" &&
-        pantallaInicio
-      ) {
-        mostrarPantalla(pantallaInicio);
-      }
-
-      window.scrollTo({ top: 0, behavior: "auto" });
-      v37Marcar("inicio");
-    } catch (error) {
-      console.error("V37 Inicio:", error);
-    }
-  }
-
-  async function v37IrProgreso() {
-    try {
-      if (typeof window.rehabV35AbrirProgreso === "function") {
-        await window.rehabV35AbrirProgreso();
-      } else if (
-        typeof mostrarPantalla === "function" &&
-        typeof pantallaProgreso !== "undefined"
-      ) {
-        if (typeof mostrarProgreso === "function") mostrarProgreso();
-        mostrarPantalla(pantallaProgreso);
-      }
-
-      window.scrollTo({ top: 0, behavior: "auto" });
-      v37Marcar("progreso");
-    } catch (error) {
-      console.error("V37 Progreso:", error);
-    }
-  }
-
-  async function v37IrCuenta() {
-    try {
-      if (typeof window.rehabV35AbrirCuenta === "function") {
-        await window.rehabV35AbrirCuenta();
-      } else if (typeof window.rehabV34AbrirCuenta === "function") {
-        await window.rehabV34AbrirCuenta();
-      }
-
-      window.scrollTo({ top: 0, behavior: "auto" });
-      v37Marcar("cuenta");
-    } catch (error) {
-      console.error("V37 Cuenta:", error);
-    }
-  }
-
-  function v37CrearNavegacion() {
-    if (document.getElementById("rehabV37Nav")) return;
-
-    const nav = document.createElement("nav");
-    nav.id = "rehabV37Nav";
-    nav.setAttribute("aria-label", "Navegación principal");
-
-    nav.innerHTML = `
-      <button class="rehabV37Tab activo" data-v37-tab="inicio" type="button">
-        <span class="rehabV37Icono">🏠</span>
-        <span class="rehabV37Texto">Inicio</span>
-      </button>
-
-      <button class="rehabV37Tab" data-v37-tab="progreso" type="button">
-        <span class="rehabV37Icono">📈</span>
-        <span class="rehabV37Texto">Progreso</span>
-      </button>
-
-      <button class="rehabV37Tab" data-v37-tab="cuenta" type="button">
-        <span class="rehabV37Icono">👤</span>
-        <span class="rehabV37Texto">Cuenta</span>
-      </button>
-    `;
-
-    document.body.appendChild(nav);
-
-    nav.querySelector('[data-v37-tab="inicio"]').onclick = v37IrInicio;
-    nav.querySelector('[data-v37-tab="progreso"]').onclick = v37IrProgreso;
-    nav.querySelector('[data-v37-tab="cuenta"]').onclick = v37IrCuenta;
-  }
-
-  function v37Iniciar() {
-    v37AgregarEstilos();
-    v37OcultarNavegacionAnterior();
-    v37CrearNavegacion();
-    v37Marcar("inicio");
-
-    console.log(
-      "RehabPod V37: navegación inferior persistente Inicio / Progreso / Cuenta activada."
-    );
-  }
-
-  setTimeout(v37Iniciar, 1500);
-
-  window.rehabV37Inicio = v37IrInicio;
-  window.rehabV37Progreso = v37IrProgreso;
-  window.rehabV37Cuenta = v37IrCuenta;
-})();
-
-// =====================================================
-// REHABPOD V38
-// FIX DE PANTALLAS SEPARADAS
+// Reemplaza a V35 + V37 + V38 (que se pisaban entre sí con
+// temporizadores de 1150/1500/1750ms, causando que en algunos
+// dispositivos Progreso o Cuenta quedaran dibujados debajo de Inicio,
+// o que el botón Inicio no respondiera hasta pasado ese tiempo).
 //
-// Problema corregido:
-// - Progreso y Cuenta podían quedar dibujados debajo de Inicio.
-// - Ahora solo UNA pantalla principal queda visible a la vez.
-
-// - La navegación inferior persiste y no mezcla contenidos.
+// Esta versión no usa setTimeout: se ejecuta una sola vez, de forma
+// síncrona, en el momento en que el script termina de cargar — los
+// mismos botones y pantallas ya existen en el HTML en ese punto.
 // =====================================================
 
-(function () {
-  function v38AgregarEstilos() {
-    if (document.getElementById("rehabV38Estilos")) return;
+const btnCuentaMenu = document.getElementById("btnCuentaMenu");
+const btnInicioMenu = document.getElementById("btnInicioMenu");
+const pantallaCuentaCloud = document.getElementById("pantallaCuentaCloud");
+const btnVolverCuentaCloud = document.getElementById("btnVolverCuentaCloud");
+const contenidoProgresoLocal = document.getElementById("contenidoProgresoLocal");
+const contenidoProgresoCloud = document.getElementById("contenidoProgresoCloud");
 
-    const st = document.createElement("style");
-    st.id = "rehabV38Estilos";
-    st.textContent = `
-      /* Las pantallas creadas por V35 deben comportarse como vistas reales. */
-      #pantallaProgresoV35,
-      #pantallaCuentaV35{
-        display:none!important;
-      }
+async function navHaySesionCloud() {
+  if (typeof window.rehabGetSupabaseClient !== "function") {
+    return false;
+  }
 
-      #pantallaProgresoV35.activa,
-      #pantallaCuentaV35.activa{
-        display:block!important;
-      }
+  try {
+    const cloud = await window.rehabGetSupabaseClient();
+    const { data } = await cloud.auth.getSession();
+    return !!data?.session?.user;
+  } catch (error) {
+    console.warn("Nav: no se pudo verificar sesión Cloud", error);
+    return false;
+  }
+}
 
-      /* Cuando una vista V35 está activa, Inicio no debe quedar debajo. */
-      body.rehabV38-progreso #pantallaInicio,
-      body.rehabV38-cuenta #pantallaInicio{
-        display:none!important;
-      }
+async function abrirInicioNav() {
+  actualizarResumenInicio();
+  mostrarPantalla(pantallaInicio);
+}
 
-      /* Restauración explícita al volver a Inicio. */
-      body.rehabV38-inicio #pantallaInicio{
-        display:block!important;
-      }
+async function abrirProgresoNav() {
+  const cloudActiva = await navHaySesionCloud();
+
+  mostrarProgreso();
+  mostrarPantalla(pantallaProgreso);
+
+  if (!cloudActiva || typeof window.rehabV31RenderEnPantalla !== "function") {
+    if (contenidoProgresoCloud) contenidoProgresoCloud.style.display = "none";
+    if (contenidoProgresoLocal) contenidoProgresoLocal.style.display = "";
+    return;
+  }
+
+  if (contenidoProgresoLocal) contenidoProgresoLocal.style.display = "none";
+  if (contenidoProgresoCloud) {
+    contenidoProgresoCloud.style.display = "";
+    contenidoProgresoCloud.innerHTML = `<div class="rehabV31Aviso">Cargando progreso...</div>`;
+
+    try {
+      await window.rehabV31RenderEnPantalla("contenidoProgresoCloud", null);
+    } catch (error) {
+      console.error("Nav progreso cloud:", error);
+      contenidoProgresoCloud.innerHTML = `
+        <div class="rehabV31Aviso">
+          No se pudo cargar el progreso: ${String(error.message || error)}
+        </div>
+      `;
+    }
+  }
+}
+
+function abrirHistorialNav() {
+  mostrarEstadisticas();
+  mostrarPantalla(pantallaEstadisticas);
+}
+
+async function abrirCuentaNav() {
+  mostrarPantalla(pantallaCuentaCloud);
+
+  const contenido = document.getElementById("contenidoCuentaCloud");
+  if (!contenido) return;
+
+  contenido.innerHTML = `<div class="rehabV34Aviso">Cargando cuenta...</div>`;
+
+  try {
+    if (typeof window.rehabV34RenderEnPantalla === "function") {
+      await window.rehabV34RenderEnPantalla("contenidoCuentaCloud");
+    } else {
+      contenido.innerHTML = `<div class="rehabV34Aviso">No se pudo cargar la sección Cuenta.</div>`;
+    }
+  } catch (error) {
+    console.error("Nav cuenta:", error);
+    contenido.innerHTML = `
+      <div class="rehabV34Aviso">
+        No se pudo cargar la cuenta: ${String(error.message || error)}
+      </div>
     `;
-
-    document.head.appendChild(st);
   }
+}
 
-  function v38Estado(tab) {
-    document.body.classList.remove(
-      "rehabV38-inicio",
-      "rehabV38-progreso",
-      "rehabV38-cuenta"
-    );
+if (btnInicioMenu) btnInicioMenu.onclick = abrirInicioNav;
+if (btnProgreso) btnProgreso.onclick = abrirProgresoNav;
+if (btnEstadisticas) btnEstadisticas.onclick = abrirHistorialNav;
+if (btnCuentaMenu) btnCuentaMenu.onclick = abrirCuentaNav;
+if (btnVolverCuentaCloud) btnVolverCuentaCloud.onclick = abrirInicioNav;
 
-    document.body.classList.add(`rehabV38-${tab}`);
-
-    const p = document.getElementById("pantallaProgresoV35");
-    const c = document.getElementById("pantallaCuentaV35");
-
-    if (p) p.classList.toggle("activa", tab === "progreso");
-    if (c) c.classList.toggle("activa", tab === "cuenta");
-
-    const inicio = document.getElementById("pantallaInicio");
-    if (inicio) inicio.classList.toggle("activa", tab === "inicio");
-  }
-
-  async function v38Inicio() {
-    v38Estado("inicio");
-
-    try {
-      if (typeof mostrarInicio === "function") {
-        mostrarInicio();
-      } else if (
-        typeof mostrarPantalla === "function" &&
-        typeof pantallaInicio !== "undefined" &&
-        pantallaInicio
-      ) {
-        mostrarPantalla(pantallaInicio);
-      }
-    } catch (error) {
-      console.warn("V38 Inicio:", error);
-    }
-
-    // mostrarPantalla puede volver a tocar clases; aseguramos el estado final.
-    v38Estado("inicio");
-
-    if (typeof window.rehabV37Inicio === "function") {
-      // Solo usamos V37 para marcar la pestaña si es posible.
-      try {
-        document
-          .querySelectorAll("#rehabV37Nav [data-v37-tab]")
-          .forEach((btn) =>
-            btn.classList.toggle("activo", btn.dataset.v37Tab === "inicio")
-          );
-      } catch (_) {}
-    }
-
-    window.scrollTo({ top: 0, behavior: "auto" });
-  }
-
-  async function v38Progreso() {
-    v38Estado("progreso");
-
-    try {
-      if (typeof window.rehabV35AbrirProgreso === "function") {
-        await window.rehabV35AbrirProgreso();
-      }
-    } catch (error) {
-      console.error("V38 Progreso:", error);
-    }
-
-    v38Estado("progreso");
-
-    document
-      .querySelectorAll("#rehabV37Nav [data-v37-tab]")
-      .forEach((btn) =>
-        btn.classList.toggle("activo", btn.dataset.v37Tab === "progreso")
-      );
-
-    window.scrollTo({ top: 0, behavior: "auto" });
-  }
-
-  async function v38Cuenta() {
-    v38Estado("cuenta");
-
-    try {
-      if (typeof window.rehabV35AbrirCuenta === "function") {
-        await window.rehabV35AbrirCuenta();
-      }
-    } catch (error) {
-      console.error("V38 Cuenta:", error);
-    }
-
-    v38Estado("cuenta");
-
-    document
-      .querySelectorAll("#rehabV37Nav [data-v37-tab]")
-      .forEach((btn) =>
-        btn.classList.toggle("activo", btn.dataset.v37Tab === "cuenta")
-      );
-
-    window.scrollTo({ top: 0, behavior: "auto" });
-  }
-
-  function v38ReasignarNavegacion() {
-    const nav = document.getElementById("rehabV37Nav");
-    if (!nav) return;
-
-    const inicio = nav.querySelector('[data-v37-tab="inicio"]');
-    const progreso = nav.querySelector('[data-v37-tab="progreso"]');
-    const cuenta = nav.querySelector('[data-v37-tab="cuenta"]');
-
-    if (inicio) inicio.onclick = v38Inicio;
-    if (progreso) progreso.onclick = v38Progreso;
-    if (cuenta) cuenta.onclick = v38Cuenta;
-  }
-
-  function v38Iniciar() {
-    v38AgregarEstilos();
-    v38Estado("inicio");
-    v38ReasignarNavegacion();
-
-    console.log(
-      "RehabPod V38: pantallas Inicio / Progreso / Cuenta separadas correctamente."
-    );
-  }
-
-
-  setTimeout(v38Iniciar, 1750);
-
-  window.rehabV38Inicio = v38Inicio;
-  window.rehabV38Progreso = v38Progreso;
-  window.rehabV38Cuenta = v38Cuenta;
-})();
-
-
+console.log("RehabPod: navegación inferior (Inicio/Progreso/Historial/Cuenta) lista.");
 
 // =====================================================
 // REHABPOD V39
@@ -19322,7 +18721,7 @@ setTimeout(() => {
       .rehabV40Btn{
 
         appearance:none;border:0;border-radius:11px;padding:10px 13px;font-weight:900;
-        cursor:pointer;background:#2563eb;color:#fff
+        cursor:pointer;background:var(--acento);color:var(--acento-tinta)
       }
       .rehabV40Btn.sec{
         background:rgba(148,163,184,.14);color:inherit;border:1px solid rgba(148,163,184,.24)
@@ -19788,7 +19187,6 @@ setTimeout(() => {
         editor.hidden = false;
         editar.hidden = true;
       };
-
     }
 
     if (cancelar && editor && editar) {
@@ -19853,11 +19251,7 @@ setTimeout(() => {
             console.warn("V42 sincronizar nombre local:", syncNombreError);
           }
 
-          v40Mensaje(
-            "rehabV40MensajePerfil",
-            "Datos actualizados correctamente.",
-            "ok"
-          );
+          v40Mensaje("rehabV40MensajePerfil", "Datos actualizados correctamente.", "ok");
 
           setTimeout(() => v40Render(contentId), 500);
         } catch (error) {
@@ -19875,12 +19269,8 @@ setTimeout(() => {
     const cambiarPassword = document.getElementById("rehabV40CambiarPassword");
     if (cambiarPassword) {
       cambiarPassword.onclick = async function () {
-        const p1 = String(
-          document.getElementById("rehabV40Password1")?.value || ""
-        );
-        const p2 = String(
-          document.getElementById("rehabV40Password2")?.value || ""
-        );
+        const p1 = String(document.getElementById("rehabV40Password1")?.value || "");
+        const p2 = String(document.getElementById("rehabV40Password2")?.value || "");
 
         if (p1.length < 8) {
           v40Mensaje(
@@ -19892,11 +19282,7 @@ setTimeout(() => {
         }
 
         if (p1 !== p2) {
-          v40Mensaje(
-            "rehabV40MensajePassword",
-            "Las contraseñas no coinciden.",
-            "error"
-          );
+          v40Mensaje("rehabV40MensajePassword", "Las contraseñas no coinciden.", "error");
           return;
         }
 
@@ -19944,7 +19330,6 @@ setTimeout(() => {
           guardarAjustes();
         } catch (error) {
           console.warn("V40 sonidos:", error);
-
         }
       };
     }
@@ -19982,10 +19367,9 @@ setTimeout(() => {
         if (!confirmar) return;
 
         try {
-          const { data, error } = await v40Cloud.rpc(
-            "rehab_unlink_relationship",
-            { p_other_user_id: otroId }
-          );
+          const { data, error } = await v40Cloud.rpc("rehab_unlink_relationship", {
+            p_other_user_id: otroId,
+          });
 
           if (error) throw error;
           if (!data) throw new Error("No se encontró una vinculación activa.");
@@ -20129,12 +19513,12 @@ setTimeout(() => {
     st.textContent = `
       #rehabV41Bell{
         position:fixed;top:14px;right:14px;z-index:100650;
-        width:46px;height:46px;border-radius:50%;border:1px solid rgba(148,163,184,.24);
-        background:rgba(15,23,42,.92);color:#fff;cursor:pointer;
+        width:46px;height:46px;border-radius:50%;border:1px solid var(--borde);
+        background:var(--tarjeta);color:var(--texto);cursor:pointer;
         display:none;align-items:center;justify-content:center;font-size:20px;
         box-shadow:0 9px 25px rgba(0,0,0,.24);backdrop-filter:blur(10px)
       }
-      .tema-claro #rehabV41Bell{background:rgba(255,255,255,.96);color:#111827}
+      .tema-claro #rehabV41Bell{background:var(--tarjeta);color:var(--texto)}
       #rehabV41Badge{
         position:absolute;right:-2px;top:-3px;min-width:19px;height:19px;
         padding:0 4px;border-radius:999px;background:#ef4444;color:#fff;
@@ -20148,7 +19532,7 @@ setTimeout(() => {
       .rehabV41Overlay[hidden]{display:none!important}
       .rehabV41Modal{
         width:min(620px,100%);max-height:88vh;overflow:auto;border-radius:24px;padding:18px;
-        background:var(--fondo-tarjeta,#111827);color:inherit;
+        background:var(--tarjeta);color:inherit;
         border:1px solid rgba(148,163,184,.22);box-shadow:0 26px 80px rgba(0,0,0,.45)
       }
       .tema-claro .rehabV41Modal{background:#fff}
@@ -20160,7 +19544,7 @@ setTimeout(() => {
       .rehabV41Acciones{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
       .rehabV41Btn{
         border:0;border-radius:11px;padding:9px 12px;font-weight:900;cursor:pointer;
-        background:#2563eb;color:#fff
+        background:var(--acento);color:var(--acento-tinta)
       }
       .rehabV41Btn.sec{
         background:rgba(148,163,184,.14);color:inherit;border:1px solid rgba(148,163,184,.24)
@@ -20245,9 +19629,7 @@ setTimeout(() => {
 
     const { data, error } = await cloud
       .from("rehab_notifications")
-      .select(
-        "id, type, title, message, read_at, created_at, assignment_id"
-      )
+      .select("id, type, title, message, read_at, created_at, assignment_id")
       .eq("user_id", v41User.id)
       .order("created_at", { ascending: false })
       .limit(limite);
@@ -20385,10 +19767,7 @@ setTimeout(() => {
   }
 
   async function v41CancelarAsignacion(assignmentId) {
-    const razon = prompt(
-      "Motivo de cancelación (opcional):",
-      ""
-    );
+    const razon = prompt("Motivo de cancelación (opcional):", "");
 
     // Si se pulsa Cancelar en prompt, no hacemos nada.
     if (razon === null) return;
@@ -20469,12 +19848,10 @@ setTimeout(() => {
     await v41ActualizarBadge(false);
     v41IniciarPolling();
 
-    console.log(
-      "RehabPod V41: estados avanzados + centro de notificaciones activados."
-    );
+    console.log("RehabPod V41: estados avanzados + centro de notificaciones activados.");
   }
 
-  setTimeout(v41Iniciar, 2350);
+  v41Iniciar();
 
   window.rehabV41AbrirNotificaciones = v41AbrirCentro;
   window.rehabV41ActualizarNotificaciones = v41ActualizarBadge;
@@ -20529,8 +19906,7 @@ setTimeout(() => {
     // Una sola entrada pendiente por asignación.
     const existente = cola.find(
       (x) =>
-        x.tipo === "routine_session" &&
-        x.payload?.assignment_id === payload.assignment_id
+        x.tipo === "routine_session" && x.payload?.assignment_id === payload.assignment_id
     );
 
     if (existente) {
@@ -20567,7 +19943,6 @@ setTimeout(() => {
       throw new Error("Debes iniciar sesión para sincronizar.");
     }
 
-
     if (authUser.id !== p.user_id) {
       throw new Error("La cola pertenece a otra cuenta.");
     }
@@ -20584,9 +19959,7 @@ setTimeout(() => {
     if (buscarError) throw buscarError;
 
     if (!Array.isArray(existente) || existente.length === 0) {
-      const { error: insertError } = await cloud
-        .from("rehab_routine_sessions")
-        .insert(p);
+      const { error: insertError } = await cloud.from("rehab_routine_sessions").insert(p);
 
       if (insertError) throw insertError;
     }
@@ -20661,12 +20034,12 @@ setTimeout(() => {
       #rehabV42Estado{
         position:fixed;left:14px;top:14px;z-index:100640;
         padding:7px 10px;border-radius:999px;font-size:11px;font-weight:900;
-        border:1px solid rgba(148,163,184,.22);
-        background:rgba(15,23,42,.90);color:#fff;
+        border:1px solid var(--borde);
+        background:var(--tarjeta);color:var(--texto);
         box-shadow:0 7px 22px rgba(0,0,0,.18);
         backdrop-filter:blur(8px);cursor:pointer
       }
-      .tema-claro #rehabV42Estado{background:rgba(255,255,255,.95);color:#111827}
+      .tema-claro #rehabV42Estado{background:var(--tarjeta);color:var(--texto)}
     `;
     document.head.appendChild(st);
 
@@ -20679,12 +20052,12 @@ setTimeout(() => {
       if (!navigator.onLine) {
         alert(
           `RehabPod está sin conexión.\n\nResultados pendientes: ${n}\n\n` +
-          "Puedes seguir con funciones locales. Al recuperar Internet se intentará sincronizar automáticamente."
+            "Puedes seguir con funciones locales. Al recuperar Internet se intentará sincronizar automáticamente."
         );
       } else if (n > 0) {
         alert(
           `Hay ${n} resultado(s) pendiente(s) de sincronizar.\n\n` +
-          "RehabPod volverá a intentarlo automáticamente."
+            "RehabPod volverá a intentarlo automáticamente."
         );
         v42Sincronizar();
       } else {
@@ -20722,7 +20095,6 @@ setTimeout(() => {
 
     try {
       const reg = await navigator.serviceWorker.register("./sw-rehabpod.js", {
-
         scope: "./",
       });
       console.log("RehabPod V42: Service Worker activo.", reg.scope);
@@ -20752,14 +20124,12 @@ setTimeout(() => {
 
     setTimeout(v42Sincronizar, 1800);
 
-    console.log(
-      "RehabPod V42: sincronización offline + cola de resultados activadas."
-    );
+    console.log("RehabPod V42: sincronización offline + cola de resultados activadas.");
   }
 
   window.rehabV42EncolarSesion = v42EncolarSesion;
   window.rehabV42Sincronizar = v42Sincronizar;
   window.rehabV42Pendientes = () => v42LeerCola();
 
-  setTimeout(v42Iniciar, 2600);
+  v42Iniciar();
 })();
