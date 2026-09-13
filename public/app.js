@@ -139,6 +139,7 @@ const textoEstadoPods = document.getElementById("textoEstadoPods");
 
 const botonesConexion = document.querySelectorAll(".botonConexionPod");
 
+
 const estadosConexion = [
   document.getElementById("estadoConexionPod1"),
 
@@ -178,6 +179,7 @@ const btnVolverTipos = document.getElementById("btnVolverTipos");
 // =====================================================
 // CONFIGURACION
 // =====================================================
+
 
 const tituloConfiguracion = document.getElementById("tituloConfiguracion");
 
@@ -277,6 +279,7 @@ const lucesPods = [
 
 // =====================================================
 // V7 - MEJORAS VISUALES + INTRO DEL ENTRENAMIENTO
+
 // =====================================================
 
 function aplicarMejorasVisualesV7() {
@@ -358,6 +361,7 @@ function aplicarMejorasVisualesV7() {
             letter-spacing:1.2px;
             font-weight:800 !important;
             color:#94a3b8 !important;
+
         }
  
         #textoObjetivo {
@@ -416,6 +420,7 @@ function aplicarMejorasVisualesV7() {
             width:min(100%,440px);
             border-radius:28px;
             border:1px solid rgba(148,163,184,.20);
+
             background:linear-gradient(160deg,#101a2d,#080f1c 72%);
             box-shadow:0 24px 60px rgba(0,0,0,.38);
             padding:24px 20px 20px;
@@ -538,6 +543,7 @@ function aplicarMejorasVisualesV7() {
             font-weight:900;
         }
  
+
         .introBtnVolverV7 {
             background:#182235;
             color:#cbd5e1;
@@ -555,6 +561,7 @@ function aplicarMejorasVisualesV7() {
         .intro-persecucion .demoPodV7:nth-child(1) {
             animation:podVerdeV7 1.1s ease-in-out infinite;
         }
+
  
         .intro-doble .demoPodV7:nth-child(1),
         .intro-doble .demoPodV7:nth-child(4) {
@@ -695,6 +702,7 @@ function obtenerGuiaModoV7() {
       descripcion:
         "Completa los cuatro Pods en un orden aleatorio. Cada Pod aparece una sola vez dentro de cada circuito.",
       pasos: [
+
         "Toca el primer Pod que se ilumine.",
         "Muévete inmediatamente al siguiente objetivo.",
         "Completa los cuatro Pods para cerrar el circuito.",
@@ -718,6 +726,7 @@ function obtenerGuiaModoV7() {
       pasos: [
         "Toca el Pod iluminado.",
         "Cambia de dirección tan pronto aparezca el siguiente objetivo.",
+
         "Mantén el ritmo y evita tocar un Pod incorrecto.",
       ],
     },
@@ -835,6 +844,7 @@ function mostrarIntroduccionEntrenamiento() {
 
 const numeroCuenta = document.getElementById("numeroCuenta");
 
+
 // =====================================================
 // RESULTADOS
 // =====================================================
@@ -898,6 +908,7 @@ const btnVolverProgreso = document.getElementById("btnVolverProgreso");
 const nombrePerfilEstadisticas = document.getElementById("nombrePerfilEstadisticas");
 
 const totalEntrenamientos = document.getElementById("totalEntrenamientos");
+
 
 const promedioGeneral = document.getElementById("promedioGeneral");
 
@@ -1079,6 +1090,7 @@ function mostrarPantalla(pantalla) {
 
     pantallaPods,
 
+
     pantallaPerfiles,
 
     pantallaTiposEntrenamiento,
@@ -1258,6 +1270,7 @@ async function conectarPodNativo(indice) {
 
     console.log(`✅ ${pod.nombre} conectado manualmente`);
   } catch (error) {
+
     console.error(`Error conectando ${pod.nombre}:`, error);
 
     marcarPodNoConectado(indice, "No conectado");
@@ -1392,6 +1405,7 @@ async function limpiarListenersPod(pod) {
     pod.notificationListener = null;
   }
 
+
   if (pod.disconnectListener) {
     try {
       await pod.disconnectListener.remove();
@@ -1438,6 +1452,7 @@ async function prepararNotificacionesPod(indice) {
     characteristic: BUTTON_UUID,
   });
 }
+
 
 function marcarPodConectado(indice) {
   const pod = podsBLE[indice];
@@ -1530,6 +1545,7 @@ async function conectarPodEncontrado(indice, dispositivo) {
       });
     } catch (error) {
       // Normal si Android no lo tenia conectado.
+
     }
 
     // Pequena pausa para que Android libere una conexion anterior.
@@ -1670,6 +1686,7 @@ async function buscarPodsParaReconectar() {
     }
 
     reconexionAutomaticaEnCurso = false;
+
   }
 }
 
@@ -1798,6 +1815,7 @@ function recibirBotonFisicoWeb(indice, evento) {
 // =====================================================
 // DATOS
 // =====================================================
+
 
 function cargarDatos() {
   try {
@@ -1950,6 +1968,7 @@ function actualizarNombresPerfil() {
 
   nombrePerfilResultados.textContent = perfil.nombre;
 
+
   nombrePerfilProgreso.textContent = perfil.nombre;
 
   nombrePerfilEstadisticas.textContent = perfil.nombre;
@@ -1978,6 +1997,7 @@ function mostrarPerfiles() {
                     >
                         ${
                           perfil.foto
+
                             ? `
                                 <img
                                     src="${perfil.foto}"
@@ -2158,6 +2178,7 @@ function actualizarFotoPerfilInicio() {
     foto.id = "fotoPerfilInicioReactiPod";
 
     foto.style.cssText = `
+
             width:52px;
             height:52px;
             border-radius:50%;
@@ -2338,6 +2359,7 @@ function mostrarGateTerminos() {
     guardarAjustes();
 
     overlay.remove();
+
   });
 }
 
@@ -2366,6 +2388,7 @@ function mostrarModalConsentimiento(nombre, alConfirmar, alCancelar) {
         padding:20px;
         background:rgba(0,0,0,.6);
         opacity:0;
+
         transition:opacity .2s ease;
     `;
 
@@ -2506,6 +2529,7 @@ function crearPerfil() {
 
   if (nombre === null) {
     return;
+
   }
 
   nombre = nombre.trim();
@@ -2518,6 +2542,7 @@ function crearPerfil() {
 
   const repetido = datosApp.perfiles.some(
     (perfil) => perfil.nombre.toLowerCase() === nombre.toLowerCase()
+
   );
 
   if (repetido) {
@@ -2646,6 +2671,7 @@ function calcularResumenPerfil() {
 
     promedio,
 
+
     mejorPromedio: mejorPromedioValor,
 
     racha,
@@ -2698,6 +2724,7 @@ function calcularRacha(historial) {
       if (i === 0) {
         continue;
       }
+
 
       break;
     }
@@ -2784,6 +2811,7 @@ const catalogoColoresPersonalizados = {
 
 function obtenerColorPod(indice) {
   const guardados = Array.isArray(ajustesApp.coloresPods)
+
     ? ajustesApp.coloresPods
     : ["red", "green", "blue", "yellow"];
 
@@ -2924,6 +2952,7 @@ function crearControlesExperienciaEntrenamiento() {
         border-radius:14px;
         background:var(--tarjeta);
         border:1px solid var(--borde);
+
     `;
 
   panel.innerHTML = `
@@ -3058,6 +3087,7 @@ function crearControlesExperienciaEntrenamiento() {
   if (referencia === pantallaConfiguracion) {
     pantallaConfiguracion.appendChild(panel);
   } else {
+
     referencia.parentElement.insertBefore(panel, referencia);
   }
 
@@ -3203,6 +3233,7 @@ function crearControlesExperienciaEntrenamiento() {
         `;
 
     contenedor.appendChild(fila);
+
   }
 
   document.querySelectorAll(".btnDificultadReactiPod").forEach((boton) => {
@@ -3238,6 +3269,7 @@ function crearControlesExperienciaEntrenamiento() {
       "blue",
       "yellow",
       "white",
+
       "purple",
       "cyan",
       "orange",
@@ -3342,6 +3374,7 @@ function pintarControlesExperiencia() {
   const personalizada = dificultadActual === "personalizada";
   const usaEspera = ["simple", "colores", "doble", "prohibido"].includes(modoActual);
   const usaPausa = !["contrarreloj", "libre", "entrenador"].includes(modoActual);
+
 
   if (contenedorEspera) {
     contenedorEspera.style.display = personalizada && usaEspera ? "block" : "none";
@@ -3482,6 +3515,7 @@ function crearTarjetaPersecucion() {
   tarjeta.innerHTML = `
         <div style="font-size:34px;margin-bottom:8px;">🔥</div>
         <strong style="display:block;font-size:17px;">Persecución</strong>
+
         <small style="display:block;margin-top:6px;color:#9ca3af;">
             Toca el Pod encendido y persigue el siguiente estímulo lo más rápido posible.
         </small>
@@ -3599,6 +3633,7 @@ function crearTarjetaContrarreloj() {
 function crearTarjetaEntrenador() {
   if (document.querySelector('[data-modo="entrenador"]')) return;
 
+
   const contenedor = document.querySelector(".tarjetaEntrenamientoModo")?.parentElement;
   const base = document.querySelector(".tarjetaEntrenamientoModo");
   if (!contenedor || !base) return;
@@ -3621,6 +3656,7 @@ function crearBotonRepetirEntrenamiento() {
   if (!btnNuevoEntrenamiento || !btnNuevoEntrenamiento.parentElement) return;
   const boton = document.createElement("button");
   boton.id = "btnRepetirEntrenamientoReactiPod";
+
   boton.type = "button";
   boton.textContent = "🔁 REPETIR ESTE ENTRENAMIENTO";
   boton.style.cssText = `
@@ -3762,6 +3798,7 @@ function tono(frecuencia, duracion) {
 
   const gain = contextoAudio.createGain();
 
+
   osc.frequency.value = frecuencia;
 
   gain.gain.value = 0.05;
@@ -3778,6 +3815,7 @@ function tono(frecuencia, duracion) {
     duracion
   );
 }
+
 
 // =====================================================
 // ENTRENAMIENTO
@@ -3900,6 +3938,7 @@ function obtenerNombreModo() {
   }
 
   if (modoActual === "circuito") {
+
     return "Circuito 4 Pods";
   }
 
@@ -3958,6 +3997,7 @@ function iniciarCuenta() {
           if (modoActual === "libre") {
             iniciarLibre();
           } else if (modoActual === "contrarreloj") {
+
             iniciarContrarreloj();
           } else if (modoActual === "entrenador") {
             iniciarEntrenador();
@@ -4179,6 +4219,7 @@ function mezclar(array) {
   }
 
   return array;
+
 }
 
 // =====================================================
@@ -4320,6 +4361,7 @@ async function activarColorProhibido() {
 
   colorObjetivo.style.background = prohibido.css;
 
+
   iniciarMedicion();
 }
 
@@ -4459,6 +4501,7 @@ async function respuestaCircuito(indice) {
   tono(820, 70);
 
   if (circuitoPosicion < circuitoOrden.length) {
+
     mensajeResultado.textContent = `✅ ${circuitoPosicion}/4 · siguiente`;
 
     mensajeResultado.className = "mensajeResultado mensajeCorrecto";
@@ -4498,6 +4541,7 @@ async function respuestaCircuito(indice) {
   await apagarTodosLosPods();
 
   continuar();
+
 }
 
 // =====================================================
@@ -4598,6 +4642,7 @@ async function respuestaPersecucion(indice) {
 
   temporizador = setTimeout(activarPersecucion, pausaPersecucion);
 }
+
 
 // =====================================================
 // CRONOMETRO
@@ -4738,6 +4783,7 @@ function crearPanelEntrenadorActivo() {
   panel.id = "panelEntrenadorActivoReactiPod";
   panel.innerHTML = `
         <div style="font-size:11px;letter-spacing:.04em;color:var(--texto2);margin-bottom:10px;">CONTROL DEL ENTRENADOR</div>
+
         <div id="gridEntrenadorActivoReactiPod">
             <button type="button" class="btnPodEntrenadorActivo" data-entrenador-pod="0">ACTIVAR POD 1</button>
             <button type="button" class="btnPodEntrenadorActivo" data-entrenador-pod="1">ACTIVAR POD 2</button>
@@ -4858,6 +4904,7 @@ async function activarPodEntrenador(indice) {
   encenderVisual(indice, color.css);
   await enviarComandoPod(indice, color.comando);
   iniciarMedicion();
+
 }
 
 async function respuestaEntrenador(indice) {
@@ -4877,6 +4924,7 @@ async function respuestaEntrenador(indice) {
 
   const tiempo = (performance.now() - tiempoInicio - tiempoPausado) / 1000;
   rondaActual++;
+
   aciertos++;
 
   contadorAciertos.textContent = aciertos;
@@ -5038,6 +5086,7 @@ async function respuestaNormal(indice) {
     await respuestaPersecucion(indice);
 
     return;
+
   }
 
   esperandoRespuesta = false;
@@ -5297,6 +5346,7 @@ async function respuestaSecuencia(indice) {
   // NUEVO: los 4 Pods se ponen verdes cuando se completa la secuencia.
   await feedbackTodosPods("green", "#22c55e", 800);
 
+
   if (rondaActual >= totalRondasActual) {
     temporizador = setTimeout(finalizarEntrenamiento, 500);
 
@@ -5398,6 +5448,7 @@ async function golpeLibre(indice) {
     // V13: en modo por rondas cerramos al alcanzar el objetivo.
     // En versiones anteriores el cierre quedaba pendiente en un timeout
     // mientras aún podía existir feedback visual del último golpe.
+
     esperandoRespuesta = false;
     detenerCronometro();
     fase = "resultado";
@@ -5575,9 +5626,11 @@ async function mostrarCelebracionFinal() {
         background:radial-gradient(circle at center,rgba(38,25,10,.96),rgba(3,7,18,.98) 65%);
         color:white;
         text-align:center;
+
         opacity:0;
         transition:opacity .25s ease;
     `;
+
 
   const frase = obtenerFraseFinal();
 
@@ -5714,6 +5767,7 @@ async function finalizarEntrenamiento() {
   clearTimeout(temporizadorFinEntrenador);
   temporizadorFinEntrenador = null;
   clearInterval(intervaloEntrenador);
+
   intervaloEntrenador = null;
 
   mostrarPanelEntrenadorActivo(false);
@@ -5758,6 +5812,7 @@ function mostrarResultados() {
   resultadoRondas.textContent = resultados.length;
 
   resultadoAciertos.textContent = aciertos;
+
 
   resultadoErrores.textContent = errores;
 
@@ -5853,6 +5908,7 @@ function guardarEntrenamiento(promedio, mejor, peor) {
 // =====================================================
 
 function mostrarEstadisticas() {
+
   const perfil = obtenerPerfilActivo();
 
   const resumen = calcularResumenPerfil();
@@ -5994,6 +6050,7 @@ function actualizarObjetivo() {
 
   objetivoActual.textContent = `${resumen.mejorTiempo.toFixed(3)} s`;
 
+
   if (resumen.mejorTiempo <= meta) {
     rellenoObjetivo.style.width = "100%";
 
@@ -6119,6 +6176,7 @@ function dibujarGrafico() {
 
   const ancho = graficoProgreso.clientWidth;
 
+
   const alto = 230;
 
   const escala = window.devicePixelRatio || 1;
@@ -6132,6 +6190,7 @@ function dibujarGrafico() {
   ctx.clearRect(0, 0, ancho, alto);
 
   if (historial.length === 0) {
+
     ctx.fillStyle = "#9ca3af";
 
     ctx.font = "14px Arial";
@@ -6272,6 +6331,7 @@ function analizarProgreso(valores) {
   } else {
     mensajeProgreso.textContent = `El último promedio fue ${Math.abs(diferencia).toFixed(3)} s más lento. La tendencia puede variar entre sesiones.`;
   }
+
 }
 
 // =====================================================
@@ -6412,6 +6472,7 @@ btnEstadisticasInicio.onclick = () => {
   actualizarResumenInicio();
 
   mostrarPantalla(pantallaInicio);
+
 };
 
 btnBorrarHistorial.onclick = () => {
@@ -6478,6 +6539,7 @@ sonidosActivados.addEventListener(
 
 // =====================================================
 // PRIVACIDAD Y DATOS (LOPDP Ecuador — acceso, portabilidad y eliminación)
+
 // =====================================================
 
 function construirExportacionPerfil(perfil) {
@@ -6659,6 +6721,7 @@ function mostrarModalDatosPerfil(perfil) {
       } catch (error) {
         console.error(error);
 
+
         document.getElementById("areaDatosPerfilRehabPod").select();
 
         alert(
@@ -6690,6 +6753,7 @@ function mostrarModalDatosPerfil(perfil) {
 }
 
 function descargarMisDatos() {
+
   const perfil = obtenerPerfilActivo();
 
   if (!perfil) {
@@ -6830,6 +6894,7 @@ function crearPantallaInicioApp() {
         >
             Prepárate para reaccionar más rápido.
         </div>
+
  
         <div
             style="
@@ -6838,6 +6903,7 @@ function crearPantallaInicioApp() {
                 height:38px;
                 border:4px solid rgba(255,255,255,.15);
                 border-top-color:#22c55e;
+
                 border-radius:50%;
                 animation:reactiPodSpin .8s linear infinite;
             "
@@ -6969,6 +7035,7 @@ function aplicarMejorasVisualesV8() {
             min-height:164px !important;
             padding:20px !important;
             border-radius:22px !important;
+
             background:
                 radial-gradient(circle at 88% 12%,rgba(34,197,94,.09),transparent 28%),
                 linear-gradient(145deg,#111d31,#0a1322) !important;
@@ -7018,6 +7085,7 @@ function aplicarMejorasVisualesV8() {
             height:min(58vw,220px) !important;
             min-width:min(58vw,220px) !important;
             min-height:min(58vw,220px) !important;
+
             border:7px solid rgba(255,255,255,.92) !important;
             box-shadow:
                 0 0 0 10px rgba(255,255,255,.035),
@@ -7108,6 +7176,7 @@ function aplicarMejorasVisualesV8() {
         @keyframes rpMensajePopV8 {
             0% { opacity:.25; transform:scale(.88); }
             70% { transform:scale(1.06); }
+
             100% { opacity:1; transform:scale(1); }
         }
  
@@ -7198,6 +7267,7 @@ function aplicarMejorasVisualesV8() {
             background:rgba(34,197,94,.08);
             color:#bbf7d0;
             font-size:12px;
+
             line-height:1.45;
             border:1px solid rgba(34,197,94,.14);
         }
@@ -7247,6 +7317,7 @@ function aplicarMejorasVisualesV8() {
         .rpCategoriaTarjetaV9 {
             width:100%;
             min-height:142px;
+
             border:1px solid rgba(148,163,184,.16);
             border-radius:24px;
             background:linear-gradient(145deg,rgba(20,31,48,.98),rgba(10,18,31,.98));
@@ -7378,6 +7449,7 @@ function organizarModosPorCategoriaV8() {
 
   const categorias = [
     {
+
       clave: "velocidad",
       icono: "⚡",
       titulo: "Velocidad",
@@ -7386,6 +7458,7 @@ function organizarModosPorCategoriaV8() {
       modos: ["simple", "persecucion", "contrarreloj"],
     },
     {
+
       clave: "coordinacion",
       icono: "🎯",
       titulo: "Coordinación",
@@ -7526,6 +7599,7 @@ function prepararIndicadoresPodsV8() {
   const primero = padres[0];
 
   if (padres.every((p) => p === primero)) {
+
     primero.classList.add("indicadoresPodsV8");
   }
 }
@@ -7558,6 +7632,7 @@ function iniciarFeedbackVisualV8() {
               { transform: "scale(1)", opacity: 1 },
             ]
           : [
+
               { transform: "translateX(0)" },
               { transform: "translateX(-8px)" },
               { transform: "translateX(8px)" },
@@ -7665,6 +7740,7 @@ function construirResumenResultadosV8(datos) {
     } else {
       pantallaResultados.appendChild(panel);
     }
+
   }
 
   const promedioTexto =
@@ -7945,6 +8021,7 @@ var MINIMO_PODS_POR_MODO = {
 };
 
 function rehabMinimoPodsModo(modo) {
+
   return MINIMO_PODS_POR_MODO[modo] || 1;
 }
 
@@ -8085,6 +8162,7 @@ function rehabActualizarControlCantidadPods() {
   }
 
   selector.value = String(cantidadPodsSeleccionada);
+
   localStorage.setItem(REHABPOD_CLAVE_CANTIDAD, String(cantidadPodsSeleccionada));
 
   if (ayuda) {
@@ -8098,6 +8176,7 @@ function rehabActualizarEtiquetasMinimoPods() {
     if (!MINIMO_PODS_POR_MODO[modo]) {
       return;
     }
+
 
     var minimo = rehabMinimoPodsModo(modo);
     var etiqueta = tarjeta.querySelector(".etiquetaFisico, .rehabMinimoPods");
@@ -8278,6 +8357,7 @@ conectarPodWeb = async function (indice) {
     var duplicado = podsBLE.findIndex(
       (otro, otroIndice) =>
         otroIndice !== indice &&
+
         otro &&
         otro.conectado &&
         otro.device &&
@@ -8458,6 +8538,7 @@ configurarModo = function () {
   rehabActualizarControlCantidadPods();
   rehabActualizarDescripcionModo();
   rehabActualizarEtiquetasMinimoPods();
+
 };
 
 var rehabObtenerNombreModoBase = obtenerNombreModo;
@@ -8639,8 +8720,10 @@ activarDobleEstimulo = async function () {
   var colorPrimero = obtenerColorEstimulo(primero);
   var colorSegundo = obtenerColorEstimulo(segundo, [colorPrimero.comando]);
 
+
   colorObjetivo.style.background = `linear-gradient(135deg, ${colorPrimero.css} 0 48%, ${colorSegundo.css} 52% 100%)`;
   encenderVisual(primero, colorPrimero.css);
+
   encenderVisual(segundo, colorSegundo.css);
 
   await Promise.all([
@@ -8781,6 +8864,7 @@ respuestaCircuito = async function (indice) {
   aciertos++;
   contadorAciertos.textContent = aciertos;
   ultimoTiempo.textContent = `${tiempo.toFixed(3)} s`;
+
   mensajeResultado.textContent = `✅ CIRCUITO COMPLETO · ${tiempo.toFixed(3)} s`;
   mensajeResultado.className = "mensajeResultado mensajeCorrecto";
   tono(1050, 160);
@@ -8818,6 +8902,7 @@ activarPersecucion = async function () {
 
   textoFase.textContent = "¡PERSIGUE!";
   textoObjetivo.textContent = `TOCA POD ${rehabNumeroVisiblePod(objetivoCorrecto)}`;
+
   nombreColor.textContent = color.nombre;
   colorObjetivo.style.background = color.css;
 
@@ -8920,6 +9005,7 @@ cancelarEntrenamiento = async function () {
 
 if (btnCancelar) {
   btnCancelar.onclick = cancelarEntrenamiento;
+
 }
 
 // =====================================================
@@ -8998,6 +9084,7 @@ function rehabCrearControlColorMemoria() {
   panel.style.marginTop = "12px";
   panel.innerHTML = `
     <label for="colorMemoriaRehabPod" style="display:block;font-weight:800;margin-bottom:8px;">
+
       Color de la secuencia
     </label>
 
@@ -9059,6 +9146,7 @@ function rehabActualizarControlColorMemoria() {
   }
 
   var selector = panel.querySelector("#colorMemoriaRehabPod");
+
   selector.value = rehabColorMemoria;
 
   var color = rehabObtenerColorMemoria();
@@ -9178,6 +9266,7 @@ function rehabActualizarAparienciaPodsVirtuales() {
       podVisual.style.cursor = "";
       podVisual.style.userSelect = "";
       podVisual.style.touchAction = "";
+
       podVisual.title = "";
       podVisual.removeAttribute("role");
       podVisual.removeAttribute("tabindex");
@@ -9338,6 +9427,7 @@ configurarModo = function () {
     modoActual === "secuencia" &&
     virtual &&
     memoria &&
+
     virtual.parentElement === memoria.parentElement
   ) {
     virtual.insertAdjacentElement("afterend", memoria);
@@ -9358,6 +9448,7 @@ rehabActualizarDescripcionModo = function () {
   if (modoActual === "secuencia" && descripcionModo) {
     var cantidad = Number(cantidadPodsSeleccionada) || rehabMinimoPodsModo(modoActual);
     var color = rehabObtenerColorMemoria();
+
 
     descripcionModo.textContent =
       `Memoriza y repite la secuencia utilizando ${cantidad} ${
@@ -9617,6 +9708,7 @@ function rehabV19CrearControlColorCaza() {
     cantidad.insertAdjacentElement("afterend", panel);
   } else if (descripcionModo && descripcionModo.parentElement) {
     descripcionModo.insertAdjacentElement("afterend", panel);
+
   }
 
   var selector = panel.querySelector("#colorCazaRehabPod");
@@ -9718,6 +9810,7 @@ function rehabV19ActualizarControlTiempoAutomatico() {
     panel.querySelector("#tiempoAutomaticoRehabPod").value = String(
       rehabTiempoAutomaticoMs
     );
+
   }
 }
 
@@ -9756,6 +9849,7 @@ rehabActualizarDescripcionModo = function () {
   var plural = cantidad === 1 ? "Pod" : "Pods";
 
   if (modoActual === "cazaColor") {
+
     var color = rehabObtenerColorCaza();
     descripcionModo.textContent =
       `Busca siempre el color ${color.nombre.toLowerCase()} entre ${cantidad} ${plural}. ` +
@@ -9898,6 +9992,7 @@ async function rehabV19RespuestaCazaColor(indice) {
 
   aciertos++;
   contadorAciertos.textContent = aciertos;
+
   ultimoTiempo.textContent = `${tiempo.toFixed(3)} s`;
   mensajeResultado.textContent = `✅ ${rehabObtenerColorCaza().nombre} encontrado · ${tiempo.toFixed(3)} s`;
   mensajeResultado.className = "mensajeResultado mensajeCorrecto";
@@ -10035,6 +10130,7 @@ iniciarRonda = async function () {
 
 // -----------------------------------------------------
 // 8. PULSACIONES
+
 // Caza de color sí usa PRESS. Cambio automático los ignora.
 // -----------------------------------------------------
 
@@ -10078,6 +10174,7 @@ alternarPausa = async function () {
 };
 
 if (btnPausar) {
+
   btnPausar.onclick = alternarPausa;
 }
 
@@ -10174,6 +10271,7 @@ function rehabDescripcionDificultadEspecifica(modo, dificultad) {
         "Personal · Mantiene los colores dinámicos y usa tus tiempos personalizados.",
     },
     secuencia: {
+
       facil: "Fácil · La secuencia crece de 1 en 1 y se muestra lentamente.",
       media: "Media · La secuencia crece de 1 en 1 a velocidad normal.",
       dificil: "Difícil · La secuencia crece de 2 en 2 y se muestra mucho más rápido.",
@@ -10258,6 +10356,7 @@ function rehabDescripcionDificultadEspecifica(modo, dificultad) {
       dificil:
         "Difícil · La regla cambia en cada ronda y la palabra siempre aparece escrita con un color diferente para generar interferencia Stroop.",
       personalizada: "Personal · Regla aleatoria con tus tiempos personalizados.",
+
     },
   };
   var grupo = mapa[modo] || mapa.simple;
@@ -10313,6 +10412,7 @@ activarColorProhibido = async function () {
       color = rehabColorProhibidoActual;
     } else {
       color = rehabColorPorClave(clavesPermitidas[pos % clavesPermitidas.length]);
+
       pos++;
     }
     coloresActuales[indice] = color;
@@ -10439,6 +10539,7 @@ activarCircuito = async function () {
   iniciarMedicion();
 };
 
+
 // -----------------------------------------------------
 // 6. CAZA DE COLOR: OBJETIVO FIJO / CADA 3 / CADA RONDA
 // -----------------------------------------------------
@@ -10452,6 +10553,7 @@ rehabV19ActivarCazaColor = async function () {
   if (dif === "dificil") debeCambiar = true;
 
   if (debeCambiar) {
+
     rehabColorCaza = rehabElegirColorClave([rehabUltimoColorCazaDinamico]);
     rehabUltimoColorCazaDinamico = rehabColorCaza;
   }
@@ -10592,6 +10694,7 @@ async function rehabV20RespuestaStroop(indice) {
 
   var tiempo = (performance.now() - tiempoInicio - tiempoPausado) / 1000;
   var correcto = indice === rehabObjetivoStroop;
+
   ultimoTiempo.textContent = `${tiempo.toFixed(3)} s`;
 
   if (correcto) {
@@ -10618,6 +10721,7 @@ async function rehabV20RespuestaStroop(indice) {
   nombreColor.style.color = "";
   nombreColor.style.textShadow = "";
   await apagarTodosLosPods();
+
   continuar();
 }
 
@@ -10731,6 +10835,7 @@ if (btnCancelar) btnCancelar.onclick = cancelarEntrenamiento;
       coordinacion.addEventListener("click", function () {
         setTimeout(rehabV20InsertarStroopSiCoordinacion, 0);
       });
+
       var contador = coordinacion.querySelector("small");
       if (contador) contador.textContent = "5 entrenamientos";
     }
@@ -10798,6 +10903,7 @@ async function rehabV21FeedbackPod(
 // =====================================================
 iluminarPodPresionado = async function (indice, duracion = 300) {
   await rehabV21FeedbackPod(indice, true, duracion);
+
 };
 
 // =====================================================
@@ -10978,6 +11084,7 @@ respuestaPersecucion = async function (indice) {
   resultados.push({
     ronda: aciertos,
     correcto: true,
+
     tiempo: tiempo,
     estado: `Pod ${rehabNumeroVisiblePod(indice)}`,
   });
@@ -11009,6 +11116,7 @@ respuestaPersecucion = async function (indice) {
 respuestaContrarreloj = async function (indice) {
   if (!entrenamientoActivo || modoActual !== "contrarreloj" || !esperandoRespuesta)
     return;
+
 
   esperandoRespuesta = false;
   detenerCronometro();
@@ -11149,6 +11257,7 @@ console.log(
       icono: "🧠🎨",
       titulo: "Palabra vs color",
       descripcion: "Responde según la palabra escrita o según su color visual.",
+
     },
   };
 
@@ -11158,6 +11267,7 @@ console.log(
       icono: "🏅",
       titulo: "Deportista",
       subtitulo: "Velocidad, agilidad, coordinación y reacción",
+
       descripcion:
         "Entrenamientos orientados al rendimiento físico, la velocidad de respuesta, los desplazamientos y la coordinación.",
       modos: [
@@ -11289,6 +11399,7 @@ console.log(
         margin-bottom:16px;
       }
 
+
       .rehabV22DetalleIcono {
         font-size:38px;
       }
@@ -11338,6 +11449,7 @@ console.log(
       }
 
       .rehabV22ModoTitulo {
+
         font-weight:850;
         margin-bottom:4px;
       }
@@ -11427,6 +11539,7 @@ console.log(
       if (h2) h2.textContent = "Elige el área de entrenamiento";
       if (p) {
         p.textContent =
+
           "Selecciona Deportista, Fisioterapia o Neurología para ver los ejercicios disponibles.";
       }
     }
@@ -11567,6 +11680,7 @@ console.log(
     { clave: "entrenador", nombre: "Modo entrenador", icono: "🧑‍🏫" },
     { clave: "cazaColor", nombre: "Caza de color", icono: "🎯🎨" },
     { clave: "automatico", nombre: "Cambio automático", icono: "🔁⚡" },
+
     { clave: "stroop", nombre: "Palabra vs color", icono: "🧠🎨" },
   ];
 
@@ -11698,6 +11812,7 @@ console.log(
         background:var(--fondo-tarjeta, #111827);
         color:inherit;
         padding:20px;
+
         box-shadow:0 25px 80px rgba(0,0,0,.40);
       }
 
@@ -11706,6 +11821,7 @@ console.log(
       }
 
       .rehabV23ModalCabecera {
+
         display:flex;
         gap:14px;
         align-items:center;
@@ -11846,6 +11962,7 @@ console.log(
         display:grid;
         grid-template-columns:1fr 1fr;
         gap:12px;
+
       }
 
       .rehabV23EditorEjercicio {
@@ -11878,6 +11995,7 @@ console.log(
         border-radius:10px;
         border:1px solid rgba(148,163,184,.25);
         padding:9px;
+
         background:rgba(148,163,184,.08);
         color:inherit;
       }
@@ -12059,6 +12177,7 @@ console.log(
 
       const ejercicios = Array.isArray(rutina.ejercicios) ? rutina.ejercicios : [];
 
+
       card.innerHTML = `
         <div class="rehabV23RutinaTop">
           <div>
@@ -12124,6 +12243,7 @@ console.log(
         if (!confirm(`¿Borrar la rutina "${rutina.nombre}"?`)) return;
 
         rehabV23Rutinas = rehabV23Rutinas.filter(function (r) {
+
           return r.id !== id;
         });
         rehabV23GuardarRutinas();
@@ -12404,6 +12524,7 @@ console.log(
         return rutina.id === rehabV23RutinaEditandoId ? nueva : rutina;
       });
     } else {
+
       rehabV23Rutinas.push(nueva);
     }
 
@@ -12418,6 +12539,7 @@ console.log(
     rehabV23CrearModal();
 
     console.log("RehabPod V23: logo y rutinas activados.");
+
   }
 
   setTimeout(rehabV23Iniciar, 120);
@@ -12543,6 +12665,7 @@ console.log(
 
       .rehabV24Overlay[hidden] {
         display:none !important;
+
       }
 
       .rehabV24Modal {
@@ -12598,6 +12721,7 @@ console.log(
         padding:14px;
         border-radius:16px;
         border:1px solid rgba(148,163,184,.20);
+
         background:rgba(148,163,184,.06);
       }
 
@@ -12682,6 +12806,7 @@ console.log(
         display:block;
         height:100%;
         border-radius:99px;
+
         background:#22c55e;
       }
 
@@ -12778,6 +12903,7 @@ console.log(
         .rehabV24DosColumnas {
           grid-template-columns:1fr;
         }
+
       }
     `;
     document.head.appendChild(style);
@@ -12821,6 +12947,7 @@ console.log(
           </div>
 
           <button id="rehabV24Cerrar" type="button" class="rehabV24Cerrar">×</button>
+
         </div>
 
         <div id="rehabV24Contenido"></div>
@@ -12961,6 +13088,7 @@ console.log(
     if (!historial.length) {
       lista.innerHTML = `
         <div class="rehabV24Vacio">
+
           <div style="font-size:34px;margin-bottom:7px;">📭</div>
           <strong>Todavía no hay rutinas registradas.</strong>
           <div style="margin-top:5px;">
@@ -13102,6 +13230,7 @@ console.log(
           <input id="rehabV24DuracionMin" type="number" min="0" max="600" step="1" value="10">
         </div>
 
+
         <div class="rehabV24Campo">
           <label>Precisión general (%) — opcional</label>
           <input id="rehabV24Precision" type="number" min="0" max="100" step="0.1" placeholder="Ej. 88.5">
@@ -13138,6 +13267,7 @@ console.log(
     select.addEventListener("change", rehabV24ActualizarRegistroRutina);
 
     document
+
       .getElementById("rehabV24GuardarRegistro")
       .addEventListener("click", rehabV24GuardarRegistro);
     document
@@ -13240,6 +13370,7 @@ console.log(
       (!Number.isFinite(precision) || precision < 0 || precision > 100)
     ) {
       alert("La precisión debe estar entre 0 y 100.");
+
       return;
     }
 
@@ -13319,6 +13450,7 @@ console.log(
     }
   }
 
+
   function guardarRutinas(rutinas) {
     localStorage.setItem(CLAVE_RUTINAS, JSON.stringify(rutinas));
   }
@@ -13379,6 +13511,7 @@ console.log(
       .rehabV25Campo input{width:100%;box-sizing:border-box;padding:10px 11px;border-radius:11px;
         border:1px solid rgba(148,163,184,.27);background:rgba(148,163,184,.07);color:inherit}
       .rehabV25Acciones{display:flex;gap:9px;flex-wrap:wrap;margin-top:10px}
+
       .rehabV25Btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;
         background:#2563eb;color:#fff}
       .rehabV25Btn.sec{background:rgba(148,163,184,.15);color:inherit;border:1px solid rgba(148,163,184,.22)}
@@ -13498,6 +13631,7 @@ console.log(
       const acciones = editar.parentElement;
       const boton = document.createElement("button");
       boton.type = "button";
+
       boton.className = "rehabV23Btn secundario";
       boton.textContent = "🎥 VIDEOS";
       boton.addEventListener("click", function () {
@@ -13518,6 +13652,7 @@ console.log(
 
       const lista = card.querySelector(".rehabV23RutinaEjercicios");
       if (!lista) return;
+
 
       const lis = lista.querySelectorAll("li");
       rutina.ejercicios.forEach((ej, i) => {
@@ -13658,6 +13793,7 @@ window.rehabGetSupabaseClient = async function () {
   try {
     return await window.rehabSupabasePromise;
   } catch (error) {
+
     window.rehabSupabasePromise = null;
     throw error;
   }
@@ -13678,6 +13814,7 @@ window.rehabGetSupabaseClient = async function () {
 (function () {
   let rehabCloud = null;
   let rehabCloudUser = null;
+
   let rehabCloudProfile = null;
 
   const ESPECIALIDADES = {
@@ -13797,6 +13934,7 @@ window.rehabGetSupabaseClient = async function () {
 
   async function inicializarCloud() {
     try {
+
       rehabCloud = await window.rehabGetSupabaseClient();
 
       const { data } = await rehabCloud.auth.getSession();
@@ -13858,6 +13996,7 @@ window.rehabGetSupabaseClient = async function () {
         padding:20px;box-shadow:0 25px 80px rgba(0,0,0,.42)}
       .tema-claro .rehabV27Modal{background:#fff}
       .rehabV27Cabecera{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+
       .rehabV27Cerrar{width:42px;height:42px;border-radius:12px;border:1px solid rgba(148,163,184,.25);
         background:rgba(148,163,184,.08);color:inherit;font-size:20px;cursor:pointer}
       .rehabV27Campo{display:grid;gap:6px;margin-bottom:12px}
@@ -13936,6 +14075,7 @@ window.rehabGetSupabaseClient = async function () {
   // -----------------------------------------------------
   async function abrirCloud() {
     const contenido = document.getElementById("rehabV27Contenido");
+
     document.getElementById("rehabV27Overlay").hidden = false;
     contenido.innerHTML = `<div class="rehabV27Estado">Conectando con RehabPod Cloud...</div>`;
 
@@ -14076,6 +14216,7 @@ window.rehabGetSupabaseClient = async function () {
     rehabCloudUser = data.user;
     await new Promise((r) => setTimeout(r, 700));
     await cargarPerfilCloud();
+
     await renderPanelCuenta();
   }
 
@@ -14217,7 +14358,9 @@ window.rehabGetSupabaseClient = async function () {
     await cargarUsuariosVinculados();
   }
 
+
   async function vincularUsuario() {
+
     const codigo = document.getElementById("rehabV27CodigoUsuario").value.trim();
     if (!codigo) {
       panelMensaje("Escribe el código del usuario.");
@@ -14355,6 +14498,7 @@ window.rehabGetSupabaseClient = async function () {
             mode: ej.modo,
             difficulty: ej.dificultad || "media",
             finish_type: ej.finalizarPor || "rondas",
+
             finish_value: Number(ej.valor || 5),
             video_url: ej.videoUrl || null,
           }));
@@ -14398,6 +14542,7 @@ window.rehabGetSupabaseClient = async function () {
 // PEGAR TODO ESTE BLOQUE AL FINAL DE app.js, DESPUES DE V27.
 // REQUIERE ejecutar antes:
 // rehabpod_v28_asignaciones_guias.sql
+
 // =====================================================
 
 (function () {
@@ -14446,6 +14591,16 @@ window.rehabGetSupabaseClient = async function () {
     return String(hora).slice(0, 5);
   }
 
+  function estadoAsignacionBonito(status) {
+    const estados = {
+      pending: "Pendiente",
+      in_progress: "En progreso",
+      completed: "Completada",
+      cancelled: "Cancelada",
+    };
+    return estados[String(status || "pending")] || String(status || "pending");
+  }
+
   async function cargarSDK() {
     if (window.supabase?.createClient) return true;
 
@@ -14484,6 +14639,7 @@ window.rehabGetSupabaseClient = async function () {
         existente.addEventListener("error", resolve, { once: true });
         return;
       }
+
 
       const s = document.createElement("script");
       s.id = "rehabSupabaseConfigPublica";
@@ -14624,6 +14780,7 @@ window.rehabGetSupabaseClient = async function () {
   // UI GENERAL
   // -----------------------------------------------------
   function estilos() {
+
     if (document.getElementById("rehabV28Estilos")) return;
 
     const st = document.createElement("style");
@@ -14764,6 +14921,7 @@ window.rehabGetSupabaseClient = async function () {
   // -----------------------------------------------------
   async function abrirPrincipal() {
     abrir();
+
     const c = document.getElementById("rehabV28Contenido");
     c.innerHTML = `<div class="rehabV28Aviso">Conectando con RehabPod Cloud...</div>`;
 
@@ -14904,6 +15062,7 @@ window.rehabGetSupabaseClient = async function () {
       <div class="rehabV28Card">
         <h3 style="margin-top:0">🎥 Videos e indicaciones de mis rutinas</h3>
         <p style="opacity:.75">
+
           Aquí puedes añadir el video y explicar exactamente cómo colocar los Pods antes de enviar la rutina.
         </p>
         <div id="rehabV28RutinasGuia">
@@ -15028,7 +15187,7 @@ window.rehabGetSupabaseClient = async function () {
         <strong>${esc(rutinas.get(a.routine_id) || "Rutina")}</strong>
         <span>👤 ${esc(usuarios.get(a.user_id) || "Usuario")}</span>
         <span>📅 ${esc(fechaBonita(a.scheduled_date))}${a.scheduled_time ? " · " + esc(horaBonita(a.scheduled_time)) : ""}</span>
-        <small>Estado: ${esc(a.status || "pending")}</small>
+        <small>Estado: ${esc(estadoAsignacionBonito(a.status))}</small>
         ${a.professional_notes ? `<small>📝 ${esc(a.professional_notes)}</small>` : ""}
       </div>
     `
@@ -15044,6 +15203,7 @@ window.rehabGetSupabaseClient = async function () {
       await Promise.all([
         cloud
           .from("rehab_routines")
+
           .select("id, name, category, rest_seconds")
           .eq("id", routineId)
           .single(),
@@ -15108,6 +15268,7 @@ window.rehabGetSupabaseClient = async function () {
         `
           )
           .join("")}
+
       </div>
 
       <div class="rehabV28Acciones">
@@ -15170,6 +15331,7 @@ window.rehabGetSupabaseClient = async function () {
         "id, routine_id, professional_id, scheduled_date, scheduled_time, professional_notes, status, created_at"
       )
       .eq("user_id", sesionUser.id)
+      .neq("status", "completed")
       .order("scheduled_date", { ascending: true });
 
     const host = document.getElementById("rehabV28ListaUsuario");
@@ -15182,6 +15344,7 @@ window.rehabGetSupabaseClient = async function () {
     if (!asignaciones?.length) {
       host.innerHTML = `<div class="rehabV28Card">Todavía no tienes rutinas asignadas.</div>`;
       return;
+
     }
 
     const routineIds = [
@@ -15210,6 +15373,7 @@ window.rehabGetSupabaseClient = async function () {
           <h3 style="margin:0 0 8px">${esc(r?.name || "Rutina")}</h3>
           <div>👤 ${esc(pros.get(a.professional_id) || "Profesional")}</div>
           <div>📅 ${esc(fechaBonita(a.scheduled_date))}${a.scheduled_time ? " · " + esc(horaBonita(a.scheduled_time)) : ""}</div>
+          <div>📌 ${esc(estadoAsignacionBonito(a.status))}</div>
           ${a.professional_notes ? `<div class="rehabV28Dato">📝 ${esc(a.professional_notes)}</div>` : ""}
           <div class="rehabV28Acciones">
             <button class="rehabV28Btn" data-ver-asignacion="${esc(a.id)}" type="button">
@@ -15286,6 +15450,7 @@ window.rehabGetSupabaseClient = async function () {
         a.professional_notes
           ? `
         <div class="rehabV28Dato">
+
           <strong>Indicaciones generales</strong><br>
           ${esc(a.professional_notes)}
         </div>
@@ -15320,6 +15485,7 @@ window.rehabGetSupabaseClient = async function () {
                 ? `
               <div class="rehabV28Dato">
                 <strong>🔵 Colocación de los Pods</strong><br>
+
                 ${esc(e.pod_setup).replaceAll("\n", "<br>")}
               </div>
             `
@@ -15460,12 +15626,14 @@ window.rehabGetSupabaseClient = async function () {
       script.id = "rehabSupabaseSDK";
       script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
       script.onload = resolve;
+
       script.onerror = reject;
       document.head.appendChild(script);
     });
   }
 
   async function v29CargarConfig() {
+
     if (
       window.REHAB_SUPABASE_CONFIG?.url &&
       window.REHAB_SUPABASE_CONFIG?.publishableKey
@@ -15599,6 +15767,7 @@ window.rehabGetSupabaseClient = async function () {
   function v29CerrarOverlay() {
     const ov = document.getElementById("rehabV29Overlay");
     if (ov) ov.hidden = true;
+
   }
 
   // Cierra las ventanas de Cloud que quedan debajo del overlay V29.
@@ -15610,6 +15779,27 @@ window.rehabGetSupabaseClient = async function () {
       const ov = document.getElementById(id);
       if (ov) ov.hidden = true;
     });
+  }
+
+  async function v29MarcarAsignacionEnProgreso() {
+    if (!v29Asignacion?.id) return;
+
+    try {
+      await v29IniciarCloud();
+
+      const { error } = await v29Cloud
+        .from("rehab_assignments")
+        .update({ status: "in_progress" })
+        .eq("id", v29Asignacion.id)
+        .eq("user_id", v29AuthUser.id);
+
+      if (error) throw error;
+      v29Asignacion.status = "in_progress";
+    } catch (error) {
+      // El entrenamiento puede continuar aunque falle este cambio temporal.
+      // Al finalizar, V29 volverá a intentar guardar "completed".
+      console.warn("V32 estado en progreso:", error);
+    }
   }
 
   // -----------------------------------------------------
@@ -15625,6 +15815,7 @@ window.rehabGetSupabaseClient = async function () {
         v29AssignmentIdCapturado = boton.dataset.verAsignacion || null;
       },
       true
+
     );
 
     const observer = new MutationObserver(function () {
@@ -15805,6 +15996,7 @@ window.rehabGetSupabaseClient = async function () {
         ${v29Ejercicios
           .map(
             (e, i) => `
+
           <div class="rehabV29Fila">
             <span>${i + 1}. ${v29Esc(v29NombreModo(e.mode))}</span>
             <strong>${v29Esc(e.difficulty || "media")}</strong>
@@ -15820,7 +16012,14 @@ window.rehabGetSupabaseClient = async function () {
       </div>
     `);
 
-    document.getElementById("rehabV29ConfirmarInicio").onclick = function () {
+    document.getElementById("rehabV29ConfirmarInicio").onclick = async function () {
+      const boton = document.getElementById("rehabV29ConfirmarInicio");
+      if (boton) {
+        boton.disabled = true;
+        boton.textContent = "INICIANDO...";
+      }
+
+      await v29MarcarAsignacionEnProgreso();
       v29CerrarVentanasCloud();
       v29IniciarEjercicioActual();
     };
@@ -15849,6 +16048,7 @@ window.rehabGetSupabaseClient = async function () {
   }
 
   function v29ConfigurarEjercicio(ejercicio) {
+
     modoActual = ejercicio.mode || "simple";
 
     ajustesApp.dificultad = ejercicio.difficulty || "media";
@@ -15978,6 +16178,7 @@ window.rehabGetSupabaseClient = async function () {
 
     // Esta cuenta solo prepara visualmente; el motor ya tiene su propio 3-2-1.
     let n = 3;
+
     const cuenta = document.querySelector("#rehabV29Card .rehabV29Cuenta");
 
     const intervalo = setInterval(() => {
@@ -16128,6 +16329,7 @@ window.rehabGetSupabaseClient = async function () {
       }
 
       if (restante <= 0) {
+
         clearInterval(v29IntervaloDescanso);
       }
     }, 1000);
@@ -16320,6 +16522,9 @@ window.rehabGetSupabaseClient = async function () {
           completed_percent: porcentaje,
           duration_seconds: duracionSeg,
           precision: precision,
+          hits: totalAciertos,
+          errors: totalErrores,
+          exercise_results: v29ResultadosEjercicios,
           notes: "Rutina completada desde ejecución automática RehabPod.",
         });
 
@@ -16335,6 +16540,7 @@ window.rehabGetSupabaseClient = async function () {
     } catch (error) {
       nubeOk = false;
       console.error("V29 guardado nube:", error);
+
     }
 
     const min = Math.floor(duracionSeg / 60);
@@ -16404,6 +16610,7 @@ window.rehabGetSupabaseClient = async function () {
     v29Ejercicios = [];
     v29Indice = 0;
     v29ResultadosEjercicios = [];
+
     v29InicioRutinaMs = 0;
     v29CancelandoRutina = false;
 
@@ -16435,4 +16642,2370 @@ window.rehabGetSupabaseClient = async function () {
       total: v29Ejercicios.length,
     };
   };
+})();
+
+// =====================================================
+// REHABPOD V31
+// HISTORIAL CLOUD + PANEL DE PROGRESO
+//
+// FUNCIONES:
+// - Usuario: ve sus sesiones cloud y detalle por ejercicio.
+// - Profesional: selecciona un usuario vinculado y revisa su progreso.
+// - Resumen: sesiones, precisión, tiempo promedio, aciertos y errores.
+// - Evolución de las últimas sesiones.
+// - Usa el cliente Supabase único de V30.
+// =====================================================
+
+(function () {
+  let v31Cloud = null;
+  let v31AuthUser = null;
+  let v31Perfil = null;
+  let v31UsuarioSeleccionado = null;
+
+  function v31Esc(valor) {
+    return String(valor ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function v31Numero(valor, defecto = 0) {
+    const n = Number(valor);
+    return Number.isFinite(n) ? n : defecto;
+  }
+
+  function v31Fecha(valor) {
+    if (!valor) return "Sin fecha";
+    const d = new Date(valor);
+    if (Number.isNaN(d.getTime())) return String(valor);
+    return d.toLocaleString();
+  }
+
+  function v31Duracion(segundos) {
+    const s = Math.max(0, Math.round(v31Numero(segundos)));
+    const min = Math.floor(s / 60);
+    const seg = s % 60;
+    return `${min}:${String(seg).padStart(2, "0")}`;
+  }
+
+  function v31Precision(valor) {
+    return `${v31Numero(valor).toFixed(1)}%`;
+  }
+
+  async function v31IniciarCloud() {
+    if (typeof window.rehabGetSupabaseClient !== "function") {
+      throw new Error("RehabPod V30 no está disponible.");
+    }
+
+    v31Cloud = await window.rehabGetSupabaseClient();
+
+    const { data } = await v31Cloud.auth.getSession();
+    v31AuthUser = data?.session?.user || null;
+
+    if (!v31AuthUser) {
+      v31Perfil = null;
+      return false;
+    }
+
+    const { data: perfil, error } = await v31Cloud
+      .from("rehab_profiles")
+      .select("user_id, full_name, role, specialty, user_code")
+      .eq("user_id", v31AuthUser.id)
+      .single();
+
+    if (error) throw error;
+
+    v31Perfil = perfil;
+    return true;
+  }
+
+  function v31AgregarEstilos() {
+
+    if (document.getElementById("rehabV31Estilos")) return;
+
+    const st = document.createElement("style");
+    st.id = "rehabV31Estilos";
+    st.textContent = `
+      .rehabV31HomeBtn{
+        display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+        min-height:48px;margin-top:10px;border-radius:14px;cursor:pointer;
+        border:1px solid rgba(34,197,94,.30);background:rgba(34,197,94,.08);
+        color:inherit;font-weight:900
+      }
+      .rehabV31Overlay{
+        position:fixed;inset:0;z-index:100650;background:rgba(2,6,23,.82);
+        backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:16px
+      }
+      .rehabV31Overlay[hidden]{display:none!important}
+      .rehabV31Modal{
+        width:min(980px,100%);max-height:94vh;overflow:auto;border-radius:24px;padding:20px;
+        background:var(--fondo-tarjeta,#111827);color:inherit;
+        border:1px solid rgba(148,163,184,.22);box-shadow:0 25px 80px rgba(0,0,0,.44)
+      }
+      .tema-claro .rehabV31Modal{background:#fff}
+      .rehabV31Head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:15px}
+      .rehabV31Cerrar{width:42px;height:42px;border-radius:12px;border:1px solid rgba(148,163,184,.25);
+        background:rgba(148,163,184,.08);color:inherit;font-size:20px;cursor:pointer}
+      .rehabV31Grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+      .rehabV31Kpi{
+        padding:14px;border-radius:16px;background:rgba(148,163,184,.06);
+
+        border:1px solid rgba(148,163,184,.16)
+      }
+      .rehabV31Kpi small{display:block;opacity:.68;font-weight:850;margin-bottom:7px}
+      .rehabV31Kpi strong{font-size:1.35rem}
+      .rehabV31Card{
+        border:1px solid rgba(148,163,184,.18);border-radius:16px;padding:14px;
+        margin:10px 0;background:rgba(148,163,184,.045)
+      }
+      .rehabV31Fila{display:flex;justify-content:space-between;gap:12px;align-items:center}
+      .rehabV31Mutado{opacity:.68;font-size:.86rem}
+      .rehabV31Btn{
+        appearance:none;border:0;border-radius:11px;padding:9px 12px;font-weight:900;
+        cursor:pointer;background:#16a34a;color:white
+      }
+      .rehabV31Btn.sec{background:rgba(148,163,184,.14);color:inherit;border:1px solid rgba(148,163,184,.24)}
+      .rehabV31Select{
+        width:100%;padding:10px;border-radius:11px;border:1px solid rgba(148,163,184,.24);
+        background:rgba(148,163,184,.07);color:inherit;font:inherit
+      }
+      .rehabV31Barra{height:9px;border-radius:999px;background:rgba(148,163,184,.14);overflow:hidden;margin-top:8px}
+      .rehabV31Barra span{display:block;height:100%;border-radius:999px;background:#22c55e}
+      .rehabV31Detalle{margin-top:12px;padding-top:12px;border-top:1px solid rgba(148,163,184,.14)}
+      .rehabV31Ejercicio{
+        padding:9px 10px;border-radius:11px;background:rgba(148,163,184,.05);margin:7px 0
+      }
+      .rehabV31Aviso{
+        padding:13px;border-radius:14px;background:rgba(14,165,233,.08);
+        border:1px solid rgba(14,165,233,.18);line-height:1.5
+      }
+      .rehabV31Evolucion{display:grid;gap:8px;margin-top:10px}
+      .rehabV31EvoFila{display:grid;grid-template-columns:130px 1fr 65px;gap:8px;align-items:center;font-size:.85rem}
+      @media(max-width:760px){
+        .rehabV31Grid{grid-template-columns:1fr 1fr}
+        .rehabV31EvoFila{grid-template-columns:90px 1fr 55px}
+      }
+    `;
+    document.head.appendChild(st);
+  }
+
+  function v31CrearModal() {
+    if (document.getElementById("rehabV31Overlay")) return;
+
+    const ov = document.createElement("div");
+    ov.id = "rehabV31Overlay";
+    ov.className = "rehabV31Overlay";
+    ov.hidden = true;
+    ov.innerHTML = `
+      <div class="rehabV31Modal">
+        <div class="rehabV31Head">
+          <div>
+            <div style="font-size:.72rem;opacity:.65;font-weight:900">REHABPOD CLOUD</div>
+            <h2 id="rehabV31Titulo" style="margin:0">Progreso cloud</h2>
+          </div>
+          <button id="rehabV31Cerrar" class="rehabV31Cerrar" type="button">×</button>
+        </div>
+        <div id="rehabV31Contenido"></div>
+      </div>
+    `;
+
+    document.body.appendChild(ov);
+
+    document.getElementById("rehabV31Cerrar").onclick = v31Cerrar;
+    ov.addEventListener("click", (e) => {
+      if (e.target === ov) v31Cerrar();
+    });
+  }
+
+  function v31Abrir() {
+    document.getElementById("rehabV31Overlay").hidden = false;
+  }
+
+  function v31Cerrar() {
+    document.getElementById("rehabV31Overlay").hidden = true;
+  }
+
+  function v31CrearBotonHome() {
+    if (document.getElementById("rehabV31HomeBtn")) return;
+
+    const ref =
+      document.getElementById("rehabV28HomeBtn") ||
+      document.getElementById("rehabV27BtnCloud") ||
+      document.getElementById("rehabV24BtnHistorial");
+
+    if (!ref) return;
+
+    const b = document.createElement("button");
+    b.id = "rehabV31HomeBtn";
+    b.type = "button";
+    b.className = "rehabV31HomeBtn";
+    b.innerHTML = "☁️ PROGRESO CLOUD";
+    b.onclick = v31AbrirPrincipal;
+
+    ref.insertAdjacentElement("afterend", b);
+  }
+
+  async function v31SesionesDeUsuario(userId) {
+    const { data, error } = await v31Cloud
+      .from("rehab_routine_sessions")
+      .select(
+        "id, assignment_id, user_id, routine_id, routine_name, completed_percent, duration_seconds, precision, hits, errors, exercise_results, notes, performed_at"
+      )
+      .eq("user_id", userId)
+      .order("performed_at", { ascending: false })
+      .limit(100);
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  function v31Resumen(sesiones) {
+    const total = sesiones.length;
+
+    const precision =
+      total > 0
+        ? sesiones.reduce((s, x) => s + v31Numero(x.precision), 0) / total
+        : 0;
+
+    const duracion =
+      total > 0
+        ? sesiones.reduce((s, x) => s + v31Numero(x.duration_seconds), 0) / total
+        : 0;
+
+    const aciertos = sesiones.reduce((s, x) => s + v31Numero(x.hits), 0);
+    const errores = sesiones.reduce((s, x) => s + v31Numero(x.errors), 0);
+
+    return { total, precision, duracion, aciertos, errores };
+  }
+
+  function v31HtmlKpis(sesiones) {
+    const r = v31Resumen(sesiones);
+
+    return `
+      <div class="rehabV31Grid">
+        <div class="rehabV31Kpi">
+          <small>SESIONES CLOUD</small>
+          <strong>${r.total}</strong>
+        </div>
+        <div class="rehabV31Kpi">
+          <small>PRECISIÓN PROMEDIO</small>
+          <strong>${v31Precision(r.precision)}</strong>
+
+        </div>
+        <div class="rehabV31Kpi">
+          <small>TIEMPO PROMEDIO</small>
+          <strong>${v31Duracion(r.duracion)}</strong>
+        </div>
+        <div class="rehabV31Kpi">
+          <small>ACIERTOS / ERRORES</small>
+          <strong>${r.aciertos} / ${r.errores}</strong>
+        </div>
+      </div>
+    `;
+  }
+
+
+  function v31HtmlEvolucion(sesiones) {
+    const ultimas = [...sesiones].slice(0, 8).reverse();
+
+    if (!ultimas.length) return "";
+
+    return `
+      <div class="rehabV31Card">
+        <h3 style="margin-top:0">📈 Evolución reciente</h3>
+        <div class="rehabV31Evolucion">
+          ${ultimas
+            .map((s) => {
+              const p = Math.max(0, Math.min(100, v31Numero(s.precision)));
+              return `
+                <div class="rehabV31EvoFila">
+                  <span title="${v31Esc(v31Fecha(s.performed_at))}">
+                    ${v31Esc(String(s.routine_name || "Rutina").slice(0, 18))}
+                  </span>
+                  <div class="rehabV31Barra"><span style="width:${p}%"></span></div>
+                  <strong>${p.toFixed(0)}%</strong>
+                </div>
+              `;
+            })
+            .join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  function v31EjerciciosSesion(sesion) {
+    const ejercicios = Array.isArray(sesion.exercise_results)
+      ? sesion.exercise_results
+      : [];
+
+    if (!ejercicios.length) {
+      return `
+        <div class="rehabV31Detalle">
+          <div class="rehabV31Mutado">
+            Esta sesión fue registrada antes de V31 y no contiene detalle por ejercicio.
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="rehabV31Detalle">
+        <strong>Detalle por ejercicio</strong>
+        ${ejercicios
+          .map((e, i) => {
+            const intentos = v31Numero(e.aciertos) + v31Numero(e.errores);
+            const precision =
+              intentos > 0 ? (v31Numero(e.aciertos) / intentos) * 100 : 100;
+
+            return `
+              <div class="rehabV31Ejercicio">
+                <div class="rehabV31Fila">
+                  <strong>${i + 1}. ${v31Esc(e.nombre || e.modo || "Ejercicio")}</strong>
+                  <span>${precision.toFixed(1)}%</span>
+                </div>
+                <div class="rehabV31Mutado">
+                  Dificultad: ${v31Esc(e.dificultad || "-")} ·
+                  Aciertos: ${v31Numero(e.aciertos)} ·
+                  Errores: ${v31Numero(e.errores)}
+                  ${
+                    e.promedio != null
+                      ? ` · Promedio: ${v31Numero(e.promedio).toFixed(3)} s`
+                      : ""
+                  }
+                </div>
+              </div>
+            `;
+          })
+          .join("")}
+      </div>
+    `;
+  }
+
+  function v31HtmlSesiones(sesiones) {
+    if (!sesiones.length) {
+      return `
+        <div class="rehabV31Aviso">
+          Todavía no hay sesiones guardadas en RehabPod Cloud.
+          Completa una rutina asignada y aparecerá aquí.
+        </div>
+      `;
+    }
+
+    return sesiones
+      .map(
+        (s) => `
+        <div class="rehabV31Card">
+          <div class="rehabV31Fila">
+            <div>
+              <strong>${v31Esc(s.routine_name || "Rutina")}</strong>
+              <div class="rehabV31Mutado">${v31Esc(v31Fecha(s.performed_at))}</div>
+            </div>
+            <button class="rehabV31Btn sec" data-v31-detalle="${v31Esc(s.id)}">
+              VER DETALLE
+            </button>
+          </div>
+
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px">
+            <span>🎯 ${v31Precision(s.precision)}</span>
+            <span>⏱️ ${v31Duracion(s.duration_seconds)}</span>
+            <span>✅ ${v31Numero(s.hits)}</span>
+            <span>❌ ${v31Numero(s.errors)}</span>
+            <span>📋 ${v31Numero(s.completed_percent).toFixed(0)}%</span>
+          </div>
+
+          <div id="rehabV31Detalle-${v31Esc(s.id)}" hidden>
+            ${v31EjerciciosSesion(s)}
+          </div>
+        </div>
+      `
+      )
+      .join("");
+  }
+
+  function v31ActivarDetalles(contenedor) {
+    contenedor.querySelectorAll("[data-v31-detalle]").forEach((btn) => {
+      btn.onclick = function () {
+        const id = btn.dataset.v31Detalle;
+        const detalle = document.getElementById(`rehabV31Detalle-${id}`);
+        if (!detalle) return;
+
+        detalle.hidden = !detalle.hidden;
+        btn.textContent = detalle.hidden ? "VER DETALLE" : "OCULTAR";
+
+      };
+    });
+  }
+
+  async function v31RenderUsuario(
+    userId,
+    nombre,
+    contentId = "rehabV31Contenido",
+    titleId = "rehabV31Titulo"
+  ) {
+    const c = document.getElementById(contentId);
+    if (!c) throw new Error("No se encontró el contenedor de progreso.");
+
+    c.innerHTML = `<div class="rehabV31Aviso">Cargando historial cloud...</div>`;
+
+    const sesiones = await v31SesionesDeUsuario(userId);
+
+    const titulo = document.getElementById(titleId);
+    if (titulo) {
+      titulo.textContent = nombre ? `Progreso · ${nombre}` : "Mi progreso";
+    }
+
+    c.innerHTML = `
+      ${v31HtmlKpis(sesiones)}
+      ${v31HtmlEvolucion(sesiones)}
+      <h3>🗂️ Historial de rutinas</h3>
+      ${v31HtmlSesiones(sesiones)}
+    `;
+
+    v31ActivarDetalles(c);
+  }
+
+  async function v31UsuariosVinculados() {
+    const { data: links, error } = await v31Cloud
+      .from("rehab_professional_users")
+      .select("user_id, status")
+      .eq("professional_id", v31AuthUser.id)
+      .eq("status", "active");
+
+    if (error) throw error;
+    if (!links?.length) return [];
+
+    const ids = links.map((x) => x.user_id);
+
+    const { data: perfiles, error: ep } = await v31Cloud
+      .from("rehab_profiles")
+      .select("user_id, full_name, specialty")
+      .in("user_id", ids);
+
+    if (ep) throw ep;
+
+    return (perfiles || []).sort((a, b) =>
+      String(a.full_name || "").localeCompare(String(b.full_name || ""))
+    );
+  }
+
+  async function v31RenderProfesional(
+    contentId = "rehabV31Contenido",
+    titleId = "rehabV31Titulo"
+  ) {
+    const c = document.getElementById(contentId);
+    if (!c) throw new Error("No se encontró el contenedor de progreso.");
+
+    const titulo = document.getElementById(titleId);
+    if (titulo) titulo.textContent = "Progreso de usuarios";
+
+    c.innerHTML = `<div class="rehabV31Aviso">Cargando usuarios vinculados...</div>`;
+
+    const usuarios = await v31UsuariosVinculados();
+
+    if (!usuarios.length) {
+      c.innerHTML = `
+        <div class="rehabV31Aviso">
+          Todavía no tienes usuarios vinculados.
+          Vincula usuarios desde <strong>☁️ CUENTA Y NUBE</strong>.
+        </div>
+      `;
+      return;
+    }
+
+    const seleccionado =
+      usuarios.find((u) => u.user_id === v31UsuarioSeleccionado) || usuarios[0];
+
+    v31UsuarioSeleccionado = seleccionado.user_id;
+
+    c.innerHTML = `
+      <div class="rehabV31Card">
+        <label style="font-size:.8rem;font-weight:900;display:block;margin-bottom:7px">
+          USUARIO
+        </label>
+        <select id="rehabV31UsuarioSelect" class="rehabV31Select">
+          ${usuarios
+            .map(
+              (u) =>
+                `<option value="${v31Esc(u.user_id)}" ${
+                  u.user_id === seleccionado.user_id ? "selected" : ""
+                }>${v31Esc(u.full_name || "Usuario")} · ${v31Esc(
+                  u.specialty || "sin especialidad"
+                )}</option>`
+            )
+            .join("")}
+        </select>
+      </div>
+
+      <div id="rehabV31PanelUsuario">
+        <div class="rehabV31Aviso">Cargando progreso...</div>
+      </div>
+    `;
+
+    const select = document.getElementById("rehabV31UsuarioSelect");
+
+    async function cargarUsuario() {
+      v31UsuarioSeleccionado = select.value;
+      const usuario = usuarios.find((u) => u.user_id === select.value);
+      const panel = document.getElementById("rehabV31PanelUsuario");
+
+      try {
+        const sesiones = await v31SesionesDeUsuario(select.value);
+
+        panel.innerHTML = `
+          <h3>${v31Esc(usuario?.full_name || "Usuario")}</h3>
+          ${v31HtmlKpis(sesiones)}
+          ${v31HtmlEvolucion(sesiones)}
+          <h3>🗂️ Sesiones</h3>
+          ${v31HtmlSesiones(sesiones)}
+        `;
+
+        v31ActivarDetalles(panel);
+      } catch (error) {
+        console.error("V31 progreso profesional:", error);
+        panel.innerHTML = `<div class="rehabV31Aviso">Error: ${v31Esc(error.message)}</div>`;
+      }
+    }
+
+    select.onchange = cargarUsuario;
+    await cargarUsuario();
+  }
+
+  async function v31AbrirPrincipal(
+    contentId = "rehabV31Contenido",
+
+    titleId = "rehabV31Titulo",
+    abrirModal = true
+  ) {
+    if (abrirModal) v31Abrir();
+
+    const c = document.getElementById(contentId);
+    if (!c) throw new Error("No se encontró el contenedor de progreso.");
+
+    c.innerHTML = `<div class="rehabV31Aviso">Conectando con RehabPod Cloud...</div>`;
+
+    try {
+      const ok = await v31IniciarCloud();
+
+      if (!ok) {
+        c.innerHTML = `
+          <div class="rehabV31Aviso">
+            Primero inicia sesión desde <strong>Cuenta</strong>.
+          </div>
+        `;
+        return false;
+      }
+
+      if (v31Perfil.role === "professional") {
+        await v31RenderProfesional(contentId, titleId);
+      } else {
+        await v31RenderUsuario(
+          v31AuthUser.id,
+          v31Perfil.full_name || "Mi progreso",
+          contentId,
+          titleId
+        );
+      }
+
+      return true;
+    } catch (error) {
+      console.error("RehabPod V31:", error);
+      c.innerHTML = `<div class="rehabV31Aviso">Error: ${v31Esc(error.message)}</div>`;
+      return false;
+    }
+  }
+
+  function v31Iniciar() {
+    v31AgregarEstilos();
+    v31CrearModal();
+    v31CrearBotonHome();
+    console.log("RehabPod V31: historial cloud + panel de progreso activados.");
+  }
+
+  setTimeout(v31Iniciar, 520);
+
+  window.rehabV31Abrir = v31AbrirPrincipal;
+  window.rehabV31RenderEnPantalla = function (contentId, titleId) {
+    return v31AbrirPrincipal(contentId, titleId, false);
+  };
+})();
+
+
+// =====================================================
+// REHABPOD V32
+// ESTADOS DE RUTINAS ASIGNADAS
+// - pending -> Pendiente
+// - in_progress -> En progreso al comenzar
+// - completed -> Completada al finalizar
+// - Las completadas dejan de mostrarse en RUTINAS ASIGNADAS del Usuario.
+// - Permanecen en Supabase y en PROGRESO CLOUD para historial.
+// =====================================================
+console.log("RehabPod V32: estados de asignaciones + ocultar completadas activados.");
+
+// =====================================================
+// REHABPOD V33
+// LIMPIEZA DE INTERFAZ + NAVEGACION CONTEXTUAL
+//
+// OBJETIVOS:
+// - Ocultar el historial antiguo V24 de la pantalla principal.
+// - Usar una sola entrada de PROGRESO.
+// - PROGRESO abre Cloud si hay cuenta iniciada; si no, usa progreso local.
+// - RUTINAS ASIGNADAS solo aparece para:
+//     * Profesional autenticado (para asignar rutinas).
+//     * Usuario autenticado y vinculado a un profesional.
+// - Usuario sin cuenta Cloud o sin profesional vinculado no ve ese botón.
+// - Mantener toda la lógica antigua internamente para compatibilidad.
+// =====================================================
+
+(function () {
+  let v33Cloud = null;
+  let v33AuthListener = null;
+  let v33Actualizando = false;
+
+  async function v33Cliente() {
+    if (typeof window.rehabGetSupabaseClient !== "function") {
+      return null;
+    }
+
+    try {
+      v33Cloud = await window.rehabGetSupabaseClient();
+      return v33Cloud;
+    } catch (error) {
+      console.warn("V33 Supabase:", error);
+      return null;
+    }
+  }
+
+  function v33OcultarHistorialAntiguo() {
+    const historialV24 = document.getElementById("rehabV24BtnHistorial");
+    if (historialV24) {
+      historialV24.style.display = "none";
+      historialV24.setAttribute("aria-hidden", "true");
+    }
+
+    // El botón inferior de estadísticas/historial deja de ser necesario:
+    // toda la información queda unificada en PROGRESO.
+    if (
+      typeof btnEstadisticas !== "undefined" &&
+      btnEstadisticas &&
+      !btnEstadisticas.dataset.v34Cuenta
+    ) {
+      btnEstadisticas.style.display = "none";
+      btnEstadisticas.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  function v33OcultarBotonProgresoCloudDuplicado() {
+    const progresoCloud = document.getElementById("rehabV31HomeBtn");
+    if (progresoCloud) {
+      progresoCloud.style.display = "none";
+      progresoCloud.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  async function v33AbrirProgresoUnificado() {
+    const cloud = await v33Cliente();
+
+    if (cloud) {
+      try {
+        const { data } = await cloud.auth.getSession();
+        const usuario = data?.session?.user || null;
+
+        if (usuario && typeof window.rehabV31Abrir === "function") {
+          await window.rehabV31Abrir();
+          return;
+
+        }
+      } catch (error) {
+        console.warn("V33 progreso cloud:", error);
+      }
+    }
+
+    // Si no hay cuenta Cloud, el usuario conserva el progreso local.
+    try {
+      if (typeof mostrarProgreso === "function") {
+        mostrarProgreso();
+      }
+      if (typeof mostrarPantalla === "function" && typeof pantallaProgreso !== "undefined") {
+        mostrarPantalla(pantallaProgreso);
+      }
+    } catch (error) {
+      console.error("V33 progreso local:", error);
+    }
+  }
+
+  function v33ConfigurarBotonProgreso() {
+    if (typeof btnProgreso === "undefined" || !btnProgreso) return;
+
+    btnProgreso.onclick = function () {
+      v33AbrirProgresoUnificado();
+    };
+  }
+
+  async function v33UsuarioTieneProfesional(userId) {
+    const cloud = await v33Cliente();
+    if (!cloud || !userId) return false;
+
+    const { data, error } = await cloud
+      .from("rehab_professional_users")
+      .select("professional_id")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .limit(1);
+
+    if (error) {
+      console.warn("V33 vínculo profesional:", error);
+      return false;
+    }
+
+    return Array.isArray(data) && data.length > 0;
+  }
+
+  async function v33ActualizarRutinasAsignadas() {
+    if (v33Actualizando) return;
+    v33Actualizando = true;
+
+    try {
+      const boton = document.getElementById("rehabV28HomeBtn");
+      if (!boton) return;
+
+      // Oculto por defecto para evitar mostrar opciones que no aplican.
+      boton.style.display = "none";
+      boton.setAttribute("aria-hidden", "true");
+
+      const cloud = await v33Cliente();
+      if (!cloud) return;
+
+      const { data } = await cloud.auth.getSession();
+      const user = data?.session?.user || null;
+
+      // Sin cuenta Cloud iniciada: no mostramos RUTINAS ASIGNADAS.
+      if (!user) return;
+
+      const { data: perfil, error: perfilError } = await cloud
+        .from("rehab_profiles")
+        .select("user_id, role")
+        .eq("user_id", user.id)
+        .single();
+
+      if (perfilError || !perfil) {
+        if (perfilError) console.warn("V33 perfil:", perfilError);
+        return;
+      }
+
+      // Profesional: mantiene el acceso porque desde aquí asigna rutinas.
+      if (perfil.role === "professional") {
+        boton.textContent = "📨 ASIGNAR RUTINAS";
+        boton.style.display = "";
+        boton.removeAttribute("aria-hidden");
+        return;
+      }
+
+      // Usuario: solo lo ve si está vinculado a un profesional.
+      const vinculado = await v33UsuarioTieneProfesional(user.id);
+
+      if (vinculado) {
+        boton.textContent = "📨 RUTINAS ASIGNADAS";
+        boton.style.display = "";
+        boton.removeAttribute("aria-hidden");
+      }
+    } catch (error) {
+      console.warn("V33 actualizar interfaz:", error);
+    } finally {
+      v33Actualizando = false;
+    }
+  }
+
+  async function v33PrepararSesion() {
+    const cloud = await v33Cliente();
+    if (!cloud) return;
+
+    try {
+      if (v33AuthListener?.data?.subscription) {
+        v33AuthListener.data.subscription.unsubscribe();
+      }
+
+      v33AuthListener = cloud.auth.onAuthStateChange(function () {
+        setTimeout(() => {
+          v33ActualizarRutinasAsignadas();
+        }, 80);
+      });
+    } catch (error) {
+      console.warn("V33 auth listener:", error);
+    }
+  }
+
+  function v33MejorarEtiquetaProgreso() {
+    // Si el botón inferior contiene texto "Progreso", lo conservamos.
+    // Solo eliminamos terminología técnica "Cloud" de la navegación.
+    const cloudBtn = document.getElementById("rehabV31HomeBtn");
+    if (cloudBtn) {
+      cloudBtn.textContent = "📊 PROGRESO";
+    }
+  }
+
+  function v33ObservarBotonesDinamicos() {
+    const observer = new MutationObserver(function () {
+      v33OcultarHistorialAntiguo();
+      v33OcultarBotonProgresoCloudDuplicado();
+
+      const asignadas = document.getElementById("rehabV28HomeBtn");
+      if (asignadas && !asignadas.dataset.v33Preparado) {
+        asignadas.dataset.v33Preparado = "1";
+        v33ActualizarRutinasAsignadas();
+      }
+    });
+
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
+  async function v33Iniciar() {
+    v33MejorarEtiquetaProgreso();
+    v33OcultarHistorialAntiguo();
+    v33OcultarBotonProgresoCloudDuplicado();
+    v33ConfigurarBotonProgreso();
+    // V36.2: no usamos un MutationObserver global sobre document.body.
+    // Los botones V23/V27/V28/V31 ya existen cuando V33 inicia (700 ms).
+    // Esto evita ciclos y congelamientos de la interfaz.
+
+    await v33PrepararSesion();
+    await v33ActualizarRutinasAsignadas();
+
+    // Si el usuario vuelve a la app después de que un profesional lo vinculó,
+    // actualizamos la navegación sin exigir cerrar sesión.
+    window.addEventListener("focus", function () {
+      v33ActualizarRutinasAsignadas();
+    });
+
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) {
+        v33ActualizarRutinasAsignadas();
+      }
+    });
+
+    console.log(
+      "RehabPod V33: interfaz simplificada + rutinas asignadas contextuales activadas."
+    );
+  }
+
+  setTimeout(v33Iniciar, 700);
+
+  // Permite refrescar manualmente la interfaz después de vincular cuentas.
+  window.rehabV33ActualizarInterfaz = v33ActualizarRutinasAsignadas;
+})();
+
+// =====================================================
+// REHABPOD V34
+// CUENTA/PERFIL EN NAVEGACION INFERIOR + AJUSTES CENTRALIZADOS
+//
+// OBJETIVOS:
+// - Barra inferior simple: Inicio / Progreso / Cuenta.
+// - Quitar de Inicio los accesos duplicados de Perfiles, Ajustes y Cuenta y Nube.
+// - Cuenta muestra datos locales y de la cuenta Cloud.
+// - Ajustes de sonido y tema viven dentro de Cuenta.
+// - Permitir desvincular Profesional <-> Usuario desde Cuenta.
+// - Mantener las pantallas antiguas internamente para compatibilidad.
+// =====================================================
+
+(function () {
+  let v34Cloud = null;
+  let v34User = null;
+  let v34PerfilCloud = null;
+
+  function v34Esc(v) {
+    return String(v ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function v34Rol(role) {
+    return role === "professional" ? "Profesional" : "Usuario";
+  }
+
+  function v34Especialidad(valor) {
+    const mapa = {
+      athlete: "Deportista",
+      fitness: "Fitness / gimnasio",
+      rehabilitation: "Rehabilitación",
+      cognitive_training: "Entrenamiento cognitivo",
+      recreational: "Recreativo",
+      physiotherapy: "Fisioterapia",
+      sports_coach: "Entrenador deportivo",
+      physical_trainer: "Preparador físico",
+      rehabilitation_professional: "Profesional de rehabilitación",
+      educator: "Profesor / educador",
+      unspecified: "Sin especificar",
+      other: "Otro",
+    };
+    return mapa[valor] || valor || "Sin especificar";
+  }
+
+  async function v34Cliente() {
+    if (typeof window.rehabGetSupabaseClient !== "function") return null;
+
+    try {
+      v34Cloud = await window.rehabGetSupabaseClient();
+      return v34Cloud;
+    } catch (error) {
+      console.warn("V34 Supabase:", error);
+      return null;
+    }
+  }
+
+  function v34AgregarEstilos() {
+    if (document.getElementById("rehabV34Estilos")) return;
+
+    const st = document.createElement("style");
+    st.id = "rehabV34Estilos";
+    st.textContent = `
+      .rehabV34Overlay{
+        position:fixed;inset:0;z-index:100750;background:rgba(2,6,23,.82);
+        backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:16px
+      }
+      .rehabV34Overlay[hidden]{display:none!important}
+      .rehabV34Modal{
+        width:min(680px,100%);max-height:94vh;overflow:auto;border-radius:24px;padding:20px;
+        background:var(--fondo-tarjeta,#111827);color:inherit;
+        border:1px solid rgba(148,163,184,.22);box-shadow:0 25px 80px rgba(0,0,0,.44)
+      }
+      .tema-claro .rehabV34Modal{background:#fff}
+      .rehabV34Head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}
+      .rehabV34Cerrar{
+        width:42px;height:42px;border-radius:12px;border:1px solid rgba(148,163,184,.25);
+        background:rgba(148,163,184,.08);color:inherit;font-size:20px;cursor:pointer
+      }
+      .rehabV34Card{
+        border:1px solid rgba(148,163,184,.18);border-radius:17px;padding:14px;
+        margin:10px 0;background:rgba(148,163,184,.045)
+      }
+      .rehabV34TituloSec{
+        font-size:.78rem;font-weight:950;letter-spacing:.7px;opacity:.68;margin-bottom:10px
+      }
+      .rehabV34Dato{
+        display:flex;justify-content:space-between;gap:16px;padding:8px 0;
+        border-bottom:1px solid rgba(148,163,184,.12)
+      }
+      .rehabV34Dato:last-child{border-bottom:0}
+      .rehabV34Dato span:first-child{opacity:.68}
+      .rehabV34Btn{
+        appearance:none;border:0;border-radius:11px;padding:10px 13px;font-weight:900;
+
+        cursor:pointer;background:#2563eb;color:#fff
+      }
+      .rehabV34Btn.sec{
+        background:rgba(148,163,184,.14);color:inherit;border:1px solid rgba(148,163,184,.24)
+      }
+      .rehabV34Btn.peligro{background:#b91c1c;color:#fff}
+      .rehabV34Acciones{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+      .rehabV34Campo{display:grid;gap:6px;margin:10px 0}
+      .rehabV34Campo label{font-size:.78rem;font-weight:900;opacity:.72}
+      .rehabV34Campo select{
+        width:100%;padding:10px;border-radius:11px;border:1px solid rgba(148,163,184,.24);
+        background:rgba(148,163,184,.07);color:inherit;font:inherit
+      }
+      .rehabV34Switch{
+        display:flex;align-items:center;justify-content:space-between;gap:15px;padding:10px 0
+      }
+      .rehabV34Switch input{width:22px;height:22px;accent-color:#22c55e}
+      .rehabV34Relacion{
+        display:flex;align-items:center;justify-content:space-between;gap:10px;
+        padding:10px;border-radius:12px;background:rgba(148,163,184,.055);margin:7px 0
+      }
+      .rehabV34Relacion small{display:block;opacity:.65;margin-top:3px}
+      .rehabV34Aviso{
+        padding:12px;border-radius:13px;background:rgba(14,165,233,.08);
+        border:1px solid rgba(14,165,233,.18);line-height:1.5
+      }
+      .rehabV34PerfilLocal{
+        display:flex;align-items:center;gap:12px
+      }
+      .rehabV34Avatar{
+        width:48px;height:48px;border-radius:50%;overflow:hidden;display:flex;align-items:center;
+        justify-content:center;background:rgba(148,163,184,.12);font-size:22px;flex:0 0 auto
+      }
+      .rehabV34Avatar img{width:100%;height:100%;object-fit:cover}
+    `;
+    document.head.appendChild(st);
+  }
+
+  function v34CrearModal() {
+    if (document.getElementById("rehabV34Overlay")) return;
+
+    const ov = document.createElement("div");
+    ov.id = "rehabV34Overlay";
+    ov.className = "rehabV34Overlay";
+    ov.hidden = true;
+    ov.innerHTML = `
+      <div class="rehabV34Modal">
+        <div class="rehabV34Head">
+          <div>
+            <div style="font-size:.72rem;opacity:.62;font-weight:900">REHABPOD</div>
+            <h2 style="margin:0">Cuenta y perfil</h2>
+          </div>
+          <button id="rehabV34Cerrar" class="rehabV34Cerrar" type="button">×</button>
+        </div>
+        <div id="rehabV34Contenido"></div>
+      </div>
+    `;
+
+    document.body.appendChild(ov);
+    document.getElementById("rehabV34Cerrar").onclick = v34Cerrar;
+    ov.addEventListener("click", (e) => {
+      if (e.target === ov) v34Cerrar();
+    });
+  }
+
+  function v34Abrir() {
+    const ov = document.getElementById("rehabV34Overlay");
+    if (ov) ov.hidden = false;
+  }
+
+  function v34Cerrar() {
+    const ov = document.getElementById("rehabV34Overlay");
+    if (ov) ov.hidden = true;
+  }
+
+  function v34SimplificarInicio() {
+    // Estas funciones siguen existiendo; solo quitamos accesos duplicados.
+    if (typeof btnPerfiles !== "undefined" && btnPerfiles) {
+      btnPerfiles.style.display = "none";
+      btnPerfiles.setAttribute("aria-hidden", "true");
+    }
+
+    if (typeof btnAjustes !== "undefined" && btnAjustes) {
+      btnAjustes.style.display = "none";
+      btnAjustes.setAttribute("aria-hidden", "true");
+    }
+
+    const cloudHome = document.getElementById("rehabV27BtnCloud");
+    if (cloudHome) {
+      cloudHome.style.display = "none";
+      cloudHome.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  function v34PrepararBotonCuentaInferior() {
+    if (typeof btnEstadisticas === "undefined" || !btnEstadisticas) return;
+
+    // IMPORTANTE V34.1:
+    // El MutationObserver de V34 llama esta función cuando cambia el DOM.
+    // Si reescribimos innerHTML en cada llamada, provocamos un ciclo infinito:
+    // mutation -> innerHTML -> mutation -> innerHTML...
+    // Por eso solo preparamos el botón UNA VEZ.
+    if (btnEstadisticas.dataset.v34Cuenta === "1") {
+      return;
+    }
+
+    btnEstadisticas.dataset.v34Cuenta = "1";
+    btnEstadisticas.style.display = "";
+    btnEstadisticas.removeAttribute("aria-hidden");
+    btnEstadisticas.innerHTML = `
+      <span style="display:block;font-size:20px;line-height:1">👤</span>
+      <span style="display:block;font-size:.78rem;margin-top:4px">Cuenta</span>
+    `;
+
+    btnEstadisticas.onclick = function () {
+      v34AbrirCuenta();
+    };
+  }
+
+  function v34PerfilLocalHtml() {
+    let perfil = null;
+
+    try {
+      if (typeof obtenerPerfilActivo === "function") {
+        perfil = obtenerPerfilActivo();
+      }
+    } catch (_) {}
+
+    if (!perfil) {
+      return `<div class="rehabV34Aviso">No se encontró el perfil local activo.</div>`;
+    }
+
+    const avatar = perfil.foto
+      ? `<img src="${v34Esc(perfil.foto)}" alt="Perfil">`
+      : "👤";
+
+    return `
+      <div class="rehabV34Card">
+        <div class="rehabV34TituloSec">PERFIL EN ESTE DISPOSITIVO</div>
+        <div class="rehabV34PerfilLocal">
+
+          <div class="rehabV34Avatar">${avatar}</div>
+          <div style="min-width:0">
+            <strong>${v34Esc(perfil.nombre || "Perfil")}</strong>
+            <div style="opacity:.65;font-size:.82rem;margin-top:3px">
+              ${Array.isArray(perfil.historial) ? perfil.historial.length : 0} entrenamientos locales
+            </div>
+          </div>
+        </div>
+        <div class="rehabV34Acciones">
+          <button id="rehabV34AdministrarPerfiles" class="rehabV34Btn sec" type="button">
+            ADMINISTRAR PERFILES
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  function v34AjustesHtml() {
+    const sonidos = !!ajustesApp?.sonidos;
+    const tema = ajustesApp?.tema || "oscuro";
+
+    return `
+      <div class="rehabV34Card">
+        <div class="rehabV34TituloSec">AJUSTES</div>
+
+        <div class="rehabV34Switch">
+          <div>
+            <strong>Sonidos</strong>
+            <div style="font-size:.8rem;opacity:.64;margin-top:3px">
+              Sonidos de acierto, error y cuenta regresiva.
+            </div>
+          </div>
+          <input id="rehabV34Sonidos" type="checkbox" ${sonidos ? "checked" : ""}>
+        </div>
+
+        <div class="rehabV34Campo">
+          <label for="rehabV34Tema">TEMA</label>
+          <select id="rehabV34Tema">
+            <option value="oscuro" ${tema === "oscuro" ? "selected" : ""}>Oscuro</option>
+            <option value="claro" ${tema === "claro" ? "selected" : ""}>Claro</option>
+          </select>
+        </div>
+      </div>
+    `;
+  }
+
+  async function v34CargarCuentaCloud() {
+    v34User = null;
+    v34PerfilCloud = null;
+
+    const cloud = await v34Cliente();
+    if (!cloud) return false;
+
+    const { data } = await cloud.auth.getSession();
+    v34User = data?.session?.user || null;
+    if (!v34User) return false;
+
+    const { data: perfil, error } = await cloud
+      .from("rehab_profiles")
+      .select("user_id, full_name, role, specialty, user_code, created_at")
+      .eq("user_id", v34User.id)
+      .single();
+
+    if (error) {
+      console.warn("V34 perfil cloud:", error);
+      return true;
+    }
+
+    v34PerfilCloud = perfil;
+    return true;
+  }
+
+  async function v34Relaciones() {
+    if (!v34Cloud || !v34User || !v34PerfilCloud) return [];
+
+    if (v34PerfilCloud.role === "professional") {
+      const { data: links, error } = await v34Cloud
+        .from("rehab_professional_users")
+        .select("user_id, status")
+        .eq("professional_id", v34User.id)
+        .eq("status", "active");
+
+      if (error) throw error;
+      if (!links?.length) return [];
+
+      const ids = links.map((x) => x.user_id);
+      const { data: perfiles, error: ep } = await v34Cloud
+        .from("rehab_profiles")
+        .select("user_id, full_name, specialty")
+        .in("user_id", ids);
+
+      if (ep) throw ep;
+
+      return (perfiles || []).map((p) => ({
+        id: p.user_id,
+        nombre: p.full_name || "Usuario",
+        detalle: v34Especialidad(p.specialty),
+        tipo: "user",
+      }));
+    }
+
+    const { data: links, error } = await v34Cloud
+      .from("rehab_professional_users")
+      .select("professional_id, status")
+      .eq("user_id", v34User.id)
+      .eq("status", "active");
+
+    if (error) throw error;
+    if (!links?.length) return [];
+
+    const ids = links.map((x) => x.professional_id);
+    const { data: perfiles, error: ep } = await v34Cloud
+      .from("rehab_profiles")
+      .select("user_id, full_name, specialty")
+      .in("user_id", ids);
+
+    if (ep) throw ep;
+
+    return (perfiles || []).map((p) => ({
+      id: p.user_id,
+      nombre: p.full_name || "Profesional",
+      detalle: v34Especialidad(p.specialty),
+      tipo: "professional",
+    }));
+  }
+
+  function v34CloudHtml(relaciones) {
+    if (!v34User) {
+      return `
+        <div class="rehabV34Card">
+          <div class="rehabV34TituloSec">CUENTA CLOUD</div>
+          <div class="rehabV34Aviso">
+            No has iniciado sesión. Puedes usar RehabPod sin cuenta, pero la cuenta Cloud
+            permite recibir rutinas de un profesional y sincronizar información.
+          </div>
+          <div class="rehabV34Acciones">
+            <button id="rehabV34AbrirCloud" class="rehabV34Btn" type="button">
+              INICIAR SESIÓN / CREAR CUENTA
+            </button>
+          </div>
+
+        </div>
+      `;
+    }
+
+    const p = v34PerfilCloud || {};
+    const etiquetaRel =
+      p.role === "professional" ? "USUARIOS VINCULADOS" : "PROFESIONALES VINCULADOS";
+
+    return `
+      <div class="rehabV34Card">
+        <div class="rehabV34TituloSec">CUENTA CLOUD</div>
+
+        <div class="rehabV34Dato">
+          <span>Nombre</span>
+          <strong>${v34Esc(p.full_name || "Sin nombre")}</strong>
+        </div>
+        <div class="rehabV34Dato">
+          <span>Correo</span>
+          <strong style="text-align:right;overflow-wrap:anywhere">${v34Esc(v34User.email || "")}</strong>
+        </div>
+        <div class="rehabV34Dato">
+          <span>Tipo de cuenta</span>
+          <strong>${v34Esc(v34Rol(p.role))}</strong>
+        </div>
+        <div class="rehabV34Dato">
+          <span>Especialidad / uso</span>
+          <strong>${v34Esc(v34Especialidad(p.specialty))}</strong>
+        </div>
+        ${
+          p.user_code
+            ? `
+          <div class="rehabV34Dato">
+            <span>Código</span>
+            <strong>${v34Esc(p.user_code)}</strong>
+          </div>
+        `
+            : ""
+        }
+
+        <div class="rehabV34Acciones">
+          <button id="rehabV34AdministrarCloud" class="rehabV34Btn sec" type="button">
+            ADMINISTRAR CUENTA
+          </button>
+        </div>
+      </div>
+
+      <div class="rehabV34Card">
+        <div class="rehabV34TituloSec">${etiquetaRel}</div>
+
+        ${
+          relaciones.length
+            ? relaciones
+                .map(
+                  (r) => `
+              <div class="rehabV34Relacion">
+                <div>
+                  <strong>${v34Esc(r.nombre)}</strong>
+                  <small>${v34Esc(r.detalle)}</small>
+                </div>
+                <button
+                  class="rehabV34Btn peligro"
+                  type="button"
+                  data-v34-desvincular="${v34Esc(r.id)}"
+                  data-v34-nombre="${v34Esc(r.nombre)}"
+                >
+                  DESVINCULAR
+                </button>
+              </div>
+            `
+                )
+                .join("")
+            : `
+              <div class="rehabV34Aviso">
+                ${
+                  p.role === "professional"
+                    ? "Todavía no tienes usuarios vinculados."
+                    : "Todavía no estás vinculado a ningún profesional."
+                }
+              </div>
+            `
+        }
+      </div>
+    `;
+  }
+
+  function v34ActivarAjustes() {
+    const sonidos = document.getElementById("rehabV34Sonidos");
+    const tema = document.getElementById("rehabV34Tema");
+
+    if (sonidos) {
+      sonidos.onchange = function () {
+        ajustesApp.sonidos = sonidos.checked;
+
+        try {
+          if (typeof ajusteSonidos !== "undefined" && ajusteSonidos) {
+            ajusteSonidos.checked = sonidos.checked;
+          }
+          if (typeof sonidosActivados !== "undefined" && sonidosActivados) {
+            sonidosActivados.checked = sonidos.checked;
+          }
+          guardarAjustes();
+        } catch (error) {
+          console.warn("V34 sonido:", error);
+        }
+      };
+    }
+
+    if (tema) {
+      tema.onchange = function () {
+        ajustesApp.tema = tema.value;
+
+        try {
+          if (typeof ajusteTema !== "undefined" && ajusteTema) {
+            ajusteTema.value = tema.value;
+          }
+          aplicarTema(tema.value);
+          guardarAjustes();
+        } catch (error) {
+          console.warn("V34 tema:", error);
+        }
+      };
+    }
+  }
+
+  function v34ActivarPerfilLocal() {
+    const btn = document.getElementById("rehabV34AdministrarPerfiles");
+    if (!btn) return;
+
+    btn.onclick = function () {
+      v34Cerrar();
+
+      try {
+        mostrarPerfiles();
+        mostrarPantalla(pantallaPerfiles);
+      } catch (error) {
+        console.error("V34 perfiles:", error);
+      }
+    };
+  }
+
+  function v34ActivarCloud() {
+    const btnLogin = document.getElementById("rehabV34AbrirCloud");
+    const btnAdmin = document.getElementById("rehabV34AdministrarCloud");
+
+    const abrir = function () {
+      v34Cerrar();
+      if (typeof window.rehabCloudAbrir === "function") {
+        window.rehabCloudAbrir();
+      }
+    };
+
+    if (btnLogin) btnLogin.onclick = abrir;
+    if (btnAdmin) btnAdmin.onclick = abrir;
+  }
+
+  async function v34Desvincular(otroId, nombre) {
+    if (!v34Cloud || !v34User) return;
+
+    const confirmar = await v36ConfirmarDesvinculacion(nombre);
+
+    if (!confirmar) return;
+
+    const { data, error } = await v34Cloud.rpc("rehab_unlink_relationship", {
+      p_other_user_id: otroId,
+    });
+
+    if (error) {
+      alert("No se pudo desvincular: " + error.message);
+      return;
+    }
+
+    if (!data) {
+      alert("No se encontró una vinculación activa.");
+      return;
+    }
+
+    // Actualiza navegación contextual V33 inmediatamente.
+    if (typeof window.rehabV33ActualizarInterfaz === "function") {
+      await window.rehabV33ActualizarInterfaz();
+    }
+
+    await v34AbrirCuenta();
+  }
+
+  function v34ActivarDesvincular() {
+    document.querySelectorAll("[data-v34-desvincular]").forEach((btn) => {
+      btn.onclick = function () {
+        v34Desvincular(
+          btn.dataset.v34Desvincular,
+          btn.dataset.v34Nombre || "esta cuenta"
+        );
+      };
+    });
+  }
+
+  async function v34AbrirCuenta(
+    contentId = "rehabV34Contenido",
+    abrirModal = true
+  ) {
+    if (abrirModal) v34Abrir();
+
+    const c = document.getElementById(contentId);
+    if (!c) throw new Error("No se encontró el contenedor de Cuenta.");
+
+    c.innerHTML = `<div class="rehabV34Aviso">Cargando cuenta...</div>`;
+
+    try {
+      await v34CargarCuentaCloud();
+
+      let relaciones = [];
+      if (v34User && v34PerfilCloud) {
+        try {
+          relaciones = await v34Relaciones();
+        } catch (error) {
+          console.warn("V34 relaciones:", error);
+        }
+      }
+
+      c.innerHTML = `
+        ${v34PerfilLocalHtml()}
+        ${v34CloudHtml(relaciones)}
+        ${v34AjustesHtml()}
+      `;
+
+      v34ActivarPerfilLocal();
+      v34ActivarCloud();
+      v34ActivarAjustes();
+      v34ActivarDesvincular();
+    } catch (error) {
+      console.error("RehabPod V34:", error);
+      c.innerHTML = `
+        ${v34PerfilLocalHtml()}
+        <div class="rehabV34Aviso">No se pudo cargar la cuenta Cloud: ${v34Esc(error.message)}</div>
+        ${v34AjustesHtml()}
+      `;
+      v34ActivarPerfilLocal();
+      v34ActivarAjustes();
+    }
+  }
+
+  function v34ObservarInterfaz() {
+    const observer = new MutationObserver(function () {
+      v34SimplificarInicio();
+      v34PrepararBotonCuentaInferior();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
+  async function v34Iniciar() {
+    v34AgregarEstilos();
+    v34CrearModal();
+    v34SimplificarInicio();
+    v34PrepararBotonCuentaInferior();
+    // V36.2: eliminado observer global de V34 para evitar bloqueo del DOM.
+
+    console.log(
+      "RehabPod V34.1: Cuenta/Perfil + ajustes + desvinculación activados (fix interfaz)."
+    );
+  }
+
+  setTimeout(v34Iniciar, 900);
+
+  window.rehabV34AbrirCuenta = v34AbrirCuenta;
+  window.rehabV34RenderEnPantalla = function (contentId) {
+    return v34AbrirCuenta(contentId, false);
+  };
+})();
+
+// =====================================================
+// REHABPOD V35
+// PROGRESO Y CUENTA COMO PANTALLAS, NO MODALES
+//
+// Barra inferior:
+//   Inicio | Progreso | Cuenta
+//
+// - Progreso Cloud se renderiza dentro de una pantalla real.
+
+// - Si no hay sesión Cloud, se conserva el Progreso local existente.
+// - Cuenta se renderiza dentro de una pantalla real.
+// - Los modales V31/V34 se conservan internamente por compatibilidad,
+//   pero la navegación inferior ya no los utiliza.
+// =====================================================
+
+(function () {
+  let v35PantallaProgreso = null;
+  let v35PantallaCuenta = null;
+
+  function v35ContenedorPantallas() {
+    return pantallaInicio?.parentElement || document.body;
+  }
+
+  function v35CrearEstilos() {
+    if (document.getElementById("rehabV35Estilos")) return;
+
+    const st = document.createElement("style");
+    st.id = "rehabV35Estilos";
+    st.textContent = `
+      .rehabV35Pantalla{
+        padding-bottom:92px;
+      }
+      .rehabV35Cabecera{
+        display:flex;align-items:center;justify-content:space-between;gap:12px;
+        margin-bottom:16px
+      }
+      .rehabV35Titulo{
+        margin:0;font-size:1.45rem
+      }
+      .rehabV35Subtitulo{
+        margin-top:4px;opacity:.62;font-size:.83rem
+      }
+      .rehabV35Contenido{
+        width:100%;
+      }
+      .rehabV35Volver{
+        appearance:none;border:1px solid rgba(148,163,184,.20);
+        background:rgba(148,163,184,.08);color:inherit;border-radius:12px;
+        padding:9px 12px;font-weight:850;cursor:pointer
+      }
+    `;
+    document.head.appendChild(st);
+  }
+
+  function v35CrearPantallas() {
+    const contenedor = v35ContenedorPantallas();
+
+    if (!document.getElementById("pantallaProgresoV35")) {
+      v35PantallaProgreso = document.createElement("section");
+      v35PantallaProgreso.id = "pantallaProgresoV35";
+      v35PantallaProgreso.className = "pantalla rehabV35Pantalla";
+      v35PantallaProgreso.innerHTML = `
+        <div class="rehabV35Cabecera">
+          <div>
+            <h2 id="rehabV35TituloProgreso" class="rehabV35Titulo">Progreso</h2>
+            <div class="rehabV35Subtitulo">Evolución, sesiones e historial</div>
+          </div>
+        </div>
+        <div id="rehabV35ContenidoProgreso" class="rehabV35Contenido"></div>
+      `;
+      contenedor.appendChild(v35PantallaProgreso);
+    } else {
+      v35PantallaProgreso = document.getElementById("pantallaProgresoV35");
+    }
+
+    if (!document.getElementById("pantallaCuentaV35")) {
+      v35PantallaCuenta = document.createElement("section");
+      v35PantallaCuenta.id = "pantallaCuentaV35";
+      v35PantallaCuenta.className = "pantalla rehabV35Pantalla";
+      v35PantallaCuenta.innerHTML = `
+        <div class="rehabV35Cabecera">
+          <div>
+            <h2 class="rehabV35Titulo">Cuenta</h2>
+            <div class="rehabV35Subtitulo">Perfil, nube y ajustes</div>
+          </div>
+        </div>
+        <div id="rehabV35ContenidoCuenta" class="rehabV35Contenido"></div>
+      `;
+      contenedor.appendChild(v35PantallaCuenta);
+    } else {
+      v35PantallaCuenta = document.getElementById("pantallaCuentaV35");
+    }
+  }
+
+  function v35Mostrar(pantalla) {
+    document.querySelectorAll(".pantalla").forEach((p) => {
+      p.classList.remove("activa");
+    });
+
+    pantalla.classList.add("activa");
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }
+
+  async function v35HaySesionCloud() {
+    if (typeof window.rehabGetSupabaseClient !== "function") return false;
+
+    try {
+      const cloud = await window.rehabGetSupabaseClient();
+      const { data } = await cloud.auth.getSession();
+      return !!data?.session?.user;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function v35AbrirProgreso() {
+    // Sin cuenta Cloud, usamos la pantalla local que ya existía.
+    const cloudActiva = await v35HaySesionCloud();
+
+    if (!cloudActiva || typeof window.rehabV31RenderEnPantalla !== "function") {
+      try {
+        mostrarProgreso();
+        mostrarPantalla(pantallaProgreso);
+      } catch (error) {
+        console.error("V35 progreso local:", error);
+      }
+      return;
+    }
+
+    v35Mostrar(v35PantallaProgreso);
+
+    const contenido = document.getElementById("rehabV35ContenidoProgreso");
+    contenido.innerHTML = `<div class="rehabV31Aviso">Cargando progreso...</div>`;
+
+    try {
+      await window.rehabV31RenderEnPantalla(
+        "rehabV35ContenidoProgreso",
+        "rehabV35TituloProgreso"
+      );
+    } catch (error) {
+      console.error("V35 progreso:", error);
+      contenido.innerHTML = `
+        <div class="rehabV31Aviso">
+          No se pudo cargar el progreso: ${String(error.message || error)}
+        </div>
+      `;
+    }
+  }
+
+  async function v35AbrirCuenta() {
+    v35Mostrar(v35PantallaCuenta);
+
+    const contenido = document.getElementById("rehabV35ContenidoCuenta");
+    contenido.innerHTML = `<div class="rehabV34Aviso">Cargando cuenta...</div>`;
+
+    try {
+      if (typeof window.rehabV34RenderEnPantalla === "function") {
+        await window.rehabV34RenderEnPantalla("rehabV35ContenidoCuenta");
+      } else {
+        contenido.innerHTML = `
+          <div class="rehabV34Aviso">
+            No se pudo cargar la sección Cuenta.
+          </div>
+        `;
+      }
+    } catch (error) {
+      console.error("V35 Cuenta:", error);
+      contenido.innerHTML = `
+        <div class="rehabV34Aviso">
+          No se pudo cargar la cuenta: ${String(error.message || error)}
+        </div>
+      `;
+    }
+  }
+
+  function v35ConfigurarNavegacion() {
+    if (typeof btnProgreso !== "undefined" && btnProgreso) {
+      btnProgreso.onclick = v35AbrirProgreso;
+    }
+
+    if (typeof btnEstadisticas !== "undefined" && btnEstadisticas) {
+      btnEstadisticas.dataset.v34Cuenta = "1";
+      btnEstadisticas.style.display = "";
+      btnEstadisticas.removeAttribute("aria-hidden");
+      btnEstadisticas.onclick = v35AbrirCuenta;
+    }
+  }
+
+  function v35OcultarModalesSiQuedaronAbiertos() {
+    const p = document.getElementById("rehabV31Overlay");
+    const c = document.getElementById("rehabV34Overlay");
+    if (p) p.hidden = true;
+    if (c) c.hidden = true;
+  }
+
+  function v35Iniciar() {
+    v35CrearEstilos();
+    v35CrearPantallas();
+    v35ConfigurarNavegacion();
+    v35OcultarModalesSiQuedaronAbiertos();
+
+    console.log(
+      "RehabPod V35: Progreso y Cuenta ahora funcionan como pantallas."
+    );
+  }
+
+  setTimeout(v35Iniciar, 1150);
+
+  window.rehabV35AbrirProgreso = v35AbrirProgreso;
+  window.rehabV35AbrirCuenta = v35AbrirCuenta;
+})();
+
+// =====================================================
+// REHABPOD V36
+// LIMPIEZA FINAL DE INICIO + CONFIRMACION SEGURA AL DESVINCULAR
+//
+// CAMBIOS:
+// - Inicio más simple: se ocultan tarjetas estadísticas duplicadas.
+//   Esas métricas ya viven en la pestaña Progreso.
+// - Se mantiene visible lo esencial: estado de Pods, administrar Pods,
+//   Iniciar entrenamiento, Mis rutinas y Rutinas asignadas cuando corresponda.
+// - Confirmación visual antes de desvincular.
+// - El aviso explica exactamente qué se pierde y qué NO se borra.
+// =====================================================
+
+(function () {
+  function v36AgregarEstilos() {
+    if (document.getElementById("rehabV36Estilos")) return;
+
+    const st = document.createElement("style");
+    st.id = "rehabV36Estilos";
+    st.textContent = `
+      .rehabV36Oculto{display:none!important}
+
+      .rehabV36ConfirmOverlay{
+        position:fixed;inset:0;z-index:101000;background:rgba(2,6,23,.88);
+        backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;
+        padding:18px
+      }
+      .rehabV36ConfirmOverlay[hidden]{display:none!important}
+
+      .rehabV36ConfirmCard{
+        width:min(440px,100%);border-radius:24px;padding:22px 18px;
+        background:var(--fondo-tarjeta,#111827);color:inherit;
+        border:1px solid rgba(239,68,68,.28);
+        box-shadow:0 28px 90px rgba(0,0,0,.50);text-align:center
+      }
+      .tema-claro .rehabV36ConfirmCard{background:#fff}
+
+      .rehabV36Icono{
+        width:66px;height:66px;border-radius:50%;display:flex;align-items:center;
+        justify-content:center;margin:0 auto 12px;background:rgba(239,68,68,.12);
+        border:1px solid rgba(239,68,68,.28);font-size:31px
+      }
+
+      .rehabV36Lista{
+        text-align:left;margin:15px 0;padding:12px 14px;border-radius:14px;
+        background:rgba(148,163,184,.06);border:1px solid rgba(148,163,184,.15);
+        font-size:.87rem;line-height:1.55
+      }
+
+      .rehabV36Acciones{
+        display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px
+      }
+
+      .rehabV36Btn{
+        border:0;border-radius:12px;padding:11px 12px;font-weight:900;cursor:pointer
+      }
+      .rehabV36BtnCancelar{
+        background:rgba(148,163,184,.14);color:inherit;
+        border:1px solid rgba(148,163,184,.22)
+      }
+      .rehabV36BtnEliminar{background:#b91c1c;color:#fff}
+
+      @media(max-width:480px){
+        .rehabV36Acciones{grid-template-columns:1fr}
+      }
+    `;
+    document.head.appendChild(st);
+  }
+
+  function v36CrearConfirmacion() {
+    if (document.getElementById("rehabV36ConfirmOverlay")) return;
+
+    const ov = document.createElement("div");
+    ov.id = "rehabV36ConfirmOverlay";
+    ov.className = "rehabV36ConfirmOverlay";
+    ov.hidden = true;
+
+    ov.innerHTML = `
+      <div class="rehabV36ConfirmCard" role="dialog" aria-modal="true">
+        <div class="rehabV36Icono">⚠️</div>
+        <h2 style="margin:0 0 8px">Desvincular cuenta</h2>
+        <p id="rehabV36ConfirmTexto" style="margin:0;opacity:.78;line-height:1.5"></p>
+
+        <div class="rehabV36Lista">
+          <strong>Al desvincular:</strong><br>
+          • El Usuario dejará de recibir nuevas rutinas de este Profesional.<br>
+          • Desaparecerá el acceso compartido al seguimiento futuro.<br>
+          • Las asignaciones pendientes pueden dejar de estar disponibles para esa relación.<br><br>
+          <strong>Importante:</strong> los resultados e historial que ya fueron guardados
+          no se eliminan automáticamente de Supabase.
+        </div>
+
+        <div class="rehabV36Acciones">
+          <button id="rehabV36Cancelar" class="rehabV36Btn rehabV36BtnCancelar" type="button">
+            CANCELAR
+          </button>
+          <button id="rehabV36Confirmar" class="rehabV36Btn rehabV36BtnEliminar" type="button">
+            SÍ, DESVINCULAR
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(ov);
+  }
+
+  window.v36ConfirmarDesvinculacion = function (nombre) {
+    return new Promise((resolve) => {
+      const ov = document.getElementById("rehabV36ConfirmOverlay");
+      const texto = document.getElementById("rehabV36ConfirmTexto");
+      const cancelar = document.getElementById("rehabV36Cancelar");
+      const confirmar = document.getElementById("rehabV36Confirmar");
+
+      if (!ov || !texto || !cancelar || !confirmar) {
+        resolve(
+          confirm(
+            `¿Desvincular a ${nombre}?\\n\\n` +
+              "Se perderá la relación profesional-usuario y el acceso compartido futuro."
+          )
+        );
+        return;
+      }
+
+      texto.innerHTML =
+        `¿Deseas desvincular a <strong>${String(nombre || "esta cuenta")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")}</strong>?`;
+
+      ov.hidden = false;
+
+      const cerrar = (valor) => {
+        ov.hidden = true;
+        cancelar.onclick = null;
+        confirmar.onclick = null;
+        resolve(valor);
+      };
+
+      cancelar.onclick = () => cerrar(false);
+      confirmar.onclick = () => cerrar(true);
+
+      ov.onclick = (e) => {
+        if (e.target === ov) cerrar(false);
+      };
+    });
+  };
+
+  function v36OcultarResumenDuplicado() {
+    // Las cuatro métricas del inicio ya existen en Progreso.
+    // Ocultamos sus tarjetas completas para dejar Inicio más limpio.
+    const ids = [
+      "inicioMejorTiempo",
+      "inicioPrecision",
+      "inicioSesiones",
+      "inicioRacha",
+    ];
+
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+
+      // Normalmente el valor está dentro de la tarjeta.
+      // Subimos hasta dos niveles buscando el contenedor visual.
+      let tarjeta = el.parentElement;
+      if (
+        tarjeta &&
+        tarjeta.parentElement &&
+        tarjeta.parentElement.children.length <= 6
+      ) {
+        // Conservamos el contenedor grid; ocultamos solo la tarjeta.
+        tarjeta.classList.add("rehabV36Oculto");
+      }
+    });
+  }
+
+  function v36LimpiarTextoInicio() {
+    const btnPods =
+      typeof btnGestionarPods !== "undefined" ? btnGestionarPods : null;
+
+    // FIX V36.1:
+    // El MutationObserver ejecuta esta función cuando cambia el DOM.
+    // No debemos reescribir textContent/innerHTML si el texto ya es correcto,
+    // porque eso vuelve a generar otra mutación y puede crear un bucle.
+    if (btnPods && btnPods.textContent.trim() !== "ADMINISTRAR PODS") {
+      btnPods.textContent = "ADMINISTRAR PODS";
+    }
+
+    const btnRutinas = document.getElementById("rehabV23BtnRutinas");
+    if (btnRutinas && btnRutinas.textContent.trim() !== "📋 MIS RUTINAS") {
+      btnRutinas.textContent = "📋 MIS RUTINAS";
+    }
+  }
+
+  function v36ObservarInicio() {
+    let programado = false;
+
+    const observer = new MutationObserver(() => {
+      // Agrupamos varias mutaciones en una sola actualización.
+      if (programado) return;
+      programado = true;
+
+      requestAnimationFrame(() => {
+        programado = false;
+        v36OcultarResumenDuplicado();
+        v36LimpiarTextoInicio();
+      });
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
+  function v36Iniciar() {
+    v36AgregarEstilos();
+    v36CrearConfirmacion();
+
+    v36OcultarResumenDuplicado();
+    v36LimpiarTextoInicio();
+    // V36.2: limpieza aplicada una sola vez. Sin observer global.
+
+    console.log(
+      "RehabPod V36.2: interfaz estable sin MutationObservers globales + confirmación segura."
+    );
+  }
+
+  setTimeout(v36Iniciar, 1300);
+
+  // Refresco ligero cuando el usuario vuelve a la app.
+  // No observa el DOM y por eso no puede entrar en bucles de mutaciones.
+  window.addEventListener("focus", () => {
+    try {
+      v36OcultarResumenDuplicado();
+      v36LimpiarTextoInicio();
+      if (typeof window.rehabV33ActualizarInterfaz === "function") {
+        window.rehabV33ActualizarInterfaz();
+      }
+    } catch (error) {
+      console.warn("V36.2 refresco interfaz:", error);
+    }
+  });
+})();
+
+// =====================================================
+// REHABPOD V37
+// NAVEGACION INFERIOR PERSISTENTE
+//
+// - La barra Inicio / Progreso / Cuenta permanece visible
+//   al cambiar de pantalla.
+// - No depende de que la barra antigua esté dentro de pantallaInicio.
+// - Evita tener que recargar la página para volver.
+// - Mantiene V35/V36.2 sin modificar su lógica estable.
+// =====================================================
+
+(function () {
+  let v37TabActual = "inicio";
+
+  function v37AgregarEstilos() {
+    if (document.getElementById("rehabV37Estilos")) return;
+
+    const st = document.createElement("style");
+    st.id = "rehabV37Estilos";
+    st.textContent = `
+      #rehabV37Nav{
+        position:fixed;
+        left:50%;
+        transform:translateX(-50%);
+        bottom:12px;
+        z-index:100500;
+        width:min(900px,calc(100% - 24px));
+        display:grid;
+        grid-template-columns:repeat(3,1fr);
+        gap:6px;
+        padding:7px;
+        border-radius:18px;
+        background:rgba(12,18,16,.96);
+        border:1px solid rgba(148,163,184,.20);
+        box-shadow:0 12px 35px rgba(0,0,0,.28);
+        backdrop-filter:blur(12px);
+      }
+
+      .tema-claro #rehabV37Nav{
+        background:rgba(250,250,250,.97);
+      }
+
+      .rehabV37Tab{
+        appearance:none;
+        border:0;
+        min-height:58px;
+        border-radius:13px;
+        background:transparent;
+        color:inherit;
+        cursor:pointer;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        gap:4px;
+        font:inherit;
+        opacity:.64;
+        transition:background .16s ease,opacity .16s ease,transform .16s ease;
+      }
+
+      .rehabV37Tab:hover{
+        opacity:.90;
+      }
+
+      .rehabV37Tab:active{
+        transform:scale(.98);
+      }
+
+      .rehabV37Tab.activo{
+        opacity:1;
+        background:rgba(132,204,22,.16);
+      }
+
+      .rehabV37Icono{
+        font-size:20px;
+        line-height:1;
+      }
+
+      .rehabV37Texto{
+        font-size:.76rem;
+        font-weight:850;
+      }
+
+      /* Espacio para que el contenido no quede debajo de la barra fija. */
+      body{
+        padding-bottom:92px!important;
+      }
+    `;
+
+    document.head.appendChild(st);
+  }
+
+  function v37OcultarNavegacionAnterior() {
+    // Ocultamos solamente los botones inferiores antiguos.
+    // Sus funciones siguen disponibles internamente.
+    const botones = [];
+
+    if (typeof btnInicio !== "undefined" && btnInicio) botones.push(btnInicio);
+    if (typeof btnProgreso !== "undefined" && btnProgreso) botones.push(btnProgreso);
+    if (typeof btnEstadisticas !== "undefined" && btnEstadisticas) botones.push(btnEstadisticas);
+
+    botones.forEach((b) => {
+      const posibleBarra = b.parentElement;
+
+      if (
+        posibleBarra &&
+        botones.filter((x) => x && x.parentElement === posibleBarra).length >= 2
+      ) {
+        posibleBarra.style.display = "none";
+        posibleBarra.setAttribute("aria-hidden", "true");
+      } else {
+        b.style.display = "none";
+        b.setAttribute("aria-hidden", "true");
+      }
+
+    });
+  }
+
+  function v37Marcar(tab) {
+    v37TabActual = tab;
+
+    document.querySelectorAll("#rehabV37Nav [data-v37-tab]").forEach((btn) => {
+      const activo = btn.dataset.v37Tab === tab;
+      btn.classList.toggle("activo", activo);
+      btn.setAttribute("aria-current", activo ? "page" : "false");
+    });
+  }
+
+  function v37IrInicio() {
+    try {
+      if (typeof mostrarInicio === "function") {
+        mostrarInicio();
+      }
+
+      if (
+        typeof mostrarPantalla === "function" &&
+        typeof pantallaInicio !== "undefined" &&
+        pantallaInicio
+      ) {
+        mostrarPantalla(pantallaInicio);
+      }
+
+      window.scrollTo({ top: 0, behavior: "auto" });
+      v37Marcar("inicio");
+    } catch (error) {
+      console.error("V37 Inicio:", error);
+    }
+  }
+
+  async function v37IrProgreso() {
+    try {
+      if (typeof window.rehabV35AbrirProgreso === "function") {
+        await window.rehabV35AbrirProgreso();
+      } else if (
+        typeof mostrarPantalla === "function" &&
+        typeof pantallaProgreso !== "undefined"
+      ) {
+        if (typeof mostrarProgreso === "function") mostrarProgreso();
+        mostrarPantalla(pantallaProgreso);
+      }
+
+      window.scrollTo({ top: 0, behavior: "auto" });
+      v37Marcar("progreso");
+    } catch (error) {
+      console.error("V37 Progreso:", error);
+    }
+  }
+
+  async function v37IrCuenta() {
+    try {
+      if (typeof window.rehabV35AbrirCuenta === "function") {
+        await window.rehabV35AbrirCuenta();
+      } else if (typeof window.rehabV34AbrirCuenta === "function") {
+        await window.rehabV34AbrirCuenta();
+      }
+
+      window.scrollTo({ top: 0, behavior: "auto" });
+      v37Marcar("cuenta");
+    } catch (error) {
+      console.error("V37 Cuenta:", error);
+    }
+  }
+
+  function v37CrearNavegacion() {
+    if (document.getElementById("rehabV37Nav")) return;
+
+    const nav = document.createElement("nav");
+    nav.id = "rehabV37Nav";
+    nav.setAttribute("aria-label", "Navegación principal");
+
+    nav.innerHTML = `
+      <button class="rehabV37Tab activo" data-v37-tab="inicio" type="button">
+        <span class="rehabV37Icono">🏠</span>
+        <span class="rehabV37Texto">Inicio</span>
+      </button>
+
+      <button class="rehabV37Tab" data-v37-tab="progreso" type="button">
+        <span class="rehabV37Icono">📈</span>
+        <span class="rehabV37Texto">Progreso</span>
+      </button>
+
+      <button class="rehabV37Tab" data-v37-tab="cuenta" type="button">
+        <span class="rehabV37Icono">👤</span>
+        <span class="rehabV37Texto">Cuenta</span>
+      </button>
+    `;
+
+    document.body.appendChild(nav);
+
+    nav.querySelector('[data-v37-tab="inicio"]').onclick = v37IrInicio;
+    nav.querySelector('[data-v37-tab="progreso"]').onclick = v37IrProgreso;
+    nav.querySelector('[data-v37-tab="cuenta"]').onclick = v37IrCuenta;
+  }
+
+  function v37Iniciar() {
+    v37AgregarEstilos();
+    v37OcultarNavegacionAnterior();
+    v37CrearNavegacion();
+    v37Marcar("inicio");
+
+    console.log(
+      "RehabPod V37: navegación inferior persistente Inicio / Progreso / Cuenta activada."
+    );
+  }
+
+  setTimeout(v37Iniciar, 1500);
+
+  window.rehabV37Inicio = v37IrInicio;
+  window.rehabV37Progreso = v37IrProgreso;
+  window.rehabV37Cuenta = v37IrCuenta;
+})();
+
+// =====================================================
+// REHABPOD V38
+// FIX DE PANTALLAS SEPARADAS
+//
+// Problema corregido:
+// - Progreso y Cuenta podían quedar dibujados debajo de Inicio.
+// - Ahora solo UNA pantalla principal queda visible a la vez.
+// - La navegación inferior persiste y no mezcla contenidos.
+// =====================================================
+
+(function () {
+  function v38AgregarEstilos() {
+    if (document.getElementById("rehabV38Estilos")) return;
+
+    const st = document.createElement("style");
+    st.id = "rehabV38Estilos";
+    st.textContent = `
+      /* Las pantallas creadas por V35 deben comportarse como vistas reales. */
+      #pantallaProgresoV35,
+      #pantallaCuentaV35{
+        display:none!important;
+      }
+
+      #pantallaProgresoV35.activa,
+      #pantallaCuentaV35.activa{
+        display:block!important;
+      }
+
+      /* Cuando una vista V35 está activa, Inicio no debe quedar debajo. */
+      body.rehabV38-progreso #pantallaInicio,
+      body.rehabV38-cuenta #pantallaInicio{
+        display:none!important;
+      }
+
+      /* Restauración explícita al volver a Inicio. */
+      body.rehabV38-inicio #pantallaInicio{
+        display:block!important;
+      }
+    `;
+
+    document.head.appendChild(st);
+  }
+
+  function v38Estado(tab) {
+    document.body.classList.remove(
+      "rehabV38-inicio",
+      "rehabV38-progreso",
+      "rehabV38-cuenta"
+    );
+
+    document.body.classList.add(`rehabV38-${tab}`);
+
+    const p = document.getElementById("pantallaProgresoV35");
+    const c = document.getElementById("pantallaCuentaV35");
+
+    if (p) p.classList.toggle("activa", tab === "progreso");
+    if (c) c.classList.toggle("activa", tab === "cuenta");
+
+    const inicio = document.getElementById("pantallaInicio");
+    if (inicio) inicio.classList.toggle("activa", tab === "inicio");
+  }
+
+  async function v38Inicio() {
+    v38Estado("inicio");
+
+    try {
+      if (typeof mostrarInicio === "function") {
+        mostrarInicio();
+      } else if (
+        typeof mostrarPantalla === "function" &&
+        typeof pantallaInicio !== "undefined" &&
+        pantallaInicio
+      ) {
+        mostrarPantalla(pantallaInicio);
+      }
+    } catch (error) {
+      console.warn("V38 Inicio:", error);
+    }
+
+    // mostrarPantalla puede volver a tocar clases; aseguramos el estado final.
+    v38Estado("inicio");
+
+    if (typeof window.rehabV37Inicio === "function") {
+      // Solo usamos V37 para marcar la pestaña si es posible.
+      try {
+        document
+          .querySelectorAll("#rehabV37Nav [data-v37-tab]")
+          .forEach((btn) =>
+            btn.classList.toggle("activo", btn.dataset.v37Tab === "inicio")
+          );
+      } catch (_) {}
+    }
+
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }
+
+  async function v38Progreso() {
+    v38Estado("progreso");
+
+    try {
+      if (typeof window.rehabV35AbrirProgreso === "function") {
+        await window.rehabV35AbrirProgreso();
+      }
+    } catch (error) {
+      console.error("V38 Progreso:", error);
+    }
+
+    v38Estado("progreso");
+
+    document
+      .querySelectorAll("#rehabV37Nav [data-v37-tab]")
+      .forEach((btn) =>
+        btn.classList.toggle("activo", btn.dataset.v37Tab === "progreso")
+      );
+
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }
+
+  async function v38Cuenta() {
+    v38Estado("cuenta");
+
+    try {
+      if (typeof window.rehabV35AbrirCuenta === "function") {
+        await window.rehabV35AbrirCuenta();
+      }
+    } catch (error) {
+      console.error("V38 Cuenta:", error);
+    }
+
+    v38Estado("cuenta");
+
+    document
+      .querySelectorAll("#rehabV37Nav [data-v37-tab]")
+      .forEach((btn) =>
+        btn.classList.toggle("activo", btn.dataset.v37Tab === "cuenta")
+      );
+
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }
+
+  function v38ReasignarNavegacion() {
+    const nav = document.getElementById("rehabV37Nav");
+    if (!nav) return;
+
+    const inicio = nav.querySelector('[data-v37-tab="inicio"]');
+    const progreso = nav.querySelector('[data-v37-tab="progreso"]');
+    const cuenta = nav.querySelector('[data-v37-tab="cuenta"]');
+
+    if (inicio) inicio.onclick = v38Inicio;
+    if (progreso) progreso.onclick = v38Progreso;
+    if (cuenta) cuenta.onclick = v38Cuenta;
+  }
+
+  function v38Iniciar() {
+    v38AgregarEstilos();
+    v38Estado("inicio");
+    v38ReasignarNavegacion();
+
+    console.log(
+      "RehabPod V38: pantallas Inicio / Progreso / Cuenta separadas correctamente."
+    );
+  }
+
+  setTimeout(v38Iniciar, 1750);
+
+  window.rehabV38Inicio = v38Inicio;
+  window.rehabV38Progreso = v38Progreso;
+  window.rehabV38Cuenta = v38Cuenta;
 })();
