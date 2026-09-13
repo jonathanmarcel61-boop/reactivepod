@@ -58,6 +58,40 @@ const VERSION_CONSENTIMIENTO = "v1";
 // (el gate que se muestra una sola vez al abrir RehabPod por primera vez).
 const VERSION_TERMINOS = "v1";
 
+// =====================================================
+// MENSAJES DE ERROR AMIGABLES (red / offline)
+//
+// Muchas pantallas que dependen de la nube (Progreso, Cuenta,
+// Notificaciones) mostraban el error técnico crudo del navegador
+// cuando no había conexión (ej. "Failed to fetch"). Esto lo reemplaza
+// por un mensaje claro para la persona que usa la app.
+// =====================================================
+
+function rehabEsErrorDeRed(error) {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    return true;
+  }
+
+  const texto = String(error?.message || error || "").toLowerCase();
+
+  return (
+    texto.includes("failed to fetch") ||
+    texto.includes("networkerror") ||
+    texto.includes("network request failed") ||
+    texto.includes("load failed") ||
+    texto.includes("timeout") ||
+    texto.includes("err_internet_disconnected")
+  );
+}
+
+function rehabMensajeError(error) {
+  if (rehabEsErrorDeRed(error)) {
+    return "Sin conexión a internet. Tus datos se cargarán cuando vuelvas a conectarte.";
+  }
+
+  return String(error?.message || error || "Ocurrió un error inesperado.");
+}
+
 let datosApp = null;
 
 let ajustesApp = {
@@ -17250,7 +17284,7 @@ window.rehabGetSupabaseClient = async function () {
         v39ActivarFiltros(sesiones, "rehabV39Prof", "rehabV39ProfPanel");
       } catch (error) {
         console.error("V31 progreso profesional:", error);
-        panel.innerHTML = `<div class="rehabV31Aviso">Error: ${v31Esc(error.message)}</div>`;
+        panel.innerHTML = `<div class="rehabV31Aviso">${v31Esc(rehabMensajeError(error))}</div>`;
       }
     }
 
@@ -17296,7 +17330,7 @@ window.rehabGetSupabaseClient = async function () {
       return true;
     } catch (error) {
       console.error("RehabPod V31:", error);
-      c.innerHTML = `<div class="rehabV31Aviso">Error: ${v31Esc(error.message)}</div>`;
+      c.innerHTML = `<div class="rehabV31Aviso">${v31Esc(rehabMensajeError(error))}</div>`;
       return false;
     }
   }
@@ -17882,7 +17916,7 @@ async function abrirProgresoNav() {
       console.error("Nav progreso cloud:", error);
       contenidoProgresoCloud.innerHTML = `
         <div class="rehabV31Aviso">
-          No se pudo cargar el progreso: ${String(error.message || error)}
+          ${rehabMensajeError(error)}
         </div>
       `;
     }
@@ -17907,7 +17941,7 @@ async function abrirCuentaNav() {
     console.error("Nav cuenta:", error);
     contenido.innerHTML = `
       <div class="rehabV40Aviso">
-        No se pudo cargar la cuenta: ${String(error.message || error)}
+        ${rehabMensajeError(error)}
       </div>
     `;
   }
@@ -18456,17 +18490,35 @@ setTimeout(() => {
     `;
   }
 
+  function v40HtmlPrivacidad() {
+    return `
+      <div class="rehabV40Card">
+        <div class="rehabV40SecTitulo">PRIVACIDAD Y DATOS</div>
+        <div style="font-size:.82rem;opacity:.75;line-height:1.5;margin-bottom:10px">
+          Puedes descargar todo lo que RehabPod guarda del perfil activo,
+          o eliminarlo por completo de este dispositivo.
+        </div>
+        <button id="rehabV40Descargar" class="rehabV40Btn sec" type="button" style="width:100%;margin-bottom:8px">
+          ⬇️ Descargar mis datos
+        </button>
+        <button id="rehabV40EliminarDatos" class="rehabV40Btn peligro" type="button" style="width:100%">
+          🗑️ Eliminar mi cuenta y mis datos
+        </button>
+      </div>
+    `;
+  }
+
   function v40HtmlAcerca() {
     return `
       <div class="rehabV40Card">
         <div class="rehabV40SecTitulo">ACERCA DE REHABPOD</div>
         <div class="rehabV40Dato">
-          <span>Versión de interfaz</span>
-          <strong>V40</strong>
+          <span>Versión</span>
+          <strong>RehabPod v0.3</strong>
         </div>
         <div style="font-size:.8rem;opacity:.62;line-height:1.45;margin-top:9px">
-          Las funciones de privacidad y administración de datos se ampliarán antes de la
-          publicación comercial de RehabPod.
+          Aplicación experimental para entrenamiento de reacción,
+          velocidad, coordinación y rehabilitación.
         </div>
       </div>
     `;
@@ -18489,6 +18541,7 @@ setTimeout(() => {
           ${tieneCloud ? v40HtmlSeguridad() : ""}
           ${v40HtmlPreferencias()}
           ${tieneCloud ? v40HtmlSesion() : ""}
+          ${v40HtmlPrivacidad()}
           ${v40HtmlAcerca()}
         </div>
       `;
@@ -18499,10 +18552,9 @@ setTimeout(() => {
       c.innerHTML = `
         <div class="rehabV40Wrap">
           ${v40HtmlLocal()}
-          <div class="rehabV40Aviso">No se pudo cargar la cuenta Cloud: ${v40Esc(
-            error.message
-          )}</div>
+          <div class="rehabV40Aviso">${v40Esc(rehabMensajeError(error))}</div>
           ${v40HtmlPreferencias()}
+          ${v40HtmlPrivacidad()}
           ${v40HtmlAcerca()}
         </div>
       `;
@@ -18511,6 +18563,20 @@ setTimeout(() => {
   }
 
   function v40ActivarEventos(contentId) {
+    const descargar = document.getElementById("rehabV40Descargar");
+    if (descargar) {
+      descargar.onclick = function () {
+        if (typeof descargarMisDatos === "function") descargarMisDatos();
+      };
+    }
+
+    const eliminarDatos = document.getElementById("rehabV40EliminarDatos");
+    if (eliminarDatos) {
+      eliminarDatos.onclick = function () {
+        if (typeof eliminarMiCuentaYDatos === "function") eliminarMiCuentaYDatos();
+      };
+    }
+
     const perfiles = document.getElementById("rehabV40Perfiles");
     if (perfiles) {
       perfiles.onclick = function () {
@@ -18626,11 +18692,7 @@ setTimeout(() => {
 
           setTimeout(() => v40Render(contentId), 500);
         } catch (error) {
-          v40Mensaje(
-            "rehabV40MensajePerfil",
-            "No se pudo actualizar: " + error.message,
-            "error"
-          );
+          v40Mensaje("rehabV40MensajePerfil", rehabMensajeError(error), "error");
         } finally {
           guardarPerfil.disabled = false;
         }
@@ -18675,11 +18737,7 @@ setTimeout(() => {
             "ok"
           );
         } catch (error) {
-          v40Mensaje(
-            "rehabV40MensajePassword",
-            "No se pudo cambiar la contraseña: " + error.message,
-            "error"
-          );
+          v40Mensaje("rehabV40MensajePassword", rehabMensajeError(error), "error");
         } finally {
           cambiarPassword.disabled = false;
         }
@@ -18751,7 +18809,7 @@ setTimeout(() => {
 
           await v40Render(contentId);
         } catch (error) {
-          alert("No se pudo desvincular: " + error.message);
+          alert(rehabMensajeError(error));
         }
       };
     });
@@ -18777,7 +18835,7 @@ setTimeout(() => {
 
           await v40Render(contentId);
         } catch (error) {
-          alert("No se pudo cerrar sesión: " + error.message);
+          alert(rehabMensajeError(error));
         } finally {
           cerrar.disabled = false;
         }
@@ -19081,7 +19139,7 @@ setTimeout(() => {
     } catch (error) {
       host.innerHTML = `
         <div class="rehabV41Vacio">
-          No se pudieron cargar las notificaciones: ${v41Esc(error.message)}
+          ${v41Esc(rehabMensajeError(error))}
         </div>
       `;
     }
@@ -19103,7 +19161,7 @@ setTimeout(() => {
       await v41AbrirCentro();
       await v41ActualizarBadge(false);
     } catch (error) {
-      alert("No se pudieron marcar como leídas: " + error.message);
+      alert(rehabMensajeError(error));
     }
   }
 
@@ -19124,7 +19182,7 @@ setTimeout(() => {
         alert("Los avisos no fueron autorizados.");
       }
     } catch (error) {
-      alert("No se pudo solicitar permiso: " + error.message);
+      alert(rehabMensajeError(error));
     }
   }
 
@@ -19161,7 +19219,7 @@ setTimeout(() => {
 
       await v41ActualizarBadge(false);
     } catch (error) {
-      alert("No se pudo cancelar: " + error.message);
+      alert(rehabMensajeError(error));
     }
   }
 
