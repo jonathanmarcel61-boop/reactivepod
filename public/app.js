@@ -13337,8 +13337,10 @@ console.log(
 
   function rehabV24Iniciar() {
     rehabV24AgregarEstilos();
-    rehabV24CrearBoton();
     rehabV24CrearModal();
+    // Nav final: ya no creamos el botón "HISTORIAL DE RUTINAS" en Inicio;
+    // esa información ya vive en Progreso, para no repetirla al usuario
+    // ni cargar la pantalla principal.
 
     console.log("RehabPod V24: historial de rutinas activado.");
   }
@@ -17581,656 +17583,6 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
 })();
 
 // =====================================================
-// REHABPOD V34
-// CUENTA/PERFIL EN NAVEGACION INFERIOR + AJUSTES CENTRALIZADOS
-//
-// OBJETIVOS:
-// - Barra inferior simple: Inicio / Progreso / Cuenta.
-// - Quitar de Inicio los accesos duplicados de Perfiles, Ajustes y Cuenta y Nube.
-// - Cuenta muestra datos locales y de la cuenta Cloud.
-// - Ajustes de sonido y tema viven dentro de Cuenta.
-// - Permitir desvincular Profesional <-> Usuario desde Cuenta.
-// - Mantener las pantallas antiguas internamente para compatibilidad.
-// =====================================================
-
-(function () {
-  let v34Cloud = null;
-  let v34User = null;
-  let v34PerfilCloud = null;
-
-  function v34Esc(v) {
-    return String(v ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function v34Rol(role) {
-    return role === "professional" ? "Profesional" : "Usuario";
-  }
-
-  function v34Especialidad(valor) {
-    const mapa = {
-      athlete: "Deportista",
-      fitness: "Fitness / gimnasio",
-      rehabilitation: "Rehabilitación",
-      cognitive_training: "Entrenamiento cognitivo",
-      recreational: "Recreativo",
-      physiotherapy: "Fisioterapia",
-      sports_coach: "Entrenador deportivo",
-      physical_trainer: "Preparador físico",
-      rehabilitation_professional: "Profesional de rehabilitación",
-      educator: "Profesor / educador",
-      unspecified: "Sin especificar",
-      other: "Otro",
-    };
-    return mapa[valor] || valor || "Sin especificar";
-  }
-
-  async function v34Cliente() {
-    if (typeof window.rehabGetSupabaseClient !== "function") return null;
-
-    try {
-      v34Cloud = await window.rehabGetSupabaseClient();
-      return v34Cloud;
-    } catch (error) {
-      console.warn("V34 Supabase:", error);
-      return null;
-    }
-  }
-
-  function v34AgregarEstilos() {
-    if (document.getElementById("rehabV34Estilos")) return;
-
-    const st = document.createElement("style");
-    st.id = "rehabV34Estilos";
-    st.textContent = `
-      .rehabV34Overlay{
-        position:fixed;inset:0;z-index:100750;background:rgba(2,6,23,.82);
-        backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:16px
-      }
-      .rehabV34Overlay[hidden]{display:none!important}
-      .rehabV34Modal{
-        width:min(680px,100%);max-height:94vh;overflow:auto;border-radius:24px;padding:20px;
-        background:var(--tarjeta);color:inherit;
-        border:1px solid rgba(148,163,184,.22);box-shadow:0 25px 80px rgba(0,0,0,.44)
-      }
-      .tema-claro .rehabV34Modal{background:#fff}
-      .rehabV34Head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}
-      .rehabV34Cerrar{
-        width:42px;height:42px;border-radius:12px;border:1px solid rgba(148,163,184,.25);
-        background:rgba(148,163,184,.08);color:inherit;font-size:20px;cursor:pointer
-      }
-      .rehabV34Card{
-        border:1px solid rgba(148,163,184,.18);border-radius:17px;padding:14px;
-        margin:10px 0;background:rgba(148,163,184,.045)
-      }
-      .rehabV34TituloSec{
-        font-size:.78rem;font-weight:950;letter-spacing:.7px;opacity:.68;margin-bottom:10px
-      }
-      .rehabV34Dato{
-        display:flex;justify-content:space-between;gap:16px;padding:8px 0;
-        border-bottom:1px solid rgba(148,163,184,.12)
-      }
-      .rehabV34Dato:last-child{border-bottom:0}
-      .rehabV34Dato span:first-child{opacity:.68}
-      .rehabV34Btn{
-        appearance:none;border:0;border-radius:11px;padding:10px 13px;font-weight:900;
-        cursor:pointer;background:var(--acento);color:var(--acento-tinta)
-      }
-      .rehabV34Btn.sec{
-        background:rgba(148,163,184,.14);color:inherit;border:1px solid rgba(148,163,184,.24)
-
-      }
-      .rehabV34Btn.peligro{background:#b91c1c;color:#fff}
-      .rehabV34Acciones{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
-      .rehabV34Campo{display:grid;gap:6px;margin:10px 0}
-      .rehabV34Campo label{font-size:.78rem;font-weight:900;opacity:.72}
-      .rehabV34Campo select{
-        width:100%;padding:10px;border-radius:11px;border:1px solid rgba(148,163,184,.24);
-        background:rgba(148,163,184,.07);color:inherit;font:inherit
-      }
-      .rehabV34Switch{
-        display:flex;align-items:center;justify-content:space-between;gap:15px;padding:10px 0
-      }
-      .rehabV34Switch input{width:22px;height:22px;accent-color:#22c55e}
-      .rehabV34Relacion{
-        display:flex;align-items:center;justify-content:space-between;gap:10px;
-        padding:10px;border-radius:12px;background:rgba(148,163,184,.055);margin:7px 0
-      }
-      .rehabV34Relacion small{display:block;opacity:.65;margin-top:3px}
-      .rehabV34Aviso{
-        padding:12px;border-radius:13px;background:rgba(14,165,233,.08);
-        border:1px solid rgba(14,165,233,.18);line-height:1.5
-      }
-      .rehabV34PerfilLocal{
-        display:flex;align-items:center;gap:12px
-      }
-      .rehabV34Avatar{
-        width:48px;height:48px;border-radius:50%;overflow:hidden;display:flex;align-items:center;
-        justify-content:center;background:rgba(148,163,184,.12);font-size:22px;flex:0 0 auto
-      }
-      .rehabV34Avatar img{width:100%;height:100%;object-fit:cover}
-    `;
-    document.head.appendChild(st);
-  }
-
-  function v34CrearModal() {
-    if (document.getElementById("rehabV34Overlay")) return;
-
-    const ov = document.createElement("div");
-    ov.id = "rehabV34Overlay";
-    ov.className = "rehabV34Overlay";
-    ov.hidden = true;
-    ov.innerHTML = `
-      <div class="rehabV34Modal">
-        <div class="rehabV34Head">
-          <div>
-            <div style="font-size:.72rem;opacity:.62;font-weight:900">REHABPOD</div>
-            <h2 style="margin:0">Cuenta y perfil</h2>
-          </div>
-          <button id="rehabV34Cerrar" class="rehabV34Cerrar" type="button">×</button>
-        </div>
-        <div id="rehabV34Contenido"></div>
-      </div>
-    `;
-
-    document.body.appendChild(ov);
-    document.getElementById("rehabV34Cerrar").onclick = v34Cerrar;
-    ov.addEventListener("click", (e) => {
-      if (e.target === ov) v34Cerrar();
-    });
-  }
-
-  function v34Abrir() {
-    const ov = document.getElementById("rehabV34Overlay");
-    if (ov) ov.hidden = false;
-  }
-
-  function v34Cerrar() {
-    const ov = document.getElementById("rehabV34Overlay");
-    if (ov) ov.hidden = true;
-  }
-
-  function v34SimplificarInicio() {
-    // Estas funciones siguen existiendo; solo quitamos accesos duplicados.
-    if (typeof btnPerfiles !== "undefined" && btnPerfiles) {
-      btnPerfiles.style.display = "none";
-      btnPerfiles.setAttribute("aria-hidden", "true");
-    }
-
-    if (typeof btnAjustes !== "undefined" && btnAjustes) {
-      btnAjustes.style.display = "none";
-      btnAjustes.setAttribute("aria-hidden", "true");
-    }
-
-    const cloudHome = document.getElementById("rehabV27BtnCloud");
-    if (cloudHome) {
-      cloudHome.style.display = "none";
-      cloudHome.setAttribute("aria-hidden", "true");
-    }
-  }
-
-  function v34PrepararBotonCuentaInferior() {
-    if (typeof btnEstadisticas === "undefined" || !btnEstadisticas) return;
-
-    // IMPORTANTE V34.1:
-    // El MutationObserver de V34 llama esta función cuando cambia el DOM.
-    // Si reescribimos innerHTML en cada llamada, provocamos un ciclo infinito:
-    // mutation -> innerHTML -> mutation -> innerHTML...
-    // Por eso solo preparamos el botón UNA VEZ.
-    if (btnEstadisticas.dataset.v34Cuenta === "1") {
-      return;
-    }
-
-    btnEstadisticas.dataset.v34Cuenta = "1";
-    btnEstadisticas.style.display = "";
-    btnEstadisticas.removeAttribute("aria-hidden");
-    btnEstadisticas.innerHTML = `
-      <span style="display:block;font-size:20px;line-height:1">👤</span>
-      <span style="display:block;font-size:.78rem;margin-top:4px">Cuenta</span>
-    `;
-
-    btnEstadisticas.onclick = function () {
-      v34AbrirCuenta();
-    };
-  }
-
-  function v34PerfilLocalHtml() {
-    let perfil = null;
-
-    try {
-      if (typeof obtenerPerfilActivo === "function") {
-        perfil = obtenerPerfilActivo();
-      }
-    } catch (_) {}
-
-    if (!perfil) {
-      return `<div class="rehabV34Aviso">No se encontró el perfil local activo.</div>`;
-    }
-
-    const avatar = perfil.foto ? `<img src="${v34Esc(perfil.foto)}" alt="Perfil">` : "👤";
-
-    return `
-      <div class="rehabV34Card">
-        <div class="rehabV34TituloSec">PERFIL EN ESTE DISPOSITIVO</div>
-        <div class="rehabV34PerfilLocal">
-          <div class="rehabV34Avatar">${avatar}</div>
-          <div style="min-width:0">
-            <strong>${v34Esc(perfil.nombre || "Perfil")}</strong>
-            <div style="opacity:.65;font-size:.82rem;margin-top:3px">
-              ${Array.isArray(perfil.historial) ? perfil.historial.length : 0} entrenamientos locales
-            </div>
-          </div>
-        </div>
-        <div class="rehabV34Acciones">
-          <button id="rehabV34AdministrarPerfiles" class="rehabV34Btn sec" type="button">
-            ADMINISTRAR PERFILES
-          </button>
-        </div>
-      </div>
-    `;
-  }
-
-  function v34AjustesHtml() {
-    const sonidos = !!ajustesApp?.sonidos;
-
-    const tema = ajustesApp?.tema || "oscuro";
-
-    return `
-      <div class="rehabV34Card">
-        <div class="rehabV34TituloSec">AJUSTES</div>
-
-        <div class="rehabV34Switch">
-          <div>
-            <strong>Sonidos</strong>
-            <div style="font-size:.8rem;opacity:.64;margin-top:3px">
-              Sonidos de acierto, error y cuenta regresiva.
-            </div>
-          </div>
-          <input id="rehabV34Sonidos" type="checkbox" ${sonidos ? "checked" : ""}>
-        </div>
-
-        <div class="rehabV34Campo">
-          <label for="rehabV34Tema">TEMA</label>
-          <select id="rehabV34Tema">
-            <option value="oscuro" ${tema === "oscuro" ? "selected" : ""}>Oscuro</option>
-            <option value="claro" ${tema === "claro" ? "selected" : ""}>Claro</option>
-          </select>
-        </div>
-      </div>
-    `;
-  }
-
-  async function v34CargarCuentaCloud() {
-    v34User = null;
-    v34PerfilCloud = null;
-
-    const cloud = await v34Cliente();
-    if (!cloud) return false;
-
-    const { data } = await cloud.auth.getSession();
-    v34User = data?.session?.user || null;
-    if (!v34User) return false;
-
-    const { data: perfil, error } = await cloud
-      .from("rehab_profiles")
-      .select("user_id, full_name, role, specialty, user_code, created_at")
-      .eq("user_id", v34User.id)
-      .single();
-
-    if (error) {
-      console.warn("V34 perfil cloud:", error);
-      return true;
-    }
-
-    v34PerfilCloud = perfil;
-    return true;
-  }
-
-  async function v34Relaciones() {
-    if (!v34Cloud || !v34User || !v34PerfilCloud) return [];
-
-    if (v34PerfilCloud.role === "professional") {
-      const { data: links, error } = await v34Cloud
-        .from("rehab_professional_users")
-        .select("user_id, status")
-        .eq("professional_id", v34User.id)
-        .eq("status", "active");
-
-      if (error) throw error;
-      if (!links?.length) return [];
-
-      const ids = links.map((x) => x.user_id);
-      const { data: perfiles, error: ep } = await v34Cloud
-        .from("rehab_profiles")
-        .select("user_id, full_name, specialty")
-        .in("user_id", ids);
-
-      if (ep) throw ep;
-
-      return (perfiles || []).map((p) => ({
-        id: p.user_id,
-        nombre: p.full_name || "Usuario",
-        detalle: v34Especialidad(p.specialty),
-        tipo: "user",
-      }));
-    }
-
-    const { data: links, error } = await v34Cloud
-      .from("rehab_professional_users")
-      .select("professional_id, status")
-      .eq("user_id", v34User.id)
-      .eq("status", "active");
-
-    if (error) throw error;
-    if (!links?.length) return [];
-
-    const ids = links.map((x) => x.professional_id);
-    const { data: perfiles, error: ep } = await v34Cloud
-      .from("rehab_profiles")
-      .select("user_id, full_name, specialty")
-      .in("user_id", ids);
-
-    if (ep) throw ep;
-
-    return (perfiles || []).map((p) => ({
-      id: p.user_id,
-      nombre: p.full_name || "Profesional",
-      detalle: v34Especialidad(p.specialty),
-      tipo: "professional",
-    }));
-  }
-
-  function v34CloudHtml(relaciones) {
-    if (!v34User) {
-      return `
-        <div class="rehabV34Card">
-          <div class="rehabV34TituloSec">CUENTA CLOUD</div>
-          <div class="rehabV34Aviso">
-            No has iniciado sesión. Puedes usar RehabPod sin cuenta, pero la cuenta Cloud
-            permite recibir rutinas de un profesional y sincronizar información.
-          </div>
-          <div class="rehabV34Acciones">
-            <button id="rehabV34AbrirCloud" class="rehabV34Btn" type="button">
-              INICIAR SESIÓN / CREAR CUENTA
-            </button>
-          </div>
-        </div>
-      `;
-    }
-
-    const p = v34PerfilCloud || {};
-    const etiquetaRel =
-      p.role === "professional" ? "USUARIOS VINCULADOS" : "PROFESIONALES VINCULADOS";
-
-    return `
-      <div class="rehabV34Card">
-        <div class="rehabV34TituloSec">CUENTA CLOUD</div>
-
-        <div class="rehabV34Dato">
-          <span>Nombre</span>
-          <strong>${v34Esc(p.full_name || "Sin nombre")}</strong>
-        </div>
-        <div class="rehabV34Dato">
-          <span>Correo</span>
-          <strong style="text-align:right;overflow-wrap:anywhere">${v34Esc(v34User.email || "")}</strong>
-        </div>
-        <div class="rehabV34Dato">
-          <span>Tipo de cuenta</span>
-          <strong>${v34Esc(v34Rol(p.role))}</strong>
-        </div>
-        <div class="rehabV34Dato">
-          <span>Especialidad / uso</span>
-          <strong>${v34Esc(v34Especialidad(p.specialty))}</strong>
-        </div>
-        ${
-          p.user_code
-            ? `
-          <div class="rehabV34Dato">
-            <span>Código</span>
-            <strong>${v34Esc(p.user_code)}</strong>
-
-          </div>
-        `
-            : ""
-        }
-
-        <div class="rehabV34Acciones">
-          <button id="rehabV34AdministrarCloud" class="rehabV34Btn sec" type="button">
-            ADMINISTRAR CUENTA
-          </button>
-        </div>
-      </div>
-
-      <div class="rehabV34Card">
-        <div class="rehabV34TituloSec">${etiquetaRel}</div>
-
-        ${
-          relaciones.length
-            ? relaciones
-                .map(
-                  (r) => `
-              <div class="rehabV34Relacion">
-                <div>
-                  <strong>${v34Esc(r.nombre)}</strong>
-                  <small>${v34Esc(r.detalle)}</small>
-                </div>
-                <button
-                  class="rehabV34Btn peligro"
-                  type="button"
-                  data-v34-desvincular="${v34Esc(r.id)}"
-                  data-v34-nombre="${v34Esc(r.nombre)}"
-                >
-                  DESVINCULAR
-                </button>
-              </div>
-            `
-                )
-                .join("")
-            : `
-              <div class="rehabV34Aviso">
-                ${
-                  p.role === "professional"
-                    ? "Todavía no tienes usuarios vinculados."
-                    : "Todavía no estás vinculado a ningún profesional."
-                }
-              </div>
-            `
-        }
-      </div>
-    `;
-  }
-
-  function v34ActivarAjustes() {
-    const sonidos = document.getElementById("rehabV34Sonidos");
-    const tema = document.getElementById("rehabV34Tema");
-
-    if (sonidos) {
-      sonidos.onchange = function () {
-        ajustesApp.sonidos = sonidos.checked;
-
-        try {
-          if (typeof ajusteSonidos !== "undefined" && ajusteSonidos) {
-            ajusteSonidos.checked = sonidos.checked;
-          }
-          if (typeof sonidosActivados !== "undefined" && sonidosActivados) {
-            sonidosActivados.checked = sonidos.checked;
-          }
-          guardarAjustes();
-        } catch (error) {
-          console.warn("V34 sonido:", error);
-        }
-      };
-    }
-
-    if (tema) {
-      tema.onchange = function () {
-        ajustesApp.tema = tema.value;
-
-        try {
-          if (typeof ajusteTema !== "undefined" && ajusteTema) {
-            ajusteTema.value = tema.value;
-          }
-          aplicarTema(tema.value);
-          guardarAjustes();
-        } catch (error) {
-          console.warn("V34 tema:", error);
-        }
-      };
-    }
-  }
-
-  function v34ActivarPerfilLocal() {
-    const btn = document.getElementById("rehabV34AdministrarPerfiles");
-    if (!btn) return;
-
-    btn.onclick = function () {
-      v34Cerrar();
-
-      try {
-        mostrarPerfiles();
-        mostrarPantalla(pantallaPerfiles);
-      } catch (error) {
-        console.error("V34 perfiles:", error);
-      }
-    };
-  }
-
-  function v34ActivarCloud() {
-    const btnLogin = document.getElementById("rehabV34AbrirCloud");
-    const btnAdmin = document.getElementById("rehabV34AdministrarCloud");
-
-    const abrir = function () {
-      v34Cerrar();
-      if (typeof window.rehabCloudAbrir === "function") {
-        window.rehabCloudAbrir();
-      }
-    };
-
-    if (btnLogin) btnLogin.onclick = abrir;
-    if (btnAdmin) btnAdmin.onclick = abrir;
-  }
-
-  async function v34Desvincular(otroId, nombre) {
-    if (!v34Cloud || !v34User) return;
-
-    const confirmar = await v36ConfirmarDesvinculacion(nombre);
-
-    if (!confirmar) return;
-
-    const { data, error } = await v34Cloud.rpc("rehab_unlink_relationship", {
-      p_other_user_id: otroId,
-    });
-
-    if (error) {
-      alert("No se pudo desvincular: " + error.message);
-      return;
-    }
-
-    if (!data) {
-      alert("No se encontró una vinculación activa.");
-      return;
-    }
-
-    // Actualiza navegación contextual V33 inmediatamente.
-    if (typeof window.rehabV33ActualizarInterfaz === "function") {
-      await window.rehabV33ActualizarInterfaz();
-    }
-
-    await v34AbrirCuenta();
-  }
-
-  function v34ActivarDesvincular() {
-    document.querySelectorAll("[data-v34-desvincular]").forEach((btn) => {
-      btn.onclick = function () {
-        v34Desvincular(
-          btn.dataset.v34Desvincular,
-
-          btn.dataset.v34Nombre || "esta cuenta"
-        );
-      };
-    });
-  }
-
-  async function v34AbrirCuenta(contentId = "rehabV34Contenido", abrirModal = true) {
-    if (abrirModal) v34Abrir();
-
-    const c = document.getElementById(contentId);
-    if (!c) throw new Error("No se encontró el contenedor de Cuenta.");
-
-    c.innerHTML = `<div class="rehabV34Aviso">Cargando cuenta...</div>`;
-
-    try {
-      await v34CargarCuentaCloud();
-
-      let relaciones = [];
-      if (v34User && v34PerfilCloud) {
-        try {
-          relaciones = await v34Relaciones();
-        } catch (error) {
-          console.warn("V34 relaciones:", error);
-        }
-      }
-
-      c.innerHTML = `
-        ${v34PerfilLocalHtml()}
-        ${v34CloudHtml(relaciones)}
-        ${v34AjustesHtml()}
-      `;
-
-      v34ActivarPerfilLocal();
-      v34ActivarCloud();
-      v34ActivarAjustes();
-      v34ActivarDesvincular();
-    } catch (error) {
-      console.error("RehabPod V34:", error);
-      c.innerHTML = `
-        ${v34PerfilLocalHtml()}
-        <div class="rehabV34Aviso">No se pudo cargar la cuenta Cloud: ${v34Esc(error.message)}</div>
-        ${v34AjustesHtml()}
-      `;
-      v34ActivarPerfilLocal();
-      v34ActivarAjustes();
-    }
-  }
-
-  function v34ObservarInterfaz() {
-    const observer = new MutationObserver(function () {
-      v34SimplificarInicio();
-      v34PrepararBotonCuentaInferior();
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
-  }
-
-  async function v34Iniciar() {
-    v34AgregarEstilos();
-    v34CrearModal();
-    v34SimplificarInicio();
-    // V34.2 / Nav final: ya no reasignamos btnEstadisticas como "Cuenta";
-    // Cuenta tiene su propio botón dedicado (ver navegación final).
-
-    console.log(
-      "RehabPod V34.1: Cuenta/Perfil + ajustes + desvinculación activados (fix interfaz)."
-    );
-  }
-
-  setTimeout(v34Iniciar, 900);
-
-  window.rehabV34AbrirCuenta = v34AbrirCuenta;
-  window.rehabV34RenderEnPantalla = function (contentId) {
-    return v34AbrirCuenta(contentId, false);
-  };
-})();
-
-// =====================================================
-// =====================================================
 // REHABPOD V36
 // LIMPIEZA FINAL DE INICIO + CONFIRMACION SEGURA AL DESVINCULAR
 //
@@ -18537,29 +17889,24 @@ async function abrirProgresoNav() {
   }
 }
 
-function abrirHistorialNav() {
-  mostrarEstadisticas();
-  mostrarPantalla(pantallaEstadisticas);
-}
-
 async function abrirCuentaNav() {
   mostrarPantalla(pantallaCuentaCloud);
 
   const contenido = document.getElementById("contenidoCuentaCloud");
   if (!contenido) return;
 
-  contenido.innerHTML = `<div class="rehabV34Aviso">Cargando cuenta...</div>`;
+  contenido.innerHTML = `<div class="rehabV40Aviso">Cargando cuenta...</div>`;
 
   try {
-    if (typeof window.rehabV34RenderEnPantalla === "function") {
-      await window.rehabV34RenderEnPantalla("contenidoCuentaCloud");
+    if (typeof window.rehabV40RenderCuenta === "function") {
+      await window.rehabV40RenderCuenta("contenidoCuentaCloud");
     } else {
-      contenido.innerHTML = `<div class="rehabV34Aviso">No se pudo cargar la sección Cuenta.</div>`;
+      contenido.innerHTML = `<div class="rehabV40Aviso">No se pudo cargar la sección Cuenta.</div>`;
     }
   } catch (error) {
     console.error("Nav cuenta:", error);
     contenido.innerHTML = `
-      <div class="rehabV34Aviso">
+      <div class="rehabV40Aviso">
         No se pudo cargar la cuenta: ${String(error.message || error)}
       </div>
     `;
@@ -18568,7 +17915,8 @@ async function abrirCuentaNav() {
 
 if (btnInicioMenu) btnInicioMenu.onclick = abrirInicioNav;
 if (btnProgreso) btnProgreso.onclick = abrirProgresoNav;
-if (btnEstadisticas) btnEstadisticas.onclick = abrirHistorialNav;
+// btnEstadisticas (Historial) ya no tiene entrada en el menú: su
+// información vive dentro de Progreso, para no repetirla al usuario.
 if (btnCuentaMenu) btnCuentaMenu.onclick = abrirCuentaNav;
 if (btnVolverCuentaCloud) btnVolverCuentaCloud.onclick = abrirInicioNav;
 
@@ -18951,6 +18299,17 @@ setTimeout(() => {
           </div>
 
           <div class="rehabV40Campo">
+            <label>TIPO DE CUENTA</label>
+            <select id="rehabV40Rol">
+              <option value="user" ${p.role === "user" ? "selected" : ""}>Usuario</option>
+              <option value="professional" ${p.role === "professional" ? "selected" : ""}>Profesional</option>
+            </select>
+            <div style="font-size:.76rem;opacity:.65;line-height:1.4;margin-top:2px">
+              Si cambias el tipo de cuenta, revisa también la especialidad/uso debajo.
+            </div>
+          </div>
+
+          <div class="rehabV40Campo">
             <label>ESPECIALIDAD / USO</label>
             <select id="rehabV40Especialidad">
               ${v40OpcionesEspecialidad(p.role, p.specialty)}
@@ -19197,11 +18556,22 @@ setTimeout(() => {
       };
     }
 
+    const rolSelect = document.getElementById("rehabV40Rol");
+    const especialidadSelect = document.getElementById("rehabV40Especialidad");
+    if (rolSelect && especialidadSelect) {
+      rolSelect.onchange = () => {
+        especialidadSelect.innerHTML = v40OpcionesEspecialidad(rolSelect.value, null);
+      };
+    }
+
     const guardarPerfil = document.getElementById("rehabV40GuardarPerfil");
     if (guardarPerfil) {
       guardarPerfil.onclick = async function () {
         const nombre = String(
           document.getElementById("rehabV40Nombre")?.value || ""
+        ).trim();
+        const rol = String(
+          document.getElementById("rehabV40Rol")?.value || v40Perfil.role
         ).trim();
         const specialty = String(
           document.getElementById("rehabV40Especialidad")?.value || ""
@@ -19223,6 +18593,7 @@ setTimeout(() => {
             .from("rehab_profiles")
             .update({
               full_name: nombre,
+              role: rol,
               specialty: specialty || "other",
             })
             .eq("user_id", v40User.id);
@@ -19428,25 +18799,16 @@ setTimeout(() => {
     }
   }
 
-  function v40ReemplazarNavegacionCuenta() {
-    // V38 creó la navegación persistente.
-    const tab = document.querySelector('#rehabV37Nav [data-v37-tab="cuenta"]');
-    if (tab) tab.onclick = v40AbrirCuenta;
-
-    // Si otras funciones llaman al renderer V34/V35, usamos V40 también.
-    window.rehabV40RenderCuenta = v40Render;
-  }
-
   function v40Iniciar() {
     v40AgregarEstilos();
-    v40ReemplazarNavegacionCuenta();
+    window.rehabV40RenderCuenta = v40Render;
 
     console.log(
       "RehabPod V40: Cuenta mejorada con edición de perfil, seguridad y sesión."
     );
   }
 
-  setTimeout(v40Iniciar, 2050);
+  v40Iniciar();
 
   window.rehabV40AbrirCuenta = v40AbrirCuenta;
 })();
