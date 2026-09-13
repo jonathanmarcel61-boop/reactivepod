@@ -139,7 +139,6 @@ const textoEstadoPods = document.getElementById("textoEstadoPods");
 
 const botonesConexion = document.querySelectorAll(".botonConexionPod");
 
-
 const estadosConexion = [
   document.getElementById("estadoConexionPod1"),
 
@@ -279,7 +278,6 @@ const lucesPods = [
 
 // =====================================================
 // V7 - MEJORAS VISUALES + INTRO DEL ENTRENAMIENTO
-
 // =====================================================
 
 function aplicarMejorasVisualesV7() {
@@ -310,6 +308,7 @@ function aplicarMejorasVisualesV7() {
             padding:18px !important;
             min-height:132px;
             box-shadow:0 12px 28px rgba(0,0,0,.18);
+
             transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
         }
  
@@ -420,7 +419,6 @@ function aplicarMejorasVisualesV7() {
             width:min(100%,440px);
             border-radius:28px;
             border:1px solid rgba(148,163,184,.20);
-
             background:linear-gradient(160deg,#101a2d,#080f1c 72%);
             box-shadow:0 24px 60px rgba(0,0,0,.38);
             padding:24px 20px 20px;
@@ -466,6 +464,7 @@ function aplicarMejorasVisualesV7() {
             line-height:1.1;
             font-weight:950;
             margin:0;
+
         }
  
         .introDescripcionV7 {
@@ -561,7 +560,6 @@ function aplicarMejorasVisualesV7() {
         .intro-persecucion .demoPodV7:nth-child(1) {
             animation:podVerdeV7 1.1s ease-in-out infinite;
         }
-
  
         .intro-doble .demoPodV7:nth-child(1),
         .intro-doble .demoPodV7:nth-child(4) {
@@ -622,6 +620,7 @@ function aplicarMejorasVisualesV7() {
             .introTituloV7 { font-size:24px; }
             .demoPodsV7 { gap:10px; margin:20px 0 16px; }
             .demoPodV7 { width:46px;height:46px; }
+
             .introAccionesV7 { grid-template-columns:1fr; }
         }
  
@@ -702,7 +701,6 @@ function obtenerGuiaModoV7() {
       descripcion:
         "Completa los cuatro Pods en un orden aleatorio. Cada Pod aparece una sola vez dentro de cada circuito.",
       pasos: [
-
         "Toca el primer Pod que se ilumine.",
         "Muévete inmediatamente al siguiente objetivo.",
         "Completa los cuatro Pods para cerrar el circuito.",
@@ -778,6 +776,7 @@ function mostrarIntroduccionEntrenamiento() {
             <div class="introEtiquetaV7">PREPARA TU ENTRENAMIENTO</div>
             <div class="introIconoV7">${guia.icono}</div>
             <h2 class="introTituloV7">${guia.titulo}</h2>
+
             <p class="introDescripcionV7">${guia.descripcion}</p>
  
             <div class="demoPodsV7" aria-hidden="true">
@@ -843,7 +842,6 @@ function mostrarIntroduccionEntrenamiento() {
 // =====================================================
 
 const numeroCuenta = document.getElementById("numeroCuenta");
-
 
 // =====================================================
 // RESULTADOS
@@ -1091,6 +1089,7 @@ function mostrarPantalla(pantalla) {
     pantallaPods,
 
 
+
     pantallaPerfiles,
 
     pantallaTiposEntrenamiento,
@@ -1244,6 +1243,7 @@ async function conectarPodNativo(indice) {
       await BluetoothLe.disconnect({
         deviceId: pod.deviceId,
       });
+
     } catch (error) {
       // Es normal si no estaba conectado.
     }
@@ -1399,12 +1399,12 @@ async function limpiarListenersPod(pod) {
     try {
       await pod.notificationListener.remove();
     } catch (error) {
+
       console.warn(error);
     }
 
     pod.notificationListener = null;
   }
-
 
   if (pod.disconnectListener) {
     try {
@@ -1545,7 +1545,6 @@ async function conectarPodEncontrado(indice, dispositivo) {
       });
     } catch (error) {
       // Normal si Android no lo tenia conectado.
-
     }
 
     // Pequena pausa para que Android libere una conexion anterior.
@@ -1556,6 +1555,7 @@ async function conectarPodEncontrado(indice, dispositivo) {
 
       () => {
         podDesconectado(indice);
+
       }
     );
 
@@ -1686,7 +1686,6 @@ async function buscarPodsParaReconectar() {
     }
 
     reconexionAutomaticaEnCurso = false;
-
   }
 }
 
@@ -1968,7 +1967,6 @@ function actualizarNombresPerfil() {
 
   nombrePerfilResultados.textContent = perfil.nombre;
 
-
   nombrePerfilProgreso.textContent = perfil.nombre;
 
   nombrePerfilEstadisticas.textContent = perfil.nombre;
@@ -2023,6 +2021,7 @@ function mostrarPerfiles() {
                         <small>
                             ${perfil.historial.length}
                             entrenamientos
+
                         </small>
  
                     </div>
@@ -2179,6 +2178,7 @@ function actualizarFotoPerfilInicio() {
 
     foto.style.cssText = `
 
+
             width:52px;
             height:52px;
             border-radius:50%;
@@ -2334,6 +2334,7 @@ function mostrarGateTerminos() {
 
   document.body.appendChild(overlay);
 
+
   const check = document.getElementById("checkTerminosRehabPod");
   const btnContinuar = document.getElementById("btnAceptarTerminosRehabPod");
 
@@ -2388,7 +2389,6 @@ function mostrarModalConsentimiento(nombre, alConfirmar, alCancelar) {
         padding:20px;
         background:rgba(0,0,0,.6);
         opacity:0;
-
         transition:opacity .2s ease;
     `;
 
@@ -2489,6 +2489,7 @@ function mostrarModalConsentimiento(nombre, alConfirmar, alCancelar) {
     btnAceptar.disabled = !check.checked;
     btnAceptar.style.opacity = check.checked ? "1" : ".5";
     btnAceptar.style.cursor = check.checked ? "pointer" : "not-allowed";
+
   });
 
   function cerrar() {
@@ -2529,7 +2530,6 @@ function crearPerfil() {
 
   if (nombre === null) {
     return;
-
   }
 
   nombre = nombre.trim();
@@ -2646,6 +2646,7 @@ function calcularResumenPerfil() {
 
   const mejorTiempo = mejores.length ? Math.min(...mejores) : null;
 
+
   const promedio = promedios.length
     ? promedios.reduce(
         (suma, valor) => suma + valor,
@@ -2670,7 +2671,6 @@ function calcularResumenPerfil() {
     mejorTiempo,
 
     promedio,
-
 
     mejorPromedio: mejorPromedioValor,
 
@@ -2802,6 +2802,7 @@ const catalogoColoresPersonalizados = {
     css: "#f97316",
   },
 
+
   pink: {
     nombre: "ROSADO",
     comando: "pink",
@@ -2811,7 +2812,6 @@ const catalogoColoresPersonalizados = {
 
 function obtenerColorPod(indice) {
   const guardados = Array.isArray(ajustesApp.coloresPods)
-
     ? ajustesApp.coloresPods
     : ["red", "green", "blue", "yellow"];
 
@@ -2952,12 +2952,12 @@ function crearControlesExperienciaEntrenamiento() {
         border-radius:14px;
         background:var(--tarjeta);
         border:1px solid var(--borde);
-
     `;
 
   panel.innerHTML = `
  
         <div
+
             id="controlDuracionContrarrelojReactiPod"
             style="display:none;margin-bottom:16px;padding:14px;border-radius:12px;background:var(--tarjeta2);border:1px solid var(--borde);"
         >
@@ -3113,6 +3113,7 @@ function crearControlesExperienciaEntrenamiento() {
  
         .filaColorPodReactiPod {
             display:grid;
+
             grid-template-columns:80px 1fr 28px;
             gap:10px;
             align-items:center;
@@ -3233,7 +3234,6 @@ function crearControlesExperienciaEntrenamiento() {
         `;
 
     contenedor.appendChild(fila);
-
   }
 
   document.querySelectorAll(".btnDificultadReactiPod").forEach((boton) => {
@@ -3269,6 +3269,7 @@ function crearControlesExperienciaEntrenamiento() {
       "blue",
       "yellow",
       "white",
+
 
       "purple",
       "cyan",
@@ -3375,7 +3376,6 @@ function pintarControlesExperiencia() {
   const usaEspera = ["simple", "colores", "doble", "prohibido"].includes(modoActual);
   const usaPausa = !["contrarreloj", "libre", "entrenador"].includes(modoActual);
 
-
   if (contenedorEspera) {
     contenedorEspera.style.display = personalizada && usaEspera ? "block" : "none";
   }
@@ -3425,6 +3425,7 @@ function ordenarConfiguracionV14() {
 
   // Los controles propios del ejercicio quedan debajo de la descripción.
   bloqueDescripcion.insertAdjacentElement("afterend", panel);
+
 
   // El botón de inicio permanece al final. La dificultad ya está al final del panel.
   if (bloqueInicio && bloqueInicio !== panel) {
@@ -3515,7 +3516,6 @@ function crearTarjetaPersecucion() {
   tarjeta.innerHTML = `
         <div style="font-size:34px;margin-bottom:8px;">🔥</div>
         <strong style="display:block;font-size:17px;">Persecución</strong>
-
         <small style="display:block;margin-top:6px;color:#9ca3af;">
             Toca el Pod encendido y persigue el siguiente estímulo lo más rápido posible.
         </small>
@@ -3581,6 +3581,7 @@ function crearTarjetasNuevosModos() {
 }
 
 function crearTarjetaCircuito() {
+
   if (document.querySelector('[data-modo="circuito"]')) {
     return;
   }
@@ -3656,7 +3657,6 @@ function crearBotonRepetirEntrenamiento() {
   if (!btnNuevoEntrenamiento || !btnNuevoEntrenamiento.parentElement) return;
   const boton = document.createElement("button");
   boton.id = "btnRepetirEntrenamientoReactiPod";
-
   boton.type = "button";
   boton.textContent = "🔁 REPETIR ESTE ENTRENAMIENTO";
   boton.style.cssText = `
@@ -3737,6 +3737,7 @@ function configurarModo() {
   } else if (modoActual === "contrarreloj") {
     tituloConfiguracion.textContent = "Contrarreloj";
     iconoConfiguracion.textContent = "⏱️";
+
     descripcionModo.textContent =
       "Tienes un tiempo limitado para conseguir tantos aciertos como puedas. Cada vez que tocas un objetivo aparece otro inmediatamente.";
     contenedorEspera.style.display = "none";
@@ -3797,7 +3798,6 @@ function tono(frecuencia, duracion) {
   const osc = contextoAudio.createOscillator();
 
   const gain = contextoAudio.createGain();
-
 
   osc.frequency.value = frecuencia;
 
@@ -3894,6 +3894,7 @@ function iniciarEntrenamiento() {
 
   tiempoPausado = 0;
 
+
   contadorAciertos.textContent = "0";
 
   contadorErrores.textContent = "0";
@@ -3938,7 +3939,6 @@ function obtenerNombreModo() {
   }
 
   if (modoActual === "circuito") {
-
     return "Circuito 4 Pods";
   }
 
@@ -4049,6 +4049,7 @@ function iniciarTemporizadorGeneralSiAplica() {
   actualizar();
   intervaloGeneral = setInterval(actualizar, 100);
   temporizadorFinGeneral = setTimeout(() => {
+
     if (!entrenamientoActivo) return;
     esperandoRespuesta = false;
     fase = "resultado";
@@ -4219,7 +4220,6 @@ function mezclar(array) {
   }
 
   return array;
-
 }
 
 // =====================================================
@@ -4501,7 +4501,6 @@ async function respuestaCircuito(indice) {
   tono(820, 70);
 
   if (circuitoPosicion < circuitoOrden.length) {
-
     mensajeResultado.textContent = `✅ ${circuitoPosicion}/4 · siguiente`;
 
     mensajeResultado.className = "mensajeResultado mensajeCorrecto";
@@ -4643,7 +4642,6 @@ async function respuestaPersecucion(indice) {
   temporizador = setTimeout(activarPersecucion, pausaPersecucion);
 }
 
-
 // =====================================================
 // CRONOMETRO
 // =====================================================
@@ -4673,6 +4671,7 @@ function actualizarCronometro() {
 function detenerCronometro() {
   if (animacionCronometro) {
     cancelAnimationFrame(animacionCronometro);
+
   }
 
   animacionCronometro = null;
@@ -4783,7 +4782,6 @@ function crearPanelEntrenadorActivo() {
   panel.id = "panelEntrenadorActivoReactiPod";
   panel.innerHTML = `
         <div style="font-size:11px;letter-spacing:.04em;color:var(--texto2);margin-bottom:10px;">CONTROL DEL ENTRENADOR</div>
-
         <div id="gridEntrenadorActivoReactiPod">
             <button type="button" class="btnPodEntrenadorActivo" data-entrenador-pod="0">ACTIVAR POD 1</button>
             <button type="button" class="btnPodEntrenadorActivo" data-entrenador-pod="1">ACTIVAR POD 2</button>
@@ -4829,6 +4827,7 @@ function habilitarBotonesEntrenador(habilitar) {
   panel.querySelectorAll(".btnPodEntrenadorActivo").forEach((boton) => {
     boton.disabled = !habilitar;
   });
+
 }
 
 async function iniciarEntrenador() {
@@ -4924,7 +4923,6 @@ async function respuestaEntrenador(indice) {
 
   const tiempo = (performance.now() - tiempoInicio - tiempoPausado) / 1000;
   rondaActual++;
-
   aciertos++;
 
   contadorAciertos.textContent = aciertos;
@@ -4985,6 +4983,7 @@ async function terminarEntrenadorTiempo() {
 // =====================================================
 
 function procesarPulsacion(indice) {
+
   if (!entrenamientoActivo || pausado) {
     return;
   }
@@ -5140,6 +5139,7 @@ async function respuestaNormal(indice) {
 
 // =====================================================
 // CONTINUAR
+
 // =====================================================
 
 function continuar() {
@@ -5295,6 +5295,7 @@ async function respuestaSecuencia(indice) {
     temporizador = setTimeout(iniciarRonda, pausaRondasMs);
 
     return;
+
   }
 
   posicionSecuencia++;
@@ -5345,7 +5346,6 @@ async function respuestaSecuencia(indice) {
 
   // NUEVO: los 4 Pods se ponen verdes cuando se completa la secuencia.
   await feedbackTodosPods("green", "#22c55e", 800);
-
 
   if (rondaActual >= totalRondasActual) {
     temporizador = setTimeout(finalizarEntrenamiento, 500);
@@ -5451,6 +5451,7 @@ async function golpeLibre(indice) {
 
     esperandoRespuesta = false;
     detenerCronometro();
+
     fase = "resultado";
 
     // Cerramos de inmediato; no esperamos ninguna escritura BLE del último golpe.
@@ -5607,6 +5608,7 @@ function obtenerFraseFinal() {
 async function mostrarCelebracionFinal() {
   let overlay = document.getElementById("celebracionReactiPod");
 
+
   if (overlay) {
     overlay.remove();
   }
@@ -5626,7 +5628,6 @@ async function mostrarCelebracionFinal() {
         background:radial-gradient(circle at center,rgba(38,25,10,.96),rgba(3,7,18,.98) 65%);
         color:white;
         text-align:center;
-
         opacity:0;
         transition:opacity .25s ease;
     `;
@@ -5762,12 +5763,12 @@ async function finalizarEntrenamiento() {
   clearTimeout(temporizadorFinContrarreloj);
   temporizadorFinContrarreloj = null;
   clearInterval(intervaloContrarreloj);
+
   intervaloContrarreloj = null;
 
   clearTimeout(temporizadorFinEntrenador);
   temporizadorFinEntrenador = null;
   clearInterval(intervaloEntrenador);
-
   intervaloEntrenador = null;
 
   mostrarPanelEntrenadorActivo(false);
@@ -5908,7 +5909,6 @@ function guardarEntrenamiento(promedio, mejor, peor) {
 // =====================================================
 
 function mostrarEstadisticas() {
-
   const perfil = obtenerPerfilActivo();
 
   const resumen = calcularResumenPerfil();
@@ -5919,6 +5919,7 @@ function mostrarEstadisticas() {
 
   promedioGeneral.textContent =
     resumen.promedio === null ? "-- s" : `${resumen.promedio.toFixed(3)} s`;
+
 
   mejorPromedio.textContent =
     resumen.mejorPromedio === null ? "-- s" : `${resumen.mejorPromedio.toFixed(3)} s`;
@@ -6050,7 +6051,6 @@ function actualizarObjetivo() {
 
   objetivoActual.textContent = `${resumen.mejorTiempo.toFixed(3)} s`;
 
-
   if (resumen.mejorTiempo <= meta) {
     rellenoObjetivo.style.width = "100%";
 
@@ -6075,6 +6075,7 @@ function actualizarObjetivo() {
 }
 
 function editarObjetivo() {
+
   const perfil = obtenerPerfilActivo();
 
   const actual = perfil.objetivo || 0.5;
@@ -6190,7 +6191,6 @@ function dibujarGrafico() {
   ctx.clearRect(0, 0, ancho, alto);
 
   if (historial.length === 0) {
-
     ctx.fillStyle = "#9ca3af";
 
     ctx.font = "14px Arial";
@@ -6231,6 +6231,7 @@ function dibujarGrafico() {
   const margenInferior = 35;
 
   const areaAncho = ancho - margenIzquierda - margenDerecha;
+
 
   const areaAlto = alto - margenSuperior - margenInferior;
 
@@ -6331,7 +6332,6 @@ function analizarProgreso(valores) {
   } else {
     mensajeProgreso.textContent = `El último promedio fue ${Math.abs(diferencia).toFixed(3)} s más lento. La tendencia puede variar entre sesiones.`;
   }
-
 }
 
 // =====================================================
@@ -6387,6 +6387,7 @@ tarjetasModos.forEach((tarjeta) => {
 });
 
 // =====================================================
+
 // NAVEGACION
 // =====================================================
 
@@ -6472,7 +6473,6 @@ btnEstadisticasInicio.onclick = () => {
   actualizarResumenInicio();
 
   mostrarPantalla(pantallaInicio);
-
 };
 
 btnBorrarHistorial.onclick = () => {
@@ -6543,6 +6543,7 @@ sonidosActivados.addEventListener(
 // =====================================================
 
 function construirExportacionPerfil(perfil) {
+
   return JSON.stringify(
     {
       exportado_el: new Date().toISOString(),
@@ -6753,7 +6754,6 @@ function mostrarModalDatosPerfil(perfil) {
 }
 
 function descargarMisDatos() {
-
   const perfil = obtenerPerfilActivo();
 
   if (!perfil) {
@@ -6854,6 +6854,7 @@ function crearPantallaInicioApp() {
         justify-content:center;
         gap:14px;
         background:
+
             radial-gradient(circle at center, #123525 0%, #07111f 48%, #030712 100%);
         color:white;
         font-family:Arial, sans-serif;
@@ -6894,7 +6895,6 @@ function crearPantallaInicioApp() {
         >
             Prepárate para reaccionar más rápido.
         </div>
-
  
         <div
             style="
@@ -7010,6 +7010,7 @@ function aplicarMejorasVisualesV8() {
             justify-content:center;
             background:#122038;
             border:1px solid rgba(148,163,184,.16);
+
             font-size:19px;
         }
  
@@ -7035,7 +7036,6 @@ function aplicarMejorasVisualesV8() {
             min-height:164px !important;
             padding:20px !important;
             border-radius:22px !important;
-
             background:
                 radial-gradient(circle at 88% 12%,rgba(34,197,94,.09),transparent 28%),
                 linear-gradient(145deg,#111d31,#0a1322) !important;
@@ -7166,6 +7166,7 @@ function aplicarMejorasVisualesV8() {
         }
  
         #mensajeResultado.rpMensajeCorrectoV8 {
+
             animation:rpMensajePopV8 .34s ease both;
         }
  
@@ -7176,7 +7177,6 @@ function aplicarMejorasVisualesV8() {
         @keyframes rpMensajePopV8 {
             0% { opacity:.25; transform:scale(.88); }
             70% { transform:scale(1.06); }
-
             100% { opacity:1; transform:scale(1); }
         }
  
@@ -7317,12 +7317,12 @@ function aplicarMejorasVisualesV8() {
         .rpCategoriaTarjetaV9 {
             width:100%;
             min-height:142px;
-
             border:1px solid rgba(148,163,184,.16);
             border-radius:24px;
             background:linear-gradient(145deg,rgba(20,31,48,.98),rgba(10,18,31,.98));
             color:#f8fafc;
             padding:20px;
+
             display:grid;
             grid-template-columns:auto 1fr auto;
             align-items:center;
@@ -7458,7 +7458,6 @@ function organizarModosPorCategoriaV8() {
       modos: ["simple", "persecucion", "contrarreloj"],
     },
     {
-
       clave: "coordinacion",
       icono: "🎯",
       titulo: "Coordinación",
@@ -7479,6 +7478,7 @@ function organizarModosPorCategoriaV8() {
       icono: "🛡️",
       titulo: "Control",
       subtitulo: "Decisión, inhibición y control manual",
+
       descripcion:
         "Entrena la toma de decisiones e incluye el modo de control directo para entrenadores.",
       modos: ["prohibido", "libre", "entrenador"],
@@ -7599,7 +7599,6 @@ function prepararIndicadoresPodsV8() {
   const primero = padres[0];
 
   if (padres.every((p) => p === primero)) {
-
     primero.classList.add("indicadoresPodsV8");
   }
 }
@@ -7635,6 +7634,7 @@ function iniciarFeedbackVisualV8() {
 
               { transform: "translateX(0)" },
               { transform: "translateX(-8px)" },
+
               { transform: "translateX(8px)" },
               { transform: "translateX(-5px)" },
               { transform: "translateX(0)" },
@@ -7740,7 +7740,6 @@ function construirResumenResultadosV8(datos) {
     } else {
       pantallaResultados.appendChild(panel);
     }
-
   }
 
   const promedioTexto =
@@ -7946,6 +7945,7 @@ function ordenarEntrenadorActivoV15() {
   const zonaObjetivoRef = nombreColor ? nombreColor.closest(".zonaObjetivo") : null;
 
   if (zonaObjetivoRef && zonaObjetivoRef.nextElementSibling !== panel) {
+
     zonaObjetivoRef.insertAdjacentElement("afterend", panel);
   }
 
@@ -8021,7 +8021,6 @@ var MINIMO_PODS_POR_MODO = {
 };
 
 function rehabMinimoPodsModo(modo) {
-
   return MINIMO_PODS_POR_MODO[modo] || 1;
 }
 
@@ -8162,7 +8161,6 @@ function rehabActualizarControlCantidadPods() {
   }
 
   selector.value = String(cantidadPodsSeleccionada);
-
   localStorage.setItem(REHABPOD_CLAVE_CANTIDAD, String(cantidadPodsSeleccionada));
 
   if (ayuda) {
@@ -8258,6 +8256,7 @@ function rehabRestaurarVisualesPods() {
 // =====================================================
 // BLE MANUAL: CUALQUIER POD COMPATIBLE PUEDE OCUPAR CUALQUIER ESPACIO
 // =====================================================
+
 
 conectarPodNativo = async function (indice) {
   var pod = podsBLE[indice];
@@ -8413,6 +8412,7 @@ buscarPodsParaReconectar = async function () {
   }
 
   if (cantidadConectados() >= podsBLE.length) {
+
     return;
   }
 
@@ -8864,7 +8864,6 @@ respuestaCircuito = async function (indice) {
   aciertos++;
   contadorAciertos.textContent = aciertos;
   ultimoTiempo.textContent = `${tiempo.toFixed(3)} s`;
-
   mensajeResultado.textContent = `✅ CIRCUITO COMPLETO · ${tiempo.toFixed(3)} s`;
   mensajeResultado.className = "mensajeResultado mensajeCorrecto";
   tono(1050, 160);
@@ -9005,7 +9004,6 @@ cancelarEntrenamiento = async function () {
 
 if (btnCancelar) {
   btnCancelar.onclick = cancelarEntrenamiento;
-
 }
 
 // =====================================================
@@ -9036,6 +9034,7 @@ if (btnCancelar) {
 // =====================================================
 
 // -----------------------------------------------------
+
 // 1. AJUSTES V18
 // -----------------------------------------------------
 
@@ -9146,7 +9145,6 @@ function rehabActualizarControlColorMemoria() {
   }
 
   var selector = panel.querySelector("#colorMemoriaRehabPod");
-
   selector.value = rehabColorMemoria;
 
   var color = rehabObtenerColorMemoria();
@@ -9192,6 +9190,7 @@ function rehabCrearControlModoVirtual() {
         ACTIVAR
       </label>
     </div>
+
 
     <div id="estadoModoVirtualRehabPod" style="margin-top:10px;font-size:12px;font-weight:800;"></div>
   `;
@@ -9427,7 +9426,6 @@ configurarModo = function () {
     modoActual === "secuencia" &&
     virtual &&
     memoria &&
-
     virtual.parentElement === memoria.parentElement
   ) {
     virtual.insertAdjacentElement("afterend", memoria);
@@ -9503,6 +9501,7 @@ if (btnCancelar) {
     "RehabPod V18: color fijo de memoria + simulación de Pods virtuales activados."
   );
 })();
+
 // =====================================================
 // REHABPOD V19
 // 2 NUEVOS MODOS:
@@ -9658,6 +9657,7 @@ function rehabV19PrepararCategorias() {
     var contadorCoordinacion = coordinacion.querySelector("small");
     if (contadorCoordinacion) {
       contadorCoordinacion.textContent = "4 entrenamientos";
+
     }
   }
 }
@@ -9708,7 +9708,6 @@ function rehabV19CrearControlColorCaza() {
     cantidad.insertAdjacentElement("afterend", panel);
   } else if (descripcionModo && descripcionModo.parentElement) {
     descripcionModo.insertAdjacentElement("afterend", panel);
-
   }
 
   var selector = panel.querySelector("#colorCazaRehabPod");
@@ -9849,7 +9848,6 @@ rehabActualizarDescripcionModo = function () {
   var plural = cantidad === 1 ? "Pod" : "Pods";
 
   if (modoActual === "cazaColor") {
-
     var color = rehabObtenerColorCaza();
     descripcionModo.textContent =
       `Busca siempre el color ${color.nombre.toLowerCase()} entre ${cantidad} ${plural}. ` +
@@ -9970,6 +9968,7 @@ async function rehabV19RespuestaCazaColor(indice) {
     !entrenamientoActivo ||
     modoActual !== "cazaColor" ||
     fase !== "cazaColorRespuesta" ||
+
     !esperandoRespuesta
   ) {
     return;
@@ -10130,7 +10129,6 @@ iniciarRonda = async function () {
 
 // -----------------------------------------------------
 // 8. PULSACIONES
-
 // Caza de color sí usa PRESS. Cambio automático los ignora.
 // -----------------------------------------------------
 
@@ -10271,7 +10269,6 @@ function rehabDescripcionDificultadEspecifica(modo, dificultad) {
         "Personal · Mantiene los colores dinámicos y usa tus tiempos personalizados.",
     },
     secuencia: {
-
       facil: "Fácil · La secuencia crece de 1 en 1 y se muestra lentamente.",
       media: "Media · La secuencia crece de 1 en 1 a velocidad normal.",
       dificil: "Difícil · La secuencia crece de 2 en 2 y se muestra mucho más rápido.",
@@ -10282,6 +10279,7 @@ function rehabDescripcionDificultadEspecifica(modo, dificultad) {
       facil: "Fácil · Sesión libre con ritmo cómodo y sin una secuencia obligatoria.",
       media: "Media · Sesión libre para mantener un ritmo continuo.",
       dificil:
+
         "Difícil · Busca mantener golpes rápidos y continuos; la app conserva el registro de tiempos.",
       personalizada: "Personal · Sesión libre con la configuración general elegida.",
     },
@@ -10412,7 +10410,6 @@ activarColorProhibido = async function () {
       color = rehabColorProhibidoActual;
     } else {
       color = rehabColorPorClave(clavesPermitidas[pos % clavesPermitidas.length]);
-
       pos++;
     }
     coloresActuales[indice] = color;
@@ -10438,6 +10435,7 @@ activarColorProhibido = async function () {
       : "Evita el color prohibido";
   mensajeResultado.className = "mensajeResultado";
   iniciarMedicion();
+
 };
 
 respuestaColorProhibido = async function (indice) {
@@ -10553,7 +10551,6 @@ rehabV19ActivarCazaColor = async function () {
   if (dif === "dificil") debeCambiar = true;
 
   if (debeCambiar) {
-
     rehabColorCaza = rehabElegirColorClave([rehabUltimoColorCazaDinamico]);
     rehabUltimoColorCazaDinamico = rehabColorCaza;
   }
@@ -10594,6 +10591,7 @@ function rehabV20CrearTarjetaStroop() {
   tarjeta.innerHTML = `
     <div style="font-size:34px;margin-bottom:8px;">🧠🎨</div>
     <strong style="display:block;font-size:17px;">Palabra vs color</strong>
+
     <small style="display:block;margin-top:6px;line-height:1.45;opacity:.78;">
       Lee la regla: toca el color que DICE la palabra o el color con el que está ESCRITA.
     </small>`;
@@ -10694,7 +10692,6 @@ async function rehabV20RespuestaStroop(indice) {
 
   var tiempo = (performance.now() - tiempoInicio - tiempoPausado) / 1000;
   var correcto = indice === rehabObjetivoStroop;
-
   ultimoTiempo.textContent = `${tiempo.toFixed(3)} s`;
 
   if (correcto) {
@@ -10750,6 +10747,7 @@ procesarPulsacion = function (indice) {
 // -----------------------------------------------------
 var rehabV20ConfigurarModoBase = configurarModo;
 configurarModo = function () {
+
   rehabV20ConfigurarModoBase();
   if (modoActual === "stroop") {
     tituloConfiguracion.textContent = "Palabra vs color";
@@ -10835,7 +10833,6 @@ if (btnCancelar) btnCancelar.onclick = cancelarEntrenamiento;
       coordinacion.addEventListener("click", function () {
         setTimeout(rehabV20InsertarStroopSiCoordinacion, 0);
       });
-
       var contador = coordinacion.querySelector("small");
       if (contador) contador.textContent = "5 entrenamientos";
     }
@@ -11061,6 +11058,7 @@ respuestaPersecucion = async function (indice) {
 
   if (indice !== objetivoCorrecto) {
     errores++;
+
     contadorErrores.textContent = errores;
     mensajeResultado.textContent = `❌ Pod ${rehabNumeroVisiblePod(indice)} incorrecto`;
     mensajeResultado.className = "mensajeResultado mensajeError";
@@ -11116,7 +11114,6 @@ respuestaPersecucion = async function (indice) {
 respuestaContrarreloj = async function (indice) {
   if (!entrenamientoActivo || modoActual !== "contrarreloj" || !esperandoRespuesta)
     return;
-
 
   esperandoRespuesta = false;
   detenerCronometro();
@@ -11217,6 +11214,7 @@ console.log(
     },
     doble: {
       icono: "⚡⚡",
+
       titulo: "Doble estímulo",
       descripcion: "Responde a dos Pods en una misma ronda.",
     },
@@ -11257,7 +11255,6 @@ console.log(
       icono: "🧠🎨",
       titulo: "Palabra vs color",
       descripcion: "Responde según la palabra escrita o según su color visual.",
-
     },
   };
 
@@ -11373,6 +11370,7 @@ console.log(
 
       .rehabV22CategoriaCantidad {
         margin-top:12px;
+
         font-size:.78rem;
         font-weight:700;
         opacity:.72;
@@ -11398,7 +11396,6 @@ console.log(
         align-items:center;
         margin-bottom:16px;
       }
-
 
       .rehabV22DetalleIcono {
         font-size:38px;
@@ -11539,7 +11536,6 @@ console.log(
       if (h2) h2.textContent = "Elige el área de entrenamiento";
       if (p) {
         p.textContent =
-
           "Selecciona Deportista, Fisioterapia o Neurología para ver los ejercicios disponibles.";
       }
     }
@@ -11680,12 +11676,12 @@ console.log(
     { clave: "entrenador", nombre: "Modo entrenador", icono: "🧑‍🏫" },
     { clave: "cazaColor", nombre: "Caza de color", icono: "🎯🎨" },
     { clave: "automatico", nombre: "Cambio automático", icono: "🔁⚡" },
-
     { clave: "stroop", nombre: "Palabra vs color", icono: "🧠🎨" },
   ];
 
   let rehabV23Rutinas = rehabV23LeerRutinas();
   let rehabV23RutinaEditandoId = null;
+
   let rehabV23EjerciciosEditor = [];
 
   function rehabV23Id() {
@@ -11821,7 +11817,6 @@ console.log(
       }
 
       .rehabV23ModalCabecera {
-
         display:flex;
         gap:14px;
         align-items:center;
@@ -11962,7 +11957,6 @@ console.log(
         display:grid;
         grid-template-columns:1fr 1fr;
         gap:12px;
-
       }
 
       .rehabV23EditorEjercicio {
@@ -11998,6 +11992,7 @@ console.log(
 
         background:rgba(148,163,184,.08);
         color:inherit;
+
       }
 
       .rehabV23Quitar {
@@ -12154,6 +12149,7 @@ console.log(
       </div>
     `;
 
+
     document.getElementById("rehabV23Nueva").addEventListener("click", function () {
       rehabV23AbrirEditor(null);
     });
@@ -12243,7 +12239,6 @@ console.log(
         if (!confirm(`¿Borrar la rutina "${rutina.nombre}"?`)) return;
 
         rehabV23Rutinas = rehabV23Rutinas.filter(function (r) {
-
           return r.id !== id;
         });
         rehabV23GuardarRutinas();
@@ -12309,6 +12304,7 @@ console.log(
         <select id="rehabV23DescansoRutina">
           ${[0, 15, 30, 45, 60, 90, 120]
             .map(function (seg) {
+
               const actual = rutina ? Number(rutina.descansoSeg || 0) : 30;
               return `<option value="${seg}" ${actual === seg ? "selected" : ""}>${seg === 0 ? "Sin descanso" : seg + " segundos"}</option>`;
             })
@@ -12464,6 +12460,7 @@ console.log(
 
         fila.querySelectorAll("[data-campo]").forEach(function (control) {
           const campo = control.dataset.campo;
+
           item[campo] = campo === "valor" ? Number(control.value) : control.value;
         });
       });
@@ -12524,7 +12521,6 @@ console.log(
         return rutina.id === rehabV23RutinaEditandoId ? nueva : rutina;
       });
     } else {
-
       rehabV23Rutinas.push(nueva);
     }
 
@@ -12620,6 +12616,7 @@ console.log(
     } catch (error) {}
 
     return {
+
       id: "perfil_local",
       nombre: "Perfil local",
     };
@@ -12665,7 +12662,6 @@ console.log(
 
       .rehabV24Overlay[hidden] {
         display:none !important;
-
       }
 
       .rehabV24Modal {
@@ -12806,7 +12802,6 @@ console.log(
         display:block;
         height:100%;
         border-radius:99px;
-
         background:#22c55e;
       }
 
@@ -12932,6 +12927,7 @@ console.log(
 
     const overlay = document.createElement("div");
     overlay.id = "rehabV24Overlay";
+
     overlay.className = "rehabV24Overlay";
     overlay.hidden = true;
 
@@ -12947,7 +12943,6 @@ console.log(
           </div>
 
           <button id="rehabV24Cerrar" type="button" class="rehabV24Cerrar">×</button>
-
         </div>
 
         <div id="rehabV24Contenido"></div>
@@ -13230,7 +13225,6 @@ console.log(
           <input id="rehabV24DuracionMin" type="number" min="0" max="600" step="1" value="10">
         </div>
 
-
         <div class="rehabV24Campo">
           <label>Precisión general (%) — opcional</label>
           <input id="rehabV24Precision" type="number" min="0" max="100" step="0.1" placeholder="Ej. 88.5">
@@ -13245,6 +13239,7 @@ console.log(
       <div class="rehabV24Campo">
         <label>Notas — opcional</label>
         <textarea
+
           id="rehabV24Notas"
           rows="3"
           maxlength="400"
@@ -13370,7 +13365,6 @@ console.log(
       (!Number.isFinite(precision) || precision < 0 || precision > 100)
     ) {
       alert("La precisión debe estar entre 0 y 100.");
-
       return;
     }
 
@@ -13401,6 +13395,7 @@ console.log(
     };
 
     const historial = rehabV24LeerHistorial();
+
     historial.push(registro);
     rehabV24GuardarHistorial(historial);
 
@@ -13511,7 +13506,6 @@ console.log(
       .rehabV25Campo input{width:100%;box-sizing:border-box;padding:10px 11px;border-radius:11px;
         border:1px solid rgba(148,163,184,.27);background:rgba(148,163,184,.07);color:inherit}
       .rehabV25Acciones{display:flex;gap:9px;flex-wrap:wrap;margin-top:10px}
-
       .rehabV25Btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;
         background:#2563eb;color:#fff}
       .rehabV25Btn.sec{background:rgba(148,163,184,.15);color:inherit;border:1px solid rgba(148,163,184,.22)}
@@ -13557,6 +13551,7 @@ console.log(
 
     const contenido = document.getElementById("rehabV25Contenido");
     const ejercicios = Array.isArray(rutina.ejercicios) ? rutina.ejercicios : [];
+
 
     contenido.innerHTML = `
       <div style="opacity:.78;margin-bottom:12px">
@@ -13653,7 +13648,6 @@ console.log(
       const lista = card.querySelector(".rehabV23RutinaEjercicios");
       if (!lista) return;
 
-
       const lis = lista.querySelectorAll("li");
       rutina.ejercicios.forEach((ej, i) => {
         if (!ej.videoUrl || !lis[i] || lis[i].querySelector(".rehabV25VideoBtn")) return;
@@ -13713,6 +13707,7 @@ window.rehabGetSupabaseClient = async function () {
           ) {
             resolve();
             return;
+
           }
 
           existente.addEventListener("load", resolve, { once: true });
@@ -13793,7 +13788,6 @@ window.rehabGetSupabaseClient = async function () {
   try {
     return await window.rehabSupabasePromise;
   } catch (error) {
-
     window.rehabSupabasePromise = null;
     throw error;
   }
@@ -13869,6 +13863,7 @@ window.rehabGetSupabaseClient = async function () {
   // -----------------------------------------------------
   // CONFIGURACION PUBLICA DE SUPABASE
   // -----------------------------------------------------
+
   async function cargarConfigPublica() {
     if (
       window.REHAB_SUPABASE_CONFIG?.url &&
@@ -13934,7 +13929,6 @@ window.rehabGetSupabaseClient = async function () {
 
   async function inicializarCloud() {
     try {
-
       rehabCloud = await window.rehabGetSupabaseClient();
 
       const { data } = await rehabCloud.auth.getSession();
@@ -14026,6 +14020,7 @@ window.rehabGetSupabaseClient = async function () {
 
     if (document.getElementById("rehabV27BtnCloud")) return;
 
+
     const ref =
       document.getElementById("rehabV24BtnHistorial") ||
       document.getElementById("rehabV23BtnRutinas") ||
@@ -14075,7 +14070,6 @@ window.rehabGetSupabaseClient = async function () {
   // -----------------------------------------------------
   async function abrirCloud() {
     const contenido = document.getElementById("rehabV27Contenido");
-
     document.getElementById("rehabV27Overlay").hidden = false;
     contenido.innerHTML = `<div class="rehabV27Estado">Conectando con RehabPod Cloud...</div>`;
 
@@ -14181,6 +14175,7 @@ window.rehabGetSupabaseClient = async function () {
     rehabCloudUser = data.user;
     await cargarPerfilCloud();
     await renderPanelCuenta();
+
   }
 
   async function registrar() {
@@ -14216,7 +14211,6 @@ window.rehabGetSupabaseClient = async function () {
     rehabCloudUser = data.user;
     await new Promise((r) => setTimeout(r, 700));
     await cargarPerfilCloud();
-
     await renderPanelCuenta();
   }
 
@@ -14337,6 +14331,7 @@ window.rehabGetSupabaseClient = async function () {
 
   async function renderPanelProfesional() {
     const host = document.getElementById("rehabV27PanelRol");
+
     host.innerHTML = `
       <div class="rehabV27Card">
         <h3>Vincular usuario</h3>
@@ -14357,7 +14352,6 @@ window.rehabGetSupabaseClient = async function () {
     document.getElementById("rehabV27Vincular").onclick = vincularUsuario;
     await cargarUsuariosVinculados();
   }
-
 
   async function vincularUsuario() {
 
@@ -14493,12 +14487,12 @@ window.rehabGetSupabaseClient = async function () {
         const ejercicios = Array.isArray(rutina.ejercicios) ? rutina.ejercicios : [];
         if (ejercicios.length) {
           const rows = ejercicios.map((ej, index) => ({
+
             routine_id: routineId,
             position: index + 1,
             mode: ej.modo,
             difficulty: ej.dificultad || "media",
             finish_type: ej.finalizarPor || "rondas",
-
             finish_value: Number(ej.valor || 5),
             video_url: ej.videoUrl || null,
           }));
@@ -14591,14 +14585,29 @@ window.rehabGetSupabaseClient = async function () {
     return String(hora).slice(0, 5);
   }
 
-  function estadoAsignacionBonito(status) {
+  function estadoAsignacionBonito(status, scheduledDate = null) {
+    const estado = String(status || "pending");
+
+    if (estado === "pending" && scheduledDate) {
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+
+      const fecha = new Date(String(scheduledDate) + "T00:00:00");
+      if (!Number.isNaN(fecha.getTime())) {
+        if (fecha.getTime() < hoy.getTime()) return "Atrasada";
+        if (fecha.getTime() === hoy.getTime()) return "Para hoy";
+      }
+    }
+
     const estados = {
       pending: "Pendiente",
       in_progress: "En progreso",
       completed: "Completada",
       cancelled: "Cancelada",
+      expired: "Vencida",
     };
-    return estados[String(status || "pending")] || String(status || "pending");
+
+    return estados[estado] || estado;
   }
 
   async function cargarSDK() {
@@ -14634,12 +14643,12 @@ window.rehabGetSupabaseClient = async function () {
 
     await new Promise((resolve) => {
       const existente = document.getElementById("rehabSupabaseConfigPublica");
+
       if (existente) {
         existente.addEventListener("load", resolve, { once: true });
         existente.addEventListener("error", resolve, { once: true });
         return;
       }
-
 
       const s = document.createElement("script");
       s.id = "rehabSupabaseConfigPublica";
@@ -14780,7 +14789,6 @@ window.rehabGetSupabaseClient = async function () {
   // UI GENERAL
   // -----------------------------------------------------
   function estilos() {
-
     if (document.getElementById("rehabV28Estilos")) return;
 
     const st = document.createElement("style");
@@ -14791,6 +14799,7 @@ window.rehabGetSupabaseClient = async function () {
         min-height:48px;margin-top:10px;border-radius:14px;cursor:pointer;
         border:1px solid rgba(14,165,233,.30);background:rgba(14,165,233,.09);
         color:inherit;font-weight:900
+
       }
       .rehabV28Overlay{
         position:fixed;inset:0;z-index:100300;background:rgba(2,6,23,.80);
@@ -14921,7 +14930,6 @@ window.rehabGetSupabaseClient = async function () {
   // -----------------------------------------------------
   async function abrirPrincipal() {
     abrir();
-
     const c = document.getElementById("rehabV28Contenido");
     c.innerHTML = `<div class="rehabV28Aviso">Conectando con RehabPod Cloud...</div>`;
 
@@ -14947,6 +14955,7 @@ window.rehabGetSupabaseClient = async function () {
       c.innerHTML = `<div class="rehabV28Aviso">Error: ${esc(error.message)}</div>`;
     }
   }
+
 
   // -----------------------------------------------------
   // PROFESIONAL
@@ -15062,7 +15071,6 @@ window.rehabGetSupabaseClient = async function () {
       <div class="rehabV28Card">
         <h3 style="margin-top:0">🎥 Videos e indicaciones de mis rutinas</h3>
         <p style="opacity:.75">
-
           Aquí puedes añadir el video y explicar exactamente cómo colocar los Pods antes de enviar la rutina.
         </p>
         <div id="rehabV28RutinasGuia">
@@ -15103,6 +15111,7 @@ window.rehabGetSupabaseClient = async function () {
 
     document.querySelectorAll("[data-guia-rutina]").forEach((btn) => {
       btn.onclick = () => editarGuiaRutina(btn.dataset.guiaRutina);
+
     });
 
     await cargarAsignacionesProfesional();
@@ -15187,8 +15196,24 @@ window.rehabGetSupabaseClient = async function () {
         <strong>${esc(rutinas.get(a.routine_id) || "Rutina")}</strong>
         <span>👤 ${esc(usuarios.get(a.user_id) || "Usuario")}</span>
         <span>📅 ${esc(fechaBonita(a.scheduled_date))}${a.scheduled_time ? " · " + esc(horaBonita(a.scheduled_time)) : ""}</span>
-        <small>Estado: ${esc(estadoAsignacionBonito(a.status))}</small>
+        <small>Estado: ${esc(estadoAsignacionBonito(a.status, a.scheduled_date))}</small>
         ${a.professional_notes ? `<small>📝 ${esc(a.professional_notes)}</small>` : ""}
+        ${
+          ["pending", "in_progress"].includes(String(a.status || "pending"))
+            ? `
+          <div class="rehabV28Acciones">
+            <button
+              class="rehabV28Btn peligro"
+              data-v41-cancel-assignment="${esc(a.id)}"
+              data-v41-cancel-role="professional"
+              type="button"
+            >
+              CANCELAR ASIGNACIÓN
+            </button>
+          </div>
+        `
+            : ""
+        }
       </div>
     `
       )
@@ -15203,7 +15228,6 @@ window.rehabGetSupabaseClient = async function () {
       await Promise.all([
         cloud
           .from("rehab_routines")
-
           .select("id, name, category, rest_seconds")
           .eq("id", routineId)
           .single(),
@@ -15243,6 +15267,7 @@ window.rehabGetSupabaseClient = async function () {
               <label>Enlace del video</label>
               <input data-campo="video_url" type="url" value="${esc(e.video_url || "")}"
                 placeholder="https://youtube.com/...">
+
             </div>
 
             <div class="rehabV28Campo">
@@ -15332,6 +15357,7 @@ window.rehabGetSupabaseClient = async function () {
       )
       .eq("user_id", sesionUser.id)
       .neq("status", "completed")
+      .neq("status", "cancelled")
       .order("scheduled_date", { ascending: true });
 
     const host = document.getElementById("rehabV28ListaUsuario");
@@ -15344,7 +15370,6 @@ window.rehabGetSupabaseClient = async function () {
     if (!asignaciones?.length) {
       host.innerHTML = `<div class="rehabV28Card">Todavía no tienes rutinas asignadas.</div>`;
       return;
-
     }
 
     const routineIds = [
@@ -15373,17 +15398,32 @@ window.rehabGetSupabaseClient = async function () {
           <h3 style="margin:0 0 8px">${esc(r?.name || "Rutina")}</h3>
           <div>👤 ${esc(pros.get(a.professional_id) || "Profesional")}</div>
           <div>📅 ${esc(fechaBonita(a.scheduled_date))}${a.scheduled_time ? " · " + esc(horaBonita(a.scheduled_time)) : ""}</div>
-          <div>📌 ${esc(estadoAsignacionBonito(a.status))}</div>
+          <div>📌 ${esc(estadoAsignacionBonito(a.status, a.scheduled_date))}</div>
           ${a.professional_notes ? `<div class="rehabV28Dato">📝 ${esc(a.professional_notes)}</div>` : ""}
           <div class="rehabV28Acciones">
             <button class="rehabV28Btn" data-ver-asignacion="${esc(a.id)}" type="button">
               ▶ VER RUTINA
             </button>
+            ${
+              ["pending", "in_progress"].includes(String(a.status || "pending"))
+                ? `
+              <button
+                class="rehabV28Btn peligro"
+                data-v41-cancel-assignment="${esc(a.id)}"
+                data-v41-cancel-role="user"
+                type="button"
+              >
+                CANCELAR
+              </button>
+            `
+                : ""
+            }
           </div>
         </div>
       `;
       })
       .join("");
+
 
     document.querySelectorAll("[data-ver-asignacion]").forEach((btn) => {
       btn.onclick = () => verAsignacionUsuario(btn.dataset.verAsignacion);
@@ -15485,7 +15525,6 @@ window.rehabGetSupabaseClient = async function () {
                 ? `
               <div class="rehabV28Dato">
                 <strong>🔵 Colocación de los Pods</strong><br>
-
                 ${esc(e.pod_setup).replaceAll("\n", "<br>")}
               </div>
             `
@@ -15540,6 +15579,7 @@ window.rehabGetSupabaseClient = async function () {
 // - Agrega COMENZAR RUTINA dentro del detalle V28.
 // - Ejecuta automaticamente ejercicio 1 -> descanso -> ejercicio 2 -> ...
 // - Respeta modo, dificultad, rondas/tiempo y descanso de la rutina.
+
 // - Muestra cuenta regresiva antes de cada ejercicio.
 // - Guarda resumen local en rehabpodHistorialRutinas.
 // - Marca la asignacion como completed en Supabase.
@@ -15626,7 +15666,6 @@ window.rehabGetSupabaseClient = async function () {
       script.id = "rehabSupabaseSDK";
       script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
       script.onload = resolve;
-
       script.onerror = reject;
       document.head.appendChild(script);
     });
@@ -15696,6 +15735,7 @@ window.rehabGetSupabaseClient = async function () {
 
       .rehabV29Card{
         width:min(520px,100%);border-radius:26px;padding:24px 20px;text-align:center;
+
         background:linear-gradient(160deg,#111c30,#07101f);
         border:1px solid rgba(148,163,184,.20);
         box-shadow:0 28px 90px rgba(0,0,0,.50)
@@ -15767,7 +15807,6 @@ window.rehabGetSupabaseClient = async function () {
   function v29CerrarOverlay() {
     const ov = document.getElementById("rehabV29Overlay");
     if (ov) ov.hidden = true;
-
   }
 
   // Cierra las ventanas de Cloud que quedan debajo del overlay V29.
@@ -15852,6 +15891,7 @@ window.rehabGetSupabaseClient = async function () {
       await v29IniciarCloud();
 
       v29AbrirOverlay(`
+
         <div style="font-size:42px">☁️</div>
         <h2>Preparando rutina...</h2>
         <p style="color:#cbd5e1">Cargando ejercicios y comprobando Pods.</p>
@@ -16007,6 +16047,7 @@ window.rehabGetSupabaseClient = async function () {
       </div>
 
       <div class="rehabV29Acciones">
+
         <button id="rehabV29ConfirmarInicio" class="rehabV29Btn">COMENZAR</button>
         <button id="rehabV29CancelarAntes" class="rehabV29Btn sec">CANCELAR</button>
       </div>
@@ -16048,7 +16089,6 @@ window.rehabGetSupabaseClient = async function () {
   }
 
   function v29ConfigurarEjercicio(ejercicio) {
-
     modoActual = ejercicio.mode || "simple";
 
     ajustesApp.dificultad = ejercicio.difficulty || "media";
@@ -16319,6 +16359,7 @@ window.rehabGetSupabaseClient = async function () {
       </div>
     `);
 
+
     const cuenta = document.getElementById("rehabV29DescansoCuenta");
 
     v29IntervaloDescanso = setInterval(() => {
@@ -16329,7 +16370,6 @@ window.rehabGetSupabaseClient = async function () {
       }
 
       if (restante <= 0) {
-
         clearInterval(v29IntervaloDescanso);
       }
     }, 1000);
@@ -16474,6 +16514,7 @@ window.rehabGetSupabaseClient = async function () {
 
       try {
         if (typeof obtenerPerfilActivo === "function") {
+
           perfil = obtenerPerfilActivo();
         }
       } catch (_) {}
@@ -16541,6 +16582,27 @@ window.rehabGetSupabaseClient = async function () {
       nubeOk = false;
       console.error("V29 guardado nube:", error);
 
+      // V42: si no hay Internet o Supabase no responde, no perdemos el resultado.
+      // Se guarda en una cola local y se reintenta automáticamente al volver la conexión.
+      try {
+        if (typeof window.rehabV42EncolarSesion === "function") {
+          window.rehabV42EncolarSesion({
+            assignment_id: v29Asignacion.id,
+            user_id: v29AuthUser.id,
+            routine_id: v29Rutina.id,
+            routine_name: v29Rutina.name,
+            completed_percent: porcentaje,
+            duration_seconds: duracionSeg,
+            precision: precision,
+            hits: totalAciertos,
+            errors: totalErrores,
+            exercise_results: v29ResultadosEjercicios,
+            notes: "Rutina completada desde ejecución automática RehabPod.",
+          });
+        }
+      } catch (queueError) {
+        console.warn("V42 cola offline:", queueError);
+      }
     }
 
     const min = Math.floor(duracionSeg / 60);
@@ -16608,9 +16670,9 @@ window.rehabGetSupabaseClient = async function () {
     v29Asignacion = null;
     v29Rutina = null;
     v29Ejercicios = [];
+
     v29Indice = 0;
     v29ResultadosEjercicios = [];
-
     v29InicioRutinaMs = 0;
     v29CancelandoRutina = false;
 
@@ -16751,7 +16813,6 @@ window.rehabGetSupabaseClient = async function () {
       .rehabV31Grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
       .rehabV31Kpi{
         padding:14px;border-radius:16px;background:rgba(148,163,184,.06);
-
         border:1px solid rgba(148,163,184,.16)
       }
       .rehabV31Kpi small{display:block;opacity:.68;font-weight:850;margin-bottom:7px}
@@ -16765,6 +16826,7 @@ window.rehabGetSupabaseClient = async function () {
       .rehabV31Btn{
         appearance:none;border:0;border-radius:11px;padding:9px 12px;font-weight:900;
         cursor:pointer;background:#16a34a;color:white
+
       }
       .rehabV31Btn.sec{background:rgba(148,163,184,.14);color:inherit;border:1px solid rgba(148,163,184,.24)}
       .rehabV31Select{
@@ -16783,9 +16845,16 @@ window.rehabGetSupabaseClient = async function () {
       }
       .rehabV31Evolucion{display:grid;gap:8px;margin-top:10px}
       .rehabV31EvoFila{display:grid;grid-template-columns:130px 1fr 65px;gap:8px;align-items:center;font-size:.85rem}
+      .rehabV39Filtros{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+      .rehabV39Campo{display:grid;gap:6px}
+      .rehabV39Campo label{font-size:.75rem;font-weight:900;opacity:.68}
+      .rehabV39Tendencia{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:.82rem;opacity:.78}
+      .rehabV39Punto{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block}
+      .rehabV39Vacio{text-align:center;padding:24px 12px;opacity:.72}
       @media(max-width:760px){
         .rehabV31Grid{grid-template-columns:1fr 1fr}
         .rehabV31EvoFila{grid-template-columns:90px 1fr 55px}
+        .rehabV39Filtros{grid-template-columns:1fr}
       }
     `;
     document.head.appendChild(st);
@@ -16892,7 +16961,6 @@ window.rehabGetSupabaseClient = async function () {
         <div class="rehabV31Kpi">
           <small>PRECISIÓN PROMEDIO</small>
           <strong>${v31Precision(r.precision)}</strong>
-
         </div>
         <div class="rehabV31Kpi">
           <small>TIEMPO PROMEDIO</small>
@@ -16914,6 +16982,7 @@ window.rehabGetSupabaseClient = async function () {
 
     return `
       <div class="rehabV31Card">
+
         <h3 style="margin-top:0">📈 Evolución reciente</h3>
         <div class="rehabV31Evolucion">
           ${ultimas
@@ -17033,9 +17102,105 @@ window.rehabGetSupabaseClient = async function () {
 
         detalle.hidden = !detalle.hidden;
         btn.textContent = detalle.hidden ? "VER DETALLE" : "OCULTAR";
-
       };
     });
+  }
+
+  // -----------------------------------------------------
+  // REHABPOD V39 - filtros y resumen de progreso
+  // -----------------------------------------------------
+  function v39FiltrarSesiones(sesiones, periodo, rutina) {
+    let lista = [...sesiones];
+
+    if (periodo !== "todo") {
+      const dias = Number(periodo);
+      const limite = new Date();
+      limite.setDate(limite.getDate() - dias);
+      lista = lista.filter((s) => new Date(s.performed_at) >= limite);
+    }
+
+    if (rutina && rutina !== "todas") {
+      lista = lista.filter((s) => String(s.routine_name || "") === rutina);
+    }
+
+    return lista;
+  }
+
+  function v39OpcionesRutinas(sesiones) {
+    const nombres = [...new Set(
+      sesiones.map((s) => String(s.routine_name || "Rutina")).filter(Boolean)
+    )].sort((a,b) => a.localeCompare(b));
+
+    return nombres.map((n) => `<option value="${v31Esc(n)}">${v31Esc(n)}</option>`).join("");
+  }
+
+  function v39HtmlFiltros(sesiones, prefijo) {
+    return `
+      <div class="rehabV31Card">
+        <div style="font-size:.76rem;font-weight:900;opacity:.68">FILTRAR PROGRESO</div>
+
+        <div class="rehabV39Filtros">
+          <div class="rehabV39Campo">
+            <label>PERÍODO</label>
+            <select id="${prefijo}Periodo" class="rehabV31Select">
+              <option value="todo">Todo el historial</option>
+              <option value="7">Últimos 7 días</option>
+              <option value="30">Últimos 30 días</option>
+              <option value="90">Últimos 90 días</option>
+            </select>
+          </div>
+          <div class="rehabV39Campo">
+            <label>RUTINA</label>
+            <select id="${prefijo}Rutina" class="rehabV31Select">
+              <option value="todas">Todas las rutinas</option>
+              ${v39OpcionesRutinas(sesiones)}
+            </select>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function v39HtmlTendencia(sesiones) {
+    if (sesiones.length < 2) return "";
+    const orden = [...sesiones].sort((a,b) => new Date(a.performed_at) - new Date(b.performed_at));
+    const mitad = Math.max(1, Math.floor(orden.length / 2));
+    const anterior = orden.slice(0, mitad);
+    const reciente = orden.slice(mitad);
+    const prom = (arr) => arr.length ? arr.reduce((s,x) => s + v31Numero(x.precision),0)/arr.length : 0;
+    const dif = prom(reciente) - prom(anterior);
+    const texto = Math.abs(dif) < 0.5 ? "Precisión estable" : dif > 0 ? `Precisión +${dif.toFixed(1)} puntos` : `Precisión ${dif.toFixed(1)} puntos`;
+    return `<div class="rehabV39Tendencia"><span class="rehabV39Punto"></span><strong>${texto}</strong> respecto a sesiones anteriores</div>`;
+  }
+
+  function v39RenderPanel(panel, sesiones) {
+    if (!sesiones.length) {
+      panel.innerHTML = `<div class="rehabV31Aviso">No hay sesiones para los filtros seleccionados.</div>`;
+      return;
+    }
+    panel.innerHTML = `
+      ${v31HtmlKpis(sesiones)}
+      ${v39HtmlTendencia(sesiones)}
+      ${v31HtmlEvolucion(sesiones)}
+      <h3>Sesiones recientes</h3>
+      ${v31HtmlSesiones(sesiones)}
+    `;
+    v31ActivarDetalles(panel);
+  }
+
+  function v39ActivarFiltros(sesiones, prefijo, panelId) {
+    const periodo = document.getElementById(`${prefijo}Periodo`);
+    const rutina = document.getElementById(`${prefijo}Rutina`);
+    const panel = document.getElementById(panelId);
+    if (!periodo || !rutina || !panel) return;
+
+    const actualizar = () => {
+      const filtradas = v39FiltrarSesiones(sesiones, periodo.value, rutina.value);
+      v39RenderPanel(panel, filtradas);
+    };
+    periodo.onchange = actualizar;
+    rutina.onchange = actualizar;
+    actualizar();
   }
 
   async function v31RenderUsuario(
@@ -17057,13 +17222,11 @@ window.rehabGetSupabaseClient = async function () {
     }
 
     c.innerHTML = `
-      ${v31HtmlKpis(sesiones)}
-      ${v31HtmlEvolucion(sesiones)}
-      <h3>🗂️ Historial de rutinas</h3>
-      ${v31HtmlSesiones(sesiones)}
+      ${v39HtmlFiltros(sesiones, "rehabV39User")}
+      <div id="rehabV39UserPanel"></div>
     `;
 
-    v31ActivarDetalles(c);
+    v39ActivarFiltros(sesiones, "rehabV39User", "rehabV39UserPanel");
   }
 
   async function v31UsuariosVinculados() {
@@ -17131,6 +17294,7 @@ window.rehabGetSupabaseClient = async function () {
                 `<option value="${v31Esc(u.user_id)}" ${
                   u.user_id === seleccionado.user_id ? "selected" : ""
                 }>${v31Esc(u.full_name || "Usuario")} · ${v31Esc(
+
                   u.specialty || "sin especialidad"
                 )}</option>`
             )
@@ -17155,13 +17319,11 @@ window.rehabGetSupabaseClient = async function () {
 
         panel.innerHTML = `
           <h3>${v31Esc(usuario?.full_name || "Usuario")}</h3>
-          ${v31HtmlKpis(sesiones)}
-          ${v31HtmlEvolucion(sesiones)}
-          <h3>🗂️ Sesiones</h3>
-          ${v31HtmlSesiones(sesiones)}
+          ${v39HtmlFiltros(sesiones, "rehabV39Prof")}
+          <div id="rehabV39ProfPanel"></div>
         `;
 
-        v31ActivarDetalles(panel);
+        v39ActivarFiltros(sesiones, "rehabV39Prof", "rehabV39ProfPanel");
       } catch (error) {
         console.error("V31 progreso profesional:", error);
         panel.innerHTML = `<div class="rehabV31Aviso">Error: ${v31Esc(error.message)}</div>`;
@@ -17174,7 +17336,6 @@ window.rehabGetSupabaseClient = async function () {
 
   async function v31AbrirPrincipal(
     contentId = "rehabV31Contenido",
-
     titleId = "rehabV31Titulo",
     abrirModal = true
   ) {
@@ -17289,6 +17450,7 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
     if (
       typeof btnEstadisticas !== "undefined" &&
       btnEstadisticas &&
+
       !btnEstadisticas.dataset.v34Cuenta
     ) {
       btnEstadisticas.style.display = "none";
@@ -17315,7 +17477,6 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
         if (usuario && typeof window.rehabV31Abrir === "function") {
           await window.rehabV31Abrir();
           return;
-
         }
       } catch (error) {
         console.warn("V33 progreso cloud:", error);
@@ -17457,7 +17618,6 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
       }
     });
 
-
     observer.observe(document.body, {
       childList: true,
       subtree: true,
@@ -17597,11 +17757,11 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
       .rehabV34Dato span:first-child{opacity:.68}
       .rehabV34Btn{
         appearance:none;border:0;border-radius:11px;padding:10px 13px;font-weight:900;
-
         cursor:pointer;background:#2563eb;color:#fff
       }
       .rehabV34Btn.sec{
         background:rgba(148,163,184,.14);color:inherit;border:1px solid rgba(148,163,184,.24)
+
       }
       .rehabV34Btn.peligro{background:#b91c1c;color:#fff}
       .rehabV34Acciones{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
@@ -17738,7 +17898,6 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
       <div class="rehabV34Card">
         <div class="rehabV34TituloSec">PERFIL EN ESTE DISPOSITIVO</div>
         <div class="rehabV34PerfilLocal">
-
           <div class="rehabV34Avatar">${avatar}</div>
           <div style="min-width:0">
             <strong>${v34Esc(perfil.nombre || "Perfil")}</strong>
@@ -17758,6 +17917,7 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
 
   function v34AjustesHtml() {
     const sonidos = !!ajustesApp?.sonidos;
+
     const tema = ajustesApp?.tema || "oscuro";
 
     return `
@@ -17879,7 +18039,6 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
               INICIAR SESIÓN / CREAR CUENTA
             </button>
           </div>
-
         </div>
       `;
     }
@@ -17914,6 +18073,7 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
           <div class="rehabV34Dato">
             <span>Código</span>
             <strong>${v34Esc(p.user_code)}</strong>
+
           </div>
         `
             : ""
@@ -18069,6 +18229,7 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
       btn.onclick = function () {
         v34Desvincular(
           btn.dataset.v34Desvincular,
+
           btn.dataset.v34Nombre || "esta cuenta"
         );
       };
@@ -18160,7 +18321,6 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
 //   Inicio | Progreso | Cuenta
 //
 // - Progreso Cloud se renderiza dentro de una pantalla real.
-
 // - Si no hay sesión Cloud, se conserva el Progreso local existente.
 // - Cuenta se renderiza dentro de una pantalla real.
 // - Los modales V31/V34 se conservan internamente por compatibilidad,
@@ -18225,6 +18385,7 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
       contenedor.appendChild(v35PantallaProgreso);
     } else {
       v35PantallaProgreso = document.getElementById("pantallaProgresoV35");
+
     }
 
     if (!document.getElementById("pantallaCuentaV35")) {
@@ -18381,6 +18542,7 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
   function v36AgregarEstilos() {
     if (document.getElementById("rehabV36Estilos")) return;
 
+
     const st = document.createElement("style");
     st.id = "rehabV36Estilos";
     st.textContent = `
@@ -18535,6 +18697,7 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
       ) {
         // Conservamos el contenedor grid; ocultamos solo la tarjeta.
         tarjeta.classList.add("rehabV36Oculto");
+
       }
     });
   }
@@ -18581,7 +18744,6 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
   function v36Iniciar() {
     v36AgregarEstilos();
     v36CrearConfirmacion();
-
     v36OcultarResumenDuplicado();
     v36LimpiarTextoInicio();
     // V36.2: limpieza aplicada una sola vez. Sin observer global.
@@ -18722,7 +18884,6 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
         b.style.display = "none";
         b.setAttribute("aria-hidden", "true");
       }
-
     });
   }
 
@@ -18847,6 +19008,7 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
 // Problema corregido:
 // - Progreso y Cuenta podían quedar dibujados debajo de Inicio.
 // - Ahora solo UNA pantalla principal queda visible a la vez.
+
 // - La navegación inferior persiste y no mezcla contenidos.
 // =====================================================
 
@@ -19003,9 +19165,1601 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
     );
   }
 
+
   setTimeout(v38Iniciar, 1750);
 
   window.rehabV38Inicio = v38Inicio;
   window.rehabV38Progreso = v38Progreso;
   window.rehabV38Cuenta = v38Cuenta;
+})();
+
+
+
+// =====================================================
+// REHABPOD V39
+// PROGRESO MEJORADO: filtros, tendencia, KPIs y sesiones
+// =====================================================
+setTimeout(() => {
+  console.log("RehabPod V39: Progreso mejorado con filtros y tendencia activado.");
+}, 1900);
+
+// =====================================================
+// REHABPOD V40
+// CUENTA MEJORADA
+//
+// - Cuenta más clara y organizada.
+// - Editar nombre y especialidad/uso de la cuenta Cloud.
+// - Cambiar contraseña desde una sesión iniciada.
+// - Cerrar sesión.
+// - Mantener vínculos Profesional <-> Usuario y desvinculación.
+// - Ajustes de sonido y tema permanecen dentro de Cuenta.
+// - Mantener perfil local y acceso a administrar perfiles.
+// =====================================================
+
+(function () {
+  let v40Cloud = null;
+  let v40User = null;
+  let v40Perfil = null;
+  let v40Relaciones = [];
+
+  function v40Esc(v) {
+    return String(v ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function v40Rol(role) {
+    return role === "professional" ? "Profesional" : "Usuario";
+  }
+
+  function v40EspecialidadLabel(valor) {
+    const mapa = {
+      athlete: "Deportista",
+      fitness: "Fitness / gimnasio",
+      rehabilitation: "Rehabilitación",
+      cognitive_training: "Entrenamiento cognitivo",
+      recreational: "Recreativo",
+      physiotherapy: "Fisioterapia",
+      sports_coach: "Entrenador deportivo",
+      physical_trainer: "Preparador físico",
+      rehabilitation_professional: "Profesional de rehabilitación",
+      educator: "Profesor / educador",
+      unspecified: "Sin especificar",
+      other: "Otro",
+    };
+    return mapa[valor] || valor || "Sin especificar";
+  }
+
+  function v40OpcionesEspecialidad(role, actual) {
+    const usuario = [
+      ["athlete", "Deportista"],
+      ["fitness", "Fitness / gimnasio"],
+      ["rehabilitation", "Rehabilitación"],
+      ["cognitive_training", "Entrenamiento cognitivo"],
+      ["recreational", "Recreativo"],
+      ["other", "Otro"],
+    ];
+
+    const profesional = [
+      ["physiotherapy", "Fisioterapia"],
+      ["sports_coach", "Entrenador deportivo"],
+      ["physical_trainer", "Preparador físico"],
+      ["rehabilitation_professional", "Profesional de rehabilitación"],
+      ["educator", "Profesor / educador"],
+      ["other", "Otro"],
+    ];
+
+    const lista = role === "professional" ? profesional : usuario;
+
+    if (actual && !lista.some(([v]) => v === actual)) {
+      lista.unshift([actual, v40EspecialidadLabel(actual)]);
+    }
+
+    return lista
+      .map(
+        ([valor, etiqueta]) =>
+          `<option value="${v40Esc(valor)}" ${
+            valor === actual ? "selected" : ""
+          }>${v40Esc(etiqueta)}</option>`
+      )
+      .join("");
+  }
+
+  async function v40Cliente() {
+    if (typeof window.rehabGetSupabaseClient !== "function") return null;
+    v40Cloud = await window.rehabGetSupabaseClient();
+    return v40Cloud;
+  }
+
+  function v40AgregarEstilos() {
+    if (document.getElementById("rehabV40Estilos")) return;
+
+    const st = document.createElement("style");
+    st.id = "rehabV40Estilos";
+    st.textContent = `
+      .rehabV40Wrap{display:grid;gap:12px}
+      .rehabV40Hero{
+        display:flex;align-items:center;gap:14px;padding:16px;border-radius:20px;
+        border:1px solid rgba(148,163,184,.18);
+        background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(34,197,94,.06))
+      }
+      .rehabV40Avatar{
+        width:62px;height:62px;border-radius:50%;display:flex;align-items:center;
+        justify-content:center;flex:0 0 auto;font-size:25px;font-weight:950;
+        background:rgba(34,197,94,.13);border:2px solid rgba(34,197,94,.38)
+      }
+      .rehabV40Hero h3{margin:0;font-size:1.18rem}
+      .rehabV40Hero small{display:block;opacity:.65;margin-top:4px}
+      .rehabV40Badge{
+        display:inline-flex;padding:4px 8px;border-radius:999px;margin-top:7px;
+        font-size:.72rem;font-weight:900;background:rgba(59,130,246,.10);
+        border:1px solid rgba(59,130,246,.20)
+      }
+      .rehabV40Card{
+        border:1px solid rgba(148,163,184,.18);border-radius:18px;padding:15px;
+        background:rgba(148,163,184,.04)
+      }
+      .rehabV40SecTitulo{
+        font-size:.78rem;font-weight:950;letter-spacing:.7px;opacity:.66;margin-bottom:11px
+      }
+      .rehabV40Dato{
+        display:flex;justify-content:space-between;gap:16px;padding:8px 0;
+        border-bottom:1px solid rgba(148,163,184,.12)
+      }
+      .rehabV40Dato:last-child{border-bottom:0}
+      .rehabV40Dato span:first-child{opacity:.65}
+      .rehabV40Campo{display:grid;gap:6px;margin:10px 0}
+      .rehabV40Campo label{font-size:.76rem;font-weight:900;opacity:.70}
+      .rehabV40Campo input,.rehabV40Campo select{
+        width:100%;box-sizing:border-box;padding:10px 11px;border-radius:11px;
+        border:1px solid rgba(148,163,184,.24);
+        background:rgba(148,163,184,.07);color:inherit;font:inherit
+      }
+      .rehabV40Acciones{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+      .rehabV40Btn{
+
+        appearance:none;border:0;border-radius:11px;padding:10px 13px;font-weight:900;
+        cursor:pointer;background:#2563eb;color:#fff
+      }
+      .rehabV40Btn.sec{
+        background:rgba(148,163,184,.14);color:inherit;border:1px solid rgba(148,163,184,.24)
+      }
+      .rehabV40Btn.ok{background:#16a34a}
+      .rehabV40Btn.peligro{background:#b91c1c}
+      .rehabV40Switch{
+        display:flex;align-items:center;justify-content:space-between;gap:14px;padding:9px 0
+      }
+      .rehabV40Switch input{width:22px;height:22px;accent-color:#22c55e}
+      .rehabV40Relacion{
+        display:flex;justify-content:space-between;align-items:center;gap:10px;
+        padding:10px;border-radius:12px;background:rgba(148,163,184,.055);margin:7px 0
+      }
+      .rehabV40Relacion small{display:block;opacity:.64;margin-top:3px}
+      .rehabV40Aviso{
+        padding:12px;border-radius:13px;background:rgba(14,165,233,.08);
+        border:1px solid rgba(14,165,233,.18);line-height:1.48
+      }
+      .rehabV40Mensaje{margin-top:9px;font-size:.84rem;line-height:1.45}
+      .rehabV40Mensaje.ok{color:#22c55e}
+      .rehabV40Mensaje.error{color:#ef4444}
+      .rehabV40Local{
+        display:flex;align-items:center;justify-content:space-between;gap:12px
+      }
+      @media(max-width:560px){
+        .rehabV40Hero{align-items:flex-start}
+        .rehabV40Dato{display:grid;gap:4px}
+        .rehabV40Relacion{align-items:flex-start;flex-direction:column}
+        .rehabV40Relacion .rehabV40Btn{width:100%}
+      }
+    `;
+    document.head.appendChild(st);
+  }
+
+  function v40Mensaje(id, texto, tipo = "") {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = `rehabV40Mensaje ${tipo}`;
+    el.textContent = texto || "";
+  }
+
+  function v40PerfilLocal() {
+    try {
+      if (typeof obtenerPerfilActivo !== "function") return null;
+      return obtenerPerfilActivo();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  async function v40CargarCloud() {
+    v40User = null;
+    v40Perfil = null;
+    v40Relaciones = [];
+
+    const cloud = await v40Cliente();
+    if (!cloud) return false;
+
+    const { data: sesion } = await cloud.auth.getSession();
+    v40User = sesion?.session?.user || null;
+
+    if (!v40User) return false;
+
+    const { data: perfil, error } = await cloud
+      .from("rehab_profiles")
+      .select("user_id, full_name, role, specialty, user_code, created_at")
+      .eq("user_id", v40User.id)
+      .single();
+
+    if (error) throw error;
+    v40Perfil = perfil;
+
+    if (perfil.role === "professional") {
+      const { data: links, error: le } = await cloud
+        .from("rehab_professional_users")
+        .select("user_id, status")
+        .eq("professional_id", v40User.id)
+        .eq("status", "active");
+
+      if (le) throw le;
+
+      if (links?.length) {
+        const ids = links.map((x) => x.user_id);
+        const { data: perfiles, error: pe } = await cloud
+          .from("rehab_profiles")
+          .select("user_id, full_name, specialty")
+          .in("user_id", ids);
+
+        if (pe) throw pe;
+
+        v40Relaciones = (perfiles || []).map((p) => ({
+          id: p.user_id,
+          nombre: p.full_name || "Usuario",
+          detalle: v40EspecialidadLabel(p.specialty),
+        }));
+      }
+    } else {
+      const { data: links, error: le } = await cloud
+        .from("rehab_professional_users")
+        .select("professional_id, status")
+        .eq("user_id", v40User.id)
+        .eq("status", "active");
+
+      if (le) throw le;
+
+      if (links?.length) {
+        const ids = links.map((x) => x.professional_id);
+        const { data: perfiles, error: pe } = await cloud
+          .from("rehab_profiles")
+          .select("user_id, full_name, specialty")
+          .in("user_id", ids);
+
+        if (pe) throw pe;
+
+        v40Relaciones = (perfiles || []).map((p) => ({
+          id: p.user_id,
+          nombre: p.full_name || "Profesional",
+          detalle: v40EspecialidadLabel(p.specialty),
+        }));
+      }
+    }
+
+    return true;
+  }
+
+  function v40HtmlLocal() {
+    const p = v40PerfilLocal();
+
+    if (!p) {
+      return `
+        <div class="rehabV40Card">
+          <div class="rehabV40SecTitulo">PERFIL EN ESTE DISPOSITIVO</div>
+          <div class="rehabV40Aviso">No se encontró un perfil local activo.</div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="rehabV40Card">
+        <div class="rehabV40SecTitulo">PERFIL EN ESTE DISPOSITIVO</div>
+        <div class="rehabV40Local">
+          <div>
+            <strong>${v40Esc(p.nombre || "Perfil")}</strong>
+            <div style="opacity:.63;font-size:.82rem;margin-top:3px">
+              ${Array.isArray(p.historial) ? p.historial.length : 0} entrenamientos locales
+            </div>
+          </div>
+          <button id="rehabV40Perfiles" class="rehabV40Btn sec" type="button">
+            ADMINISTRAR
+          </button>
+        </div>
+      </div>
+
+    `;
+  }
+
+  function v40HtmlSinCloud() {
+    return `
+      <div class="rehabV40Card">
+        <div class="rehabV40SecTitulo">CUENTA CLOUD</div>
+        <div class="rehabV40Aviso">
+          Puedes entrenar sin una cuenta Cloud. Inicia sesión o crea una cuenta para
+          recibir rutinas, sincronizar resultados y vincularte con un profesional.
+        </div>
+        <div class="rehabV40Acciones">
+          <button id="rehabV40Login" class="rehabV40Btn" type="button">
+            INICIAR SESIÓN / CREAR CUENTA
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  function v40HtmlCloud() {
+    const p = v40Perfil;
+    const inicial = (p.full_name || v40User.email || "R").trim().charAt(0).toUpperCase();
+
+    return `
+      <div class="rehabV40Hero">
+        <div class="rehabV40Avatar">${v40Esc(inicial)}</div>
+        <div style="min-width:0">
+          <h3>${v40Esc(p.full_name || "Cuenta RehabPod")}</h3>
+          <small style="overflow-wrap:anywhere">${v40Esc(v40User.email || "")}</small>
+          <span class="rehabV40Badge">${v40Esc(v40Rol(p.role))}</span>
+        </div>
+      </div>
+
+      <div class="rehabV40Card">
+        <div class="rehabV40SecTitulo">DATOS DE LA CUENTA</div>
+
+        <div class="rehabV40Dato">
+          <span>Nombre</span>
+          <strong>${v40Esc(p.full_name || "Sin nombre")}</strong>
+        </div>
+        <div class="rehabV40Dato">
+          <span>Tipo de cuenta</span>
+          <strong>${v40Esc(v40Rol(p.role))}</strong>
+        </div>
+        <div class="rehabV40Dato">
+          <span>Especialidad / uso</span>
+          <strong>${v40Esc(v40EspecialidadLabel(p.specialty))}</strong>
+        </div>
+        ${
+          p.user_code
+            ? `
+          <div class="rehabV40Dato">
+            <span>Código de vinculación</span>
+            <strong>${v40Esc(p.user_code)}</strong>
+          </div>
+        `
+            : ""
+        }
+
+        <div class="rehabV40Acciones">
+          <button id="rehabV40EditarPerfil" class="rehabV40Btn sec" type="button">
+            EDITAR DATOS
+          </button>
+        </div>
+
+        <div id="rehabV40EditorPerfil" hidden>
+          <div class="rehabV40Campo">
+            <label>NOMBRE</label>
+            <input id="rehabV40Nombre" type="text" maxlength="80" value="${v40Esc(
+              p.full_name || ""
+            )}">
+          </div>
+
+          <div class="rehabV40Campo">
+            <label>ESPECIALIDAD / USO</label>
+            <select id="rehabV40Especialidad">
+              ${v40OpcionesEspecialidad(p.role, p.specialty)}
+            </select>
+          </div>
+
+          <div class="rehabV40Acciones">
+            <button id="rehabV40GuardarPerfil" class="rehabV40Btn ok" type="button">
+              GUARDAR CAMBIOS
+            </button>
+            <button id="rehabV40CancelarPerfil" class="rehabV40Btn sec" type="button">
+              CANCELAR
+            </button>
+          </div>
+          <div id="rehabV40MensajePerfil"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  function v40HtmlRelaciones() {
+    if (!v40User || !v40Perfil) return "";
+
+    const titulo =
+      v40Perfil.role === "professional"
+        ? "USUARIOS VINCULADOS"
+        : "PROFESIONALES VINCULADOS";
+
+    return `
+      <div class="rehabV40Card">
+        <div class="rehabV40SecTitulo">${titulo}</div>
+
+        ${
+          v40Relaciones.length
+            ? v40Relaciones
+                .map(
+                  (r) => `
+            <div class="rehabV40Relacion">
+              <div>
+                <strong>${v40Esc(r.nombre)}</strong>
+                <small>${v40Esc(r.detalle)}</small>
+              </div>
+              <button
+                class="rehabV40Btn peligro"
+                type="button"
+                data-v40-desvincular="${v40Esc(r.id)}"
+                data-v40-nombre="${v40Esc(r.nombre)}"
+              >
+                DESVINCULAR
+              </button>
+            </div>
+          `
+                )
+                .join("")
+            : `
+              <div class="rehabV40Aviso">
+                ${
+                  v40Perfil.role === "professional"
+                    ? "Todavía no tienes usuarios vinculados."
+                    : "Todavía no estás vinculado a ningún profesional."
+                }
+              </div>
+            `
+        }
+      </div>
+    `;
+  }
+
+  function v40HtmlSeguridad() {
+    if (!v40User) return "";
+
+    return `
+      <div class="rehabV40Card">
+        <div class="rehabV40SecTitulo">SEGURIDAD</div>
+
+        <div class="rehabV40Campo">
+          <label>NUEVA CONTRASEÑA</label>
+          <input id="rehabV40Password1" type="password" minlength="8" autocomplete="new-password"
+            placeholder="Mínimo 8 caracteres">
+        </div>
+
+
+        <div class="rehabV40Campo">
+          <label>REPETIR CONTRASEÑA</label>
+          <input id="rehabV40Password2" type="password" minlength="8" autocomplete="new-password"
+            placeholder="Repite la contraseña">
+        </div>
+
+        <div class="rehabV40Acciones">
+          <button id="rehabV40CambiarPassword" class="rehabV40Btn sec" type="button">
+            CAMBIAR CONTRASEÑA
+          </button>
+        </div>
+        <div id="rehabV40MensajePassword"></div>
+      </div>
+    `;
+  }
+
+  function v40HtmlPreferencias() {
+    const sonidos = !!ajustesApp?.sonidos;
+    const tema = ajustesApp?.tema || "oscuro";
+
+    return `
+      <div class="rehabV40Card">
+        <div class="rehabV40SecTitulo">PREFERENCIAS</div>
+
+        <div class="rehabV40Switch">
+          <div>
+            <strong>Sonidos</strong>
+            <div style="font-size:.8rem;opacity:.63;margin-top:3px">
+              Aciertos, errores y cuenta regresiva.
+            </div>
+          </div>
+          <input id="rehabV40Sonidos" type="checkbox" ${sonidos ? "checked" : ""}>
+        </div>
+
+        <div class="rehabV40Campo">
+          <label>TEMA</label>
+          <select id="rehabV40Tema">
+            <option value="oscuro" ${tema === "oscuro" ? "selected" : ""}>Oscuro</option>
+            <option value="claro" ${tema === "claro" ? "selected" : ""}>Claro</option>
+          </select>
+        </div>
+      </div>
+    `;
+  }
+
+  function v40HtmlSesion() {
+    if (!v40User) return "";
+
+    return `
+      <div class="rehabV40Card">
+        <div class="rehabV40SecTitulo">SESIÓN</div>
+        <div class="rehabV40Aviso">
+          Tu información Cloud permanece guardada al cerrar sesión. Podrás volver a entrar
+          con el mismo correo y contraseña.
+        </div>
+        <div class="rehabV40Acciones">
+          <button id="rehabV40CerrarSesion" class="rehabV40Btn peligro" type="button">
+            CERRAR SESIÓN
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  function v40HtmlAcerca() {
+    return `
+      <div class="rehabV40Card">
+        <div class="rehabV40SecTitulo">ACERCA DE REHABPOD</div>
+        <div class="rehabV40Dato">
+          <span>Versión de interfaz</span>
+          <strong>V40</strong>
+        </div>
+        <div style="font-size:.8rem;opacity:.62;line-height:1.45;margin-top:9px">
+          Las funciones de privacidad y administración de datos se ampliarán antes de la
+          publicación comercial de RehabPod.
+        </div>
+      </div>
+    `;
+  }
+
+  async function v40Render(contentId = "rehabV35ContenidoCuenta") {
+    const c = document.getElementById(contentId);
+    if (!c) throw new Error("No se encontró la pantalla Cuenta.");
+
+    c.innerHTML = `<div class="rehabV40Aviso">Cargando cuenta...</div>`;
+
+    try {
+      const tieneCloud = await v40CargarCloud();
+
+      c.innerHTML = `
+        <div class="rehabV40Wrap">
+          ${v40HtmlLocal()}
+          ${tieneCloud ? v40HtmlCloud() : v40HtmlSinCloud()}
+          ${tieneCloud ? v40HtmlRelaciones() : ""}
+          ${tieneCloud ? v40HtmlSeguridad() : ""}
+          ${v40HtmlPreferencias()}
+          ${tieneCloud ? v40HtmlSesion() : ""}
+          ${v40HtmlAcerca()}
+        </div>
+      `;
+
+      v40ActivarEventos(contentId);
+    } catch (error) {
+      console.error("RehabPod V40:", error);
+      c.innerHTML = `
+        <div class="rehabV40Wrap">
+          ${v40HtmlLocal()}
+          <div class="rehabV40Aviso">No se pudo cargar la cuenta Cloud: ${v40Esc(
+            error.message
+          )}</div>
+          ${v40HtmlPreferencias()}
+          ${v40HtmlAcerca()}
+        </div>
+      `;
+      v40ActivarEventos(contentId);
+    }
+  }
+
+  function v40ActivarEventos(contentId) {
+    const perfiles = document.getElementById("rehabV40Perfiles");
+    if (perfiles) {
+      perfiles.onclick = function () {
+        try {
+          if (typeof mostrarPerfiles === "function") mostrarPerfiles();
+          if (
+            typeof mostrarPantalla === "function" &&
+            typeof pantallaPerfiles !== "undefined"
+          ) {
+            mostrarPantalla(pantallaPerfiles);
+          }
+        } catch (error) {
+          console.error("V40 perfiles:", error);
+        }
+      };
+    }
+
+    const login = document.getElementById("rehabV40Login");
+    if (login) {
+      login.onclick = function () {
+        if (typeof window.rehabCloudAbrir === "function") {
+          window.rehabCloudAbrir();
+        }
+      };
+    }
+
+    const editar = document.getElementById("rehabV40EditarPerfil");
+    const editor = document.getElementById("rehabV40EditorPerfil");
+    const cancelar = document.getElementById("rehabV40CancelarPerfil");
+
+    if (editar && editor) {
+      editar.onclick = () => {
+        editor.hidden = false;
+        editar.hidden = true;
+      };
+
+    }
+
+    if (cancelar && editor && editar) {
+      cancelar.onclick = () => {
+        editor.hidden = true;
+        editar.hidden = false;
+        v40Mensaje("rehabV40MensajePerfil", "");
+      };
+    }
+
+    const guardarPerfil = document.getElementById("rehabV40GuardarPerfil");
+    if (guardarPerfil) {
+      guardarPerfil.onclick = async function () {
+        const nombre = String(
+          document.getElementById("rehabV40Nombre")?.value || ""
+        ).trim();
+        const specialty = String(
+          document.getElementById("rehabV40Especialidad")?.value || ""
+        ).trim();
+
+        if (nombre.length < 2) {
+          v40Mensaje(
+            "rehabV40MensajePerfil",
+            "Escribe un nombre de al menos 2 caracteres.",
+            "error"
+          );
+          return;
+        }
+
+        guardarPerfil.disabled = true;
+
+        try {
+          const { error } = await v40Cloud
+            .from("rehab_profiles")
+            .update({
+              full_name: nombre,
+              specialty: specialty || "other",
+            })
+            .eq("user_id", v40User.id);
+
+          if (error) throw error;
+
+          // V42: el nombre Cloud también actualiza el perfil local activo.
+          // Así Inicio, Entrenamiento, Resultados y Progreso muestran el mismo nombre.
+          try {
+            if (typeof obtenerPerfilActivo === "function") {
+              const perfilLocalActivo = obtenerPerfilActivo();
+
+              if (perfilLocalActivo) {
+                perfilLocalActivo.nombre = nombre;
+
+                if (typeof guardarDatos === "function") {
+                  guardarDatos();
+                }
+
+                if (typeof actualizarNombresPerfil === "function") {
+                  actualizarNombresPerfil();
+                }
+              }
+            }
+          } catch (syncNombreError) {
+            console.warn("V42 sincronizar nombre local:", syncNombreError);
+          }
+
+          v40Mensaje(
+            "rehabV40MensajePerfil",
+            "Datos actualizados correctamente.",
+            "ok"
+          );
+
+          setTimeout(() => v40Render(contentId), 500);
+        } catch (error) {
+          v40Mensaje(
+            "rehabV40MensajePerfil",
+            "No se pudo actualizar: " + error.message,
+            "error"
+          );
+        } finally {
+          guardarPerfil.disabled = false;
+        }
+      };
+    }
+
+    const cambiarPassword = document.getElementById("rehabV40CambiarPassword");
+    if (cambiarPassword) {
+      cambiarPassword.onclick = async function () {
+        const p1 = String(
+          document.getElementById("rehabV40Password1")?.value || ""
+        );
+        const p2 = String(
+          document.getElementById("rehabV40Password2")?.value || ""
+        );
+
+        if (p1.length < 8) {
+          v40Mensaje(
+            "rehabV40MensajePassword",
+            "La contraseña debe tener al menos 8 caracteres.",
+            "error"
+          );
+          return;
+        }
+
+        if (p1 !== p2) {
+          v40Mensaje(
+            "rehabV40MensajePassword",
+            "Las contraseñas no coinciden.",
+            "error"
+          );
+          return;
+        }
+
+        cambiarPassword.disabled = true;
+
+        try {
+          const { error } = await v40Cloud.auth.updateUser({
+            password: p1,
+          });
+
+          if (error) throw error;
+
+          document.getElementById("rehabV40Password1").value = "";
+          document.getElementById("rehabV40Password2").value = "";
+
+          v40Mensaje(
+            "rehabV40MensajePassword",
+            "Contraseña actualizada correctamente.",
+            "ok"
+          );
+        } catch (error) {
+          v40Mensaje(
+            "rehabV40MensajePassword",
+            "No se pudo cambiar la contraseña: " + error.message,
+            "error"
+          );
+        } finally {
+          cambiarPassword.disabled = false;
+        }
+      };
+    }
+
+    const sonidos = document.getElementById("rehabV40Sonidos");
+    if (sonidos) {
+      sonidos.onchange = function () {
+        ajustesApp.sonidos = sonidos.checked;
+
+        try {
+          if (typeof ajusteSonidos !== "undefined" && ajusteSonidos) {
+            ajusteSonidos.checked = sonidos.checked;
+          }
+          if (typeof sonidosActivados !== "undefined" && sonidosActivados) {
+            sonidosActivados.checked = sonidos.checked;
+          }
+          guardarAjustes();
+        } catch (error) {
+          console.warn("V40 sonidos:", error);
+
+        }
+      };
+    }
+
+    const tema = document.getElementById("rehabV40Tema");
+    if (tema) {
+      tema.onchange = function () {
+        ajustesApp.tema = tema.value;
+
+        try {
+          if (typeof ajusteTema !== "undefined" && ajusteTema) {
+            ajusteTema.value = tema.value;
+          }
+          aplicarTema(tema.value);
+          guardarAjustes();
+        } catch (error) {
+          console.warn("V40 tema:", error);
+        }
+      };
+    }
+
+    document.querySelectorAll("[data-v40-desvincular]").forEach((btn) => {
+      btn.onclick = async function () {
+        const otroId = btn.dataset.v40Desvincular;
+        const nombre = btn.dataset.v40Nombre || "esta cuenta";
+
+        let confirmar = false;
+
+        if (typeof window.v36ConfirmarDesvinculacion === "function") {
+          confirmar = await window.v36ConfirmarDesvinculacion(nombre);
+        } else {
+          confirmar = confirm(`¿Desvincular a ${nombre}?`);
+        }
+
+        if (!confirmar) return;
+
+        try {
+          const { data, error } = await v40Cloud.rpc(
+            "rehab_unlink_relationship",
+            { p_other_user_id: otroId }
+          );
+
+          if (error) throw error;
+          if (!data) throw new Error("No se encontró una vinculación activa.");
+
+          if (typeof window.rehabV33ActualizarInterfaz === "function") {
+            await window.rehabV33ActualizarInterfaz();
+          }
+
+          await v40Render(contentId);
+        } catch (error) {
+          alert("No se pudo desvincular: " + error.message);
+        }
+      };
+    });
+
+    const cerrar = document.getElementById("rehabV40CerrarSesion");
+    if (cerrar) {
+      cerrar.onclick = async function () {
+        const confirmar = confirm(
+          "¿Cerrar sesión en RehabPod?\n\nTus datos Cloud permanecerán guardados."
+        );
+
+        if (!confirmar) return;
+
+        cerrar.disabled = true;
+
+        try {
+          const { error } = await v40Cloud.auth.signOut();
+          if (error) throw error;
+
+          if (typeof window.rehabV33ActualizarInterfaz === "function") {
+            await window.rehabV33ActualizarInterfaz();
+          }
+
+          await v40Render(contentId);
+        } catch (error) {
+          alert("No se pudo cerrar sesión: " + error.message);
+        } finally {
+          cerrar.disabled = false;
+        }
+      };
+    }
+  }
+
+  async function v40AbrirCuenta() {
+    try {
+      if (typeof window.rehabV38Cuenta === "function") {
+        await window.rehabV38Cuenta();
+      } else if (typeof window.rehabV35AbrirCuenta === "function") {
+        await window.rehabV35AbrirCuenta();
+      }
+
+      await v40Render("rehabV35ContenidoCuenta");
+    } catch (error) {
+      console.error("V40 abrir Cuenta:", error);
+    }
+  }
+
+  function v40ReemplazarNavegacionCuenta() {
+    // V38 creó la navegación persistente.
+    const tab = document.querySelector('#rehabV37Nav [data-v37-tab="cuenta"]');
+    if (tab) tab.onclick = v40AbrirCuenta;
+
+    // Si otras funciones llaman al renderer V34/V35, usamos V40 también.
+    window.rehabV40RenderCuenta = v40Render;
+  }
+
+  function v40Iniciar() {
+    v40AgregarEstilos();
+    v40ReemplazarNavegacionCuenta();
+
+    console.log(
+      "RehabPod V40: Cuenta mejorada con edición de perfil, seguridad y sesión."
+    );
+  }
+
+  setTimeout(v40Iniciar, 2050);
+
+  window.rehabV40AbrirCuenta = v40AbrirCuenta;
+})();
+
+// =====================================================
+// REHABPOD V41
+// ESTADOS AVANZADOS DE RUTINAS + CENTRO DE NOTIFICACIONES
+//
+// Estados visuales:
+// - Pendiente
+// - Para hoy
+// - Atrasada
+// - En progreso
+// - Completada
+// - Cancelada
+//
+// Notificaciones Cloud:
+// - Nueva rutina asignada -> Usuario
+// - Usuario inicia rutina -> Profesional
+// - Usuario completa rutina -> Profesional
+// - Rutina cancelada -> contraparte
+//
+// La campana muestra notificaciones dentro de RehabPod.
+// Si el navegador tiene permiso, también muestra un aviso mientras
+// RehabPod está abierto. Las notificaciones push con la app cerrada
+// se implementarán más adelante.
+// =====================================================
+
+(function () {
+  let v41Cloud = null;
+  let v41User = null;
+  let v41Intervalo = null;
+  let v41UltimosIds = new Set();
+
+  function v41Esc(v) {
+    return String(v ?? "")
+      .replaceAll("&", "&amp;")
+
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  async function v41Cliente() {
+    if (typeof window.rehabGetSupabaseClient !== "function") return null;
+
+    try {
+      v41Cloud = await window.rehabGetSupabaseClient();
+      const { data } = await v41Cloud.auth.getSession();
+      v41User = data?.session?.user || null;
+      return v41Cloud;
+    } catch (error) {
+      console.warn("V41 Cloud:", error);
+      return null;
+    }
+  }
+
+  function v41AgregarEstilos() {
+    if (document.getElementById("rehabV41Estilos")) return;
+
+    const st = document.createElement("style");
+    st.id = "rehabV41Estilos";
+    st.textContent = `
+      #rehabV41Bell{
+        position:fixed;top:14px;right:14px;z-index:100650;
+        width:46px;height:46px;border-radius:50%;border:1px solid rgba(148,163,184,.24);
+        background:rgba(15,23,42,.92);color:#fff;cursor:pointer;
+        display:none;align-items:center;justify-content:center;font-size:20px;
+        box-shadow:0 9px 25px rgba(0,0,0,.24);backdrop-filter:blur(10px)
+      }
+      .tema-claro #rehabV41Bell{background:rgba(255,255,255,.96);color:#111827}
+      #rehabV41Badge{
+        position:absolute;right:-2px;top:-3px;min-width:19px;height:19px;
+        padding:0 4px;border-radius:999px;background:#ef4444;color:#fff;
+        display:none;align-items:center;justify-content:center;
+        font-size:10px;font-weight:950;border:2px solid rgba(15,23,42,.9)
+      }
+      .rehabV41Overlay{
+        position:fixed;inset:0;z-index:100900;background:rgba(2,6,23,.84);
+        backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:16px
+      }
+      .rehabV41Overlay[hidden]{display:none!important}
+      .rehabV41Modal{
+        width:min(620px,100%);max-height:88vh;overflow:auto;border-radius:24px;padding:18px;
+        background:var(--fondo-tarjeta,#111827);color:inherit;
+        border:1px solid rgba(148,163,184,.22);box-shadow:0 26px 80px rgba(0,0,0,.45)
+      }
+      .tema-claro .rehabV41Modal{background:#fff}
+      .rehabV41Head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+      .rehabV41Cerrar{
+        width:40px;height:40px;border-radius:11px;border:1px solid rgba(148,163,184,.24);
+        background:rgba(148,163,184,.08);color:inherit;font-size:20px;cursor:pointer
+      }
+      .rehabV41Acciones{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+      .rehabV41Btn{
+        border:0;border-radius:11px;padding:9px 12px;font-weight:900;cursor:pointer;
+        background:#2563eb;color:#fff
+      }
+      .rehabV41Btn.sec{
+        background:rgba(148,163,184,.14);color:inherit;border:1px solid rgba(148,163,184,.24)
+      }
+      .rehabV41Item{
+        padding:12px;border-radius:14px;margin:8px 0;
+        border:1px solid rgba(148,163,184,.16);background:rgba(148,163,184,.045)
+      }
+      .rehabV41Item.nueva{
+        border-color:rgba(59,130,246,.30);background:rgba(59,130,246,.08)
+      }
+      .rehabV41Item small{display:block;opacity:.62;margin-top:5px}
+      .rehabV41Vacio{
+        padding:18px;text-align:center;border-radius:14px;
+        border:1px dashed rgba(148,163,184,.22);opacity:.72
+      }
+    `;
+    document.head.appendChild(st);
+  }
+
+  function v41CrearUI() {
+    if (!document.getElementById("rehabV41Bell")) {
+      const bell = document.createElement("button");
+      bell.id = "rehabV41Bell";
+      bell.type = "button";
+      bell.setAttribute("aria-label", "Notificaciones");
+      bell.innerHTML = `🔔<span id="rehabV41Badge"></span>`;
+      bell.onclick = v41AbrirCentro;
+      document.body.appendChild(bell);
+    }
+
+    if (!document.getElementById("rehabV41Overlay")) {
+      const ov = document.createElement("div");
+      ov.id = "rehabV41Overlay";
+      ov.className = "rehabV41Overlay";
+      ov.hidden = true;
+      ov.innerHTML = `
+        <div class="rehabV41Modal">
+          <div class="rehabV41Head">
+            <div>
+              <div style="font-size:.72rem;opacity:.62;font-weight:900">REHABPOD</div>
+              <h2 style="margin:0">Notificaciones</h2>
+            </div>
+            <button id="rehabV41Cerrar" class="rehabV41Cerrar" type="button">×</button>
+          </div>
+          <div class="rehabV41Acciones">
+            <button id="rehabV41LeerTodas" class="rehabV41Btn sec" type="button">
+              MARCAR TODO COMO LEÍDO
+            </button>
+            <button id="rehabV41Permiso" class="rehabV41Btn sec" type="button">
+              ACTIVAR AVISOS
+            </button>
+          </div>
+          <div id="rehabV41Lista">Cargando...</div>
+        </div>
+      `;
+      document.body.appendChild(ov);
+
+      document.getElementById("rehabV41Cerrar").onclick = () => {
+        ov.hidden = true;
+      };
+
+      ov.addEventListener("click", (e) => {
+        if (e.target === ov) ov.hidden = true;
+      });
+
+      document.getElementById("rehabV41LeerTodas").onclick = v41MarcarTodasLeidas;
+      document.getElementById("rehabV41Permiso").onclick = v41PedirPermiso;
+    }
+  }
+
+  function v41Fecha(valor) {
+    if (!valor) return "";
+    const d = new Date(valor);
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toLocaleString();
+  }
+
+  async function v41ObtenerNotificaciones(limite = 40) {
+    const cloud = await v41Cliente();
+    if (!cloud || !v41User) return [];
+
+    const { data, error } = await cloud
+      .from("rehab_notifications")
+      .select(
+        "id, type, title, message, read_at, created_at, assignment_id"
+      )
+      .eq("user_id", v41User.id)
+      .order("created_at", { ascending: false })
+      .limit(limite);
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function v41ActualizarBadge(mostrarAvisos = false) {
+    const bell = document.getElementById("rehabV41Bell");
+    const badge = document.getElementById("rehabV41Badge");
+    if (!bell || !badge) return;
+
+    try {
+      const cloud = await v41Cliente();
+
+      if (!cloud || !v41User) {
+        bell.style.display = "none";
+        badge.style.display = "none";
+        return;
+      }
+
+      bell.style.display = "flex";
+
+      const notificaciones = await v41ObtenerNotificaciones(30);
+      const nuevas = notificaciones.filter((n) => !n.read_at);
+
+      badge.textContent = nuevas.length > 99 ? "99+" : String(nuevas.length);
+      badge.style.display = nuevas.length ? "flex" : "none";
+
+      if (mostrarAvisos && typeof Notification !== "undefined") {
+        if (Notification.permission === "granted") {
+          for (const n of nuevas) {
+            if (v41UltimosIds.has(n.id)) continue;
+            v41UltimosIds.add(n.id);
+
+            try {
+              new Notification(n.title || "RehabPod", {
+                body: n.message || "",
+                icon: "logo-icon.png",
+              });
+            } catch (_) {}
+          }
+        }
+      }
+
+      // Primera carga: registramos ids sin disparar avisos antiguos.
+      if (!v41UltimosIds.size) {
+        notificaciones.forEach((n) => v41UltimosIds.add(n.id));
+      }
+    } catch (error) {
+      console.warn("V41 badge:", error);
+    }
+  }
+
+  async function v41AbrirCentro() {
+    const ov = document.getElementById("rehabV41Overlay");
+    const host = document.getElementById("rehabV41Lista");
+    if (!ov || !host) return;
+
+    ov.hidden = false;
+    host.innerHTML = `<div class="rehabV41Vacio">Cargando...</div>`;
+
+    try {
+      const lista = await v41ObtenerNotificaciones(50);
+
+      if (!lista.length) {
+        host.innerHTML = `
+          <div class="rehabV41Vacio">
+            No tienes notificaciones todavía.
+          </div>
+        `;
+        return;
+      }
+
+      host.innerHTML = lista
+        .map(
+          (n) => `
+          <div class="rehabV41Item ${n.read_at ? "" : "nueva"}">
+            <strong>${v41Esc(n.title || "RehabPod")}</strong>
+            <div style="margin-top:4px;line-height:1.45">${v41Esc(n.message || "")}</div>
+            <small>${v41Esc(v41Fecha(n.created_at))}</small>
+          </div>
+        `
+        )
+        .join("");
+    } catch (error) {
+      host.innerHTML = `
+        <div class="rehabV41Vacio">
+          No se pudieron cargar las notificaciones: ${v41Esc(error.message)}
+        </div>
+      `;
+    }
+  }
+
+  async function v41MarcarTodasLeidas() {
+    try {
+      const cloud = await v41Cliente();
+      if (!cloud || !v41User) return;
+
+      const { error } = await cloud
+        .from("rehab_notifications")
+        .update({ read_at: new Date().toISOString() })
+        .eq("user_id", v41User.id)
+        .is("read_at", null);
+
+      if (error) throw error;
+
+      await v41AbrirCentro();
+      await v41ActualizarBadge(false);
+    } catch (error) {
+      alert("No se pudieron marcar como leídas: " + error.message);
+    }
+  }
+
+  async function v41PedirPermiso() {
+    if (typeof Notification === "undefined") {
+      alert("Este navegador no admite avisos del sistema.");
+      return;
+    }
+
+    try {
+      const permiso = await Notification.requestPermission();
+
+      if (permiso === "granted") {
+        alert(
+          "Avisos activados. RehabPod podrá mostrar notificaciones mientras la app esté abierta."
+        );
+      } else {
+        alert("Los avisos no fueron autorizados.");
+      }
+    } catch (error) {
+      alert("No se pudo solicitar permiso: " + error.message);
+    }
+  }
+
+  async function v41CancelarAsignacion(assignmentId) {
+    const razon = prompt(
+      "Motivo de cancelación (opcional):",
+      ""
+    );
+
+    // Si se pulsa Cancelar en prompt, no hacemos nada.
+    if (razon === null) return;
+
+    const confirmar = confirm(
+      "¿Confirmas que deseas cancelar esta rutina asignada?\n\n" +
+        "La rutina dejará de aparecer como pendiente y la otra persona recibirá una notificación."
+    );
+
+    if (!confirmar) return;
+
+    try {
+      const cloud = await v41Cliente();
+      if (!cloud || !v41User) {
+        throw new Error("Primero inicia sesión.");
+      }
+
+      const { data, error } = await cloud.rpc("rehab_cancel_assignment", {
+        p_assignment_id: assignmentId,
+        p_reason: String(razon || "").trim() || null,
+      });
+
+      if (error) throw error;
+      if (!data) throw new Error("No se pudo cancelar la asignación.");
+
+      if (typeof window.rehabV28Abrir === "function") {
+        await window.rehabV28Abrir();
+      }
+
+      await v41ActualizarBadge(false);
+    } catch (error) {
+      alert("No se pudo cancelar: " + error.message);
+    }
+  }
+
+  function v41ActivarCancelaciones() {
+    document.addEventListener("click", function (e) {
+      const btn = e.target.closest?.("[data-v41-cancel-assignment]");
+      if (!btn) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      v41CancelarAsignacion(btn.dataset.v41CancelAssignment);
+    });
+  }
+
+  async function v41PrepararAuth() {
+    const cloud = await v41Cliente();
+    if (!cloud) return;
+
+    try {
+      cloud.auth.onAuthStateChange(function () {
+        setTimeout(() => {
+          v41ActualizarBadge(false);
+        }, 120);
+      });
+    } catch (_) {}
+  }
+
+  function v41IniciarPolling() {
+    if (v41Intervalo) clearInterval(v41Intervalo);
+
+    v41Intervalo = setInterval(() => {
+      v41ActualizarBadge(true);
+    }, 60000);
+
+    window.addEventListener("focus", () => {
+      v41ActualizarBadge(true);
+    });
+  }
+
+  async function v41Iniciar() {
+    v41AgregarEstilos();
+    v41CrearUI();
+    v41ActivarCancelaciones();
+    await v41PrepararAuth();
+    await v41ActualizarBadge(false);
+    v41IniciarPolling();
+
+    console.log(
+      "RehabPod V41: estados avanzados + centro de notificaciones activados."
+    );
+  }
+
+  setTimeout(v41Iniciar, 2350);
+
+  window.rehabV41AbrirNotificaciones = v41AbrirCentro;
+  window.rehabV41ActualizarNotificaciones = v41ActualizarBadge;
+})();
+
+// =====================================================
+// REHABPOD V42
+// SINCRONIZACION / OFFLINE - FASE 1
+//
+// - Cachea la estructura principal de la app con Service Worker.
+// - Cola local para resultados Cloud que no pudieron enviarse.
+// - Reintenta automáticamente al recuperar Internet.
+// - Evita duplicar una sesión: comprueba assignment_id antes de insertar.
+// - Indicador pequeño: En línea / Sin conexión / Pendientes.
+// - Nombre Cloud y perfil local se mantienen sincronizados (parche V40).
+//
+// IMPORTANTE:
+// Esta fase protege especialmente el RESULTADO del entrenamiento.
+// La primera carga de RehabPod y la descarga de rutinas nuevas todavía
+// requieren haber tenido conexión previamente.
+// =====================================================
+
+(function () {
+  const V42_QUEUE_KEY = "rehabpodSyncQueueV42";
+  let v42Sincronizando = false;
+
+  function v42LeerCola() {
+    try {
+      const raw = localStorage.getItem(V42_QUEUE_KEY);
+      const data = raw ? JSON.parse(raw) : [];
+      return Array.isArray(data) ? data : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function v42GuardarCola(cola) {
+    localStorage.setItem(V42_QUEUE_KEY, JSON.stringify(cola || []));
+    v42ActualizarIndicador();
+  }
+
+  function v42Id() {
+    if (crypto?.randomUUID) return crypto.randomUUID();
+    return "sync_" + Date.now() + "_" + Math.random().toString(16).slice(2);
+  }
+
+  function v42EncolarSesion(payload) {
+    if (!payload?.assignment_id || !payload?.user_id) return false;
+
+    const cola = v42LeerCola();
+
+    // Una sola entrada pendiente por asignación.
+    const existente = cola.find(
+      (x) =>
+        x.tipo === "routine_session" &&
+        x.payload?.assignment_id === payload.assignment_id
+    );
+
+    if (existente) {
+      existente.payload = payload;
+      existente.updated_at = new Date().toISOString();
+    } else {
+      cola.push({
+        id: v42Id(),
+        tipo: "routine_session",
+        payload,
+        created_at: new Date().toISOString(),
+        intentos: 0,
+        ultimo_error: null,
+      });
+    }
+
+    v42GuardarCola(cola);
+    console.log("RehabPod V42: resultado guardado en cola offline.");
+    return true;
+  }
+
+  async function v42Cliente() {
+    if (typeof window.rehabGetSupabaseClient !== "function") return null;
+    return await window.rehabGetSupabaseClient();
+  }
+
+  async function v42SincronizarSesion(cloud, item) {
+    const p = item.payload;
+
+    const { data: sesion } = await cloud.auth.getSession();
+    const authUser = sesion?.session?.user || null;
+
+    if (!authUser) {
+      throw new Error("Debes iniciar sesión para sincronizar.");
+    }
+
+
+    if (authUser.id !== p.user_id) {
+      throw new Error("La cola pertenece a otra cuenta.");
+    }
+
+    // Si la sesión ya llegó a Supabase antes de un fallo posterior,
+    // no la insertamos de nuevo.
+    const { data: existente, error: buscarError } = await cloud
+      .from("rehab_routine_sessions")
+      .select("id")
+      .eq("assignment_id", p.assignment_id)
+      .eq("user_id", p.user_id)
+      .limit(1);
+
+    if (buscarError) throw buscarError;
+
+    if (!Array.isArray(existente) || existente.length === 0) {
+      const { error: insertError } = await cloud
+        .from("rehab_routine_sessions")
+        .insert(p);
+
+      if (insertError) throw insertError;
+    }
+
+    const { error: estadoError } = await cloud
+      .from("rehab_assignments")
+      .update({ status: "completed" })
+      .eq("id", p.assignment_id)
+      .eq("user_id", p.user_id);
+
+    if (estadoError) throw estadoError;
+
+    return true;
+  }
+
+  async function v42Sincronizar() {
+    if (v42Sincronizando || !navigator.onLine) return;
+
+    const colaInicial = v42LeerCola();
+    if (!colaInicial.length) {
+      v42ActualizarIndicador();
+      return;
+    }
+
+    v42Sincronizando = true;
+    v42ActualizarIndicador("sync");
+
+    try {
+      const cloud = await v42Cliente();
+      if (!cloud) throw new Error("Supabase no disponible.");
+
+      const pendientes = v42LeerCola();
+      const conservar = [];
+
+      for (const item of pendientes) {
+        try {
+          if (item.tipo === "routine_session") {
+            await v42SincronizarSesion(cloud, item);
+          } else {
+            conservar.push(item);
+          }
+        } catch (error) {
+          item.intentos = Number(item.intentos || 0) + 1;
+          item.ultimo_error = String(error?.message || error || "Error");
+          item.updated_at = new Date().toISOString();
+          conservar.push(item);
+          console.warn("V42 sincronización pendiente:", error);
+        }
+      }
+
+      v42GuardarCola(conservar);
+
+      if (conservar.length === 0) {
+        console.log("RehabPod V42: sincronización completada.");
+
+        if (typeof window.rehabV41ActualizarNotificaciones === "function") {
+          window.rehabV41ActualizarNotificaciones(false);
+        }
+      }
+    } finally {
+      v42Sincronizando = false;
+      v42ActualizarIndicador();
+    }
+  }
+
+  function v42CrearIndicador() {
+    if (document.getElementById("rehabV42Estado")) return;
+
+    const st = document.createElement("style");
+    st.id = "rehabV42Estilos";
+    st.textContent = `
+      #rehabV42Estado{
+        position:fixed;left:14px;top:14px;z-index:100640;
+        padding:7px 10px;border-radius:999px;font-size:11px;font-weight:900;
+        border:1px solid rgba(148,163,184,.22);
+        background:rgba(15,23,42,.90);color:#fff;
+        box-shadow:0 7px 22px rgba(0,0,0,.18);
+        backdrop-filter:blur(8px);cursor:pointer
+      }
+      .tema-claro #rehabV42Estado{background:rgba(255,255,255,.95);color:#111827}
+    `;
+    document.head.appendChild(st);
+
+    const el = document.createElement("button");
+    el.id = "rehabV42Estado";
+    el.type = "button";
+    el.title = "Estado de sincronización";
+    el.onclick = function () {
+      const n = v42LeerCola().length;
+      if (!navigator.onLine) {
+        alert(
+          `RehabPod está sin conexión.\n\nResultados pendientes: ${n}\n\n` +
+          "Puedes seguir con funciones locales. Al recuperar Internet se intentará sincronizar automáticamente."
+        );
+      } else if (n > 0) {
+        alert(
+          `Hay ${n} resultado(s) pendiente(s) de sincronizar.\n\n` +
+          "RehabPod volverá a intentarlo automáticamente."
+        );
+        v42Sincronizar();
+      } else {
+        alert("RehabPod está en línea y no hay resultados pendientes.");
+      }
+    };
+    document.body.appendChild(el);
+  }
+
+  function v42ActualizarIndicador(forzado = "") {
+    const el = document.getElementById("rehabV42Estado");
+    if (!el) return;
+
+    const pendientes = v42LeerCola().length;
+
+    if (forzado === "sync" || v42Sincronizando) {
+      el.textContent = "↻ Sincronizando";
+      return;
+    }
+
+    if (!navigator.onLine) {
+      el.textContent = pendientes
+        ? `● Sin conexión · ${pendientes} pendiente${pendientes === 1 ? "" : "s"}`
+        : "● Sin conexión";
+      return;
+    }
+
+    el.textContent = pendientes
+      ? `● En línea · ${pendientes} pendiente${pendientes === 1 ? "" : "s"}`
+      : "● En línea";
+  }
+
+  async function v42RegistrarServiceWorker() {
+    if (!("serviceWorker" in navigator)) return;
+
+    try {
+      const reg = await navigator.serviceWorker.register("./sw-rehabpod.js", {
+
+        scope: "./",
+      });
+      console.log("RehabPod V42: Service Worker activo.", reg.scope);
+    } catch (error) {
+      console.warn("V42 Service Worker:", error);
+    }
+  }
+
+  async function v42Iniciar() {
+    v42CrearIndicador();
+    v42ActualizarIndicador();
+    await v42RegistrarServiceWorker();
+
+    window.addEventListener("online", function () {
+      v42ActualizarIndicador();
+      setTimeout(v42Sincronizar, 700);
+    });
+
+    window.addEventListener("offline", function () {
+      v42ActualizarIndicador();
+    });
+
+    window.addEventListener("focus", function () {
+      v42ActualizarIndicador();
+      if (navigator.onLine) v42Sincronizar();
+    });
+
+    setTimeout(v42Sincronizar, 1800);
+
+    console.log(
+      "RehabPod V42: sincronización offline + cola de resultados activadas."
+    );
+  }
+
+  window.rehabV42EncolarSesion = v42EncolarSesion;
+  window.rehabV42Sincronizar = v42Sincronizar;
+  window.rehabV42Pendientes = () => v42LeerCola();
+
+  setTimeout(v42Iniciar, 2600);
 })();
