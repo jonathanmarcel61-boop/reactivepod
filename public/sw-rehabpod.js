@@ -15,7 +15,7 @@
 // nueva en vez de seguir usando la vieja del caché.
 // =====================================================
 
-const CACHE_VERSION = "rehabpod-v2";
+const CACHE_VERSION = "rehabpod-v3";
 
 const ARCHIVOS_DEL_CASCARON = [
   "./",
@@ -68,6 +68,20 @@ self.addEventListener("fetch", (evento) => {
   const url = new URL(solicitud.url);
 
   if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  // Solo cacheamos el cascarón conocido de la app (HTML/CSS/JS/logos).
+  // Cualquier otra petición del mismo origen (por ejemplo, con parámetros
+  // de consulta o rutas no previstas) va directa a la red sin guardarse
+  // en caché, para no almacenar contenido inesperado ni dejar crecer el
+  // caché sin control.
+  const rutaRelativa = "./" + url.pathname.replace(/^\//, "");
+  const esArchivoDelCascaron =
+    ARCHIVOS_DEL_CASCARON.includes(rutaRelativa) ||
+    ARCHIVOS_DEL_CASCARON.includes(url.pathname);
+
+  if (!esArchivoDelCascaron) {
     return;
   }
 

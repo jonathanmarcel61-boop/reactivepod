@@ -1,10 +1,19 @@
 const express = require("express");
 const http = require("http");
 const WebSocket = require("ws");
+const helmet = require("helmet");
 
 const app = express();
+
+app.use(helmet());
+
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+
+// Límite de tamaño de mensaje (64 KB): estos son solo mensajes de control
+// cortos (registrar pod, pulsación, color). Sin este límite, cualquiera
+// que se conecte al WebSocket podría mandar mensajes enormes y agotar la
+// memoria del servidor (ataque de denegación de servicio).
+const wss = new WebSocket.Server({ server, maxPayload: 64 * 1024 });
 
 app.use(express.static("public"));
 
