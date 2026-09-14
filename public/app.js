@@ -92,6 +92,91 @@ function rehabMensajeError(error) {
   return String(error?.message || error || "Ocurrió un error inesperado.");
 }
 
+// =====================================================
+// VALIDACIÓN DE FORMULARIOS (cuentas en la nube)
+// =====================================================
+
+function rehabValidarEmail(email) {
+  const texto = String(email || "").trim();
+  // Validación simple pero suficiente para un formulario: usuario@dominio.tld
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(texto);
+}
+
+function rehabValidarPassword(password) {
+  return typeof password === "string" && password.length >= 6;
+}
+
+// =====================================================
+// LÍMITE DE INTENTOS (rate limit del lado de la app)
+//
+// Esto es una primera capa de protección contra intentos repetidos desde
+// este mismo dispositivo/navegador (fuerza bruta simple, clics
+// accidentales repetidos). No reemplaza el límite que ya aplica Supabase
+// del lado del servidor — es un complemento, para dar una respuesta
+// clara a la persona ("espera unos minutos") en vez de dejarla reintentar
+// sin límite.
+// =====================================================
+
+const REHAB_RL_CLAVE = "rehabpodLimiteIntentos";
+const REHAB_RL_MAX_INTENTOS = 5;
+const REHAB_RL_VENTANA_MS = 15 * 60 * 1000; // 15 minutos
+const REHAB_RL_BLOQUEO_MS = 5 * 60 * 1000; // 5 minutos de espera
+
+function rehabRLLeerTodo() {
+  try {
+    return JSON.parse(localStorage.getItem(REHAB_RL_CLAVE)) || {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function rehabRLGuardarTodo(estado) {
+  try {
+    localStorage.setItem(REHAB_RL_CLAVE, JSON.stringify(estado));
+  } catch (error) {
+    console.warn("No se pudo guardar el límite de intentos:", error);
+  }
+}
+
+// Devuelve un mensaje si la acción está bloqueada, o null si puede intentarse.
+function rehabRLVerificar(accion) {
+  const todo = rehabRLLeerTodo();
+  const estado = todo[accion] || { intentos: [], bloqueadoHasta: 0 };
+  const ahora = Date.now();
+
+  if (estado.bloqueadoHasta && ahora < estado.bloqueadoHasta) {
+    const minutos = Math.max(1, Math.ceil((estado.bloqueadoHasta - ahora) / 60000));
+    return `Demasiados intentos. Espera ${minutos} minuto${minutos === 1 ? "" : "s"} antes de volver a intentar.`;
+  }
+
+  return null;
+}
+
+function rehabRLRegistrarFallo(accion) {
+  const todo = rehabRLLeerTodo();
+  const estado = todo[accion] || { intentos: [], bloqueadoHasta: 0 };
+  const ahora = Date.now();
+
+  estado.intentos = (estado.intentos || []).filter(
+    (marca) => ahora - marca < REHAB_RL_VENTANA_MS
+  );
+  estado.intentos.push(ahora);
+
+  if (estado.intentos.length >= REHAB_RL_MAX_INTENTOS) {
+    estado.bloqueadoHasta = ahora + REHAB_RL_BLOQUEO_MS;
+    estado.intentos = [];
+  }
+
+  todo[accion] = estado;
+  rehabRLGuardarTodo(todo);
+}
+
+function rehabRLRegistrarExito(accion) {
+  const todo = rehabRLLeerTodo();
+  todo[accion] = { intentos: [], bloqueadoHasta: 0 };
+  rehabRLGuardarTodo(todo);
+}
+
 let datosApp = null;
 
 let ajustesApp = {
@@ -13966,6 +14051,8 @@ window.rehabGetSupabaseClient = async function () {
       .rehabV27Btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;
         background:#7c3aed;color:#fff}
       .rehabV27Btn.sec{background:rgba(148,163,184,.15);color:inherit;border:1px solid rgba(148,163,184,.22)}
+      .rehabV27Link{appearance:none;border:0;background:none;color:var(--acento,#7c3aed);
+        font-size:.82rem;font-weight:700;cursor:pointer;padding:8px 2px;text-align:left;width:100%}
       .rehabV27Card{border:1px solid rgba(148,163,184,.21);border-radius:17px;padding:14px;
         background:rgba(148,163,184,.05);margin:10px 0}
       .rehabV27Estado{padding:11px 12px;border-radius:13px;background:rgba(59,130,246,.09);
@@ -14062,6 +14149,7 @@ window.rehabGetSupabaseClient = async function () {
           <div class="rehabV27Campo"><label>Correo</label><input id="rehabV27LoginEmail" type="email" autocomplete="email"></div>
           <div class="rehabV27Campo"><label>Contraseña</label><input id="rehabV27LoginPass" type="password" autocomplete="current-password"></div>
           <button id="rehabV27LoginBtn" class="rehabV27Btn" type="button">INGRESAR</button>
+          <button id="rehabV27OlvideBtn" class="rehabV27Link" type="button">¿Olvidaste tu contraseña?</button>
         </div>
 
         <div class="rehabV27Card">
@@ -14088,6 +14176,7 @@ window.rehabGetSupabaseClient = async function () {
     `;
 
     document.getElementById("rehabV27LoginBtn").onclick = login;
+    document.getElementById("rehabV27OlvideBtn").onclick = recuperarContrasena;
     document.getElementById("rehabV27RegBtn").onclick = registrar;
     document.getElementById("rehabV27RegRol").onchange = actualizarRegistroRol;
     actualizarRegistroRol();
@@ -14121,59 +14210,159 @@ window.rehabGetSupabaseClient = async function () {
   }
 
   async function login() {
+    const btn = document.getElementById("rehabV27LoginBtn");
     const email = document.getElementById("rehabV27LoginEmail").value.trim();
     const password = document.getElementById("rehabV27LoginPass").value;
 
-    if (!email || !password) {
-      mensaje("Completa correo y contraseña.");
+    const bloqueo = rehabRLVerificar("login");
+    if (bloqueo) {
+      mensaje(bloqueo);
       return;
     }
 
-    const { data, error } = await rehabCloud.auth.signInWithPassword({ email, password });
-    if (error) {
-      mensaje(error.message);
+    if (!rehabValidarEmail(email)) {
+      mensaje("Escribe un correo válido (ejemplo: nombre@dominio.com).");
       return;
     }
 
-    rehabCloudUser = data.user;
-    await cargarPerfilCloud();
-    await renderPanelCuenta();
+    if (!password) {
+      mensaje("Escribe tu contraseña.");
+      return;
+    }
+
+    if (btn) btn.disabled = true;
+
+    try {
+      const { data, error } = await rehabCloud.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        rehabRLRegistrarFallo("login");
+        const bloqueoNuevo = rehabRLVerificar("login");
+        mensaje(bloqueoNuevo || rehabMensajeError(error));
+        return;
+      }
+
+      rehabRLRegistrarExito("login");
+      rehabCloudUser = data.user;
+      await cargarPerfilCloud();
+      await renderPanelCuenta();
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  async function recuperarContrasena() {
+    const btn = document.getElementById("rehabV27OlvideBtn");
+    const email = document.getElementById("rehabV27LoginEmail").value.trim();
+
+    const bloqueo = rehabRLVerificar("recuperar");
+    if (bloqueo) {
+      mensaje(bloqueo);
+      return;
+    }
+
+    if (!rehabValidarEmail(email)) {
+      mensaje(
+        "Escribe tu correo en el campo de arriba y vuelve a tocar “¿Olvidaste tu contraseña?”."
+      );
+      return;
+    }
+
+    if (btn) btn.disabled = true;
+
+    try {
+      const redirectTo =
+        typeof window !== "undefined"
+          ? window.location.origin + window.location.pathname
+          : undefined;
+
+      const { error } = await rehabCloud.auth.resetPasswordForEmail(email, {
+        redirectTo,
+      });
+
+      rehabRLRegistrarFallo("recuperar");
+
+      if (error) {
+        mensaje(rehabMensajeError(error));
+        return;
+      }
+
+      mensaje(
+        "Si ese correo tiene una cuenta en RehabPod, te enviamos un enlace para crear una nueva contraseña. Revisa tu bandeja de entrada (y spam)."
+      );
+    } finally {
+      if (btn) btn.disabled = false;
+    }
   }
 
   async function registrar() {
+    const btn = document.getElementById("rehabV27RegBtn");
     const full_name = document.getElementById("rehabV27RegNombre").value.trim();
     const role = document.getElementById("rehabV27RegRol").value;
     const specialty = document.getElementById("rehabV27RegEspecialidad").value;
     const email = document.getElementById("rehabV27RegEmail").value.trim();
     const password = document.getElementById("rehabV27RegPass").value;
 
-    if (!full_name || !email || !password || !specialty) {
+    const bloqueo = rehabRLVerificar("registro");
+    if (bloqueo) {
+      mensaje(bloqueo);
+      return;
+    }
+
+    if (!full_name || full_name.length < 2 || full_name.length > 80) {
+      mensaje("Escribe un nombre de entre 2 y 80 caracteres.");
+      return;
+    }
+
+    if (!rehabValidarEmail(email)) {
+      mensaje("Escribe un correo válido (ejemplo: nombre@dominio.com).");
+      return;
+    }
+
+    if (!rehabValidarPassword(password)) {
+      mensaje("La contraseña debe tener al menos 6 caracteres.");
+      return;
+    }
+
+    if (!specialty) {
       mensaje("Completa todos los campos.");
       return;
     }
 
-    const { data, error } = await rehabCloud.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name, role, specialty } },
-    });
+    if (btn) btn.disabled = true;
 
-    if (error) {
-      mensaje(error.message);
-      return;
+    try {
+      const { data, error } = await rehabCloud.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name, role, specialty } },
+      });
+
+      if (error) {
+        rehabRLRegistrarFallo("registro");
+        mensaje(rehabMensajeError(error));
+        return;
+      }
+
+      rehabRLRegistrarExito("registro");
+
+      if (!data.session) {
+        mensaje(
+          "Cuenta creada. Revisa tu correo para confirmar la cuenta y luego inicia sesión."
+        );
+        return;
+      }
+
+      rehabCloudUser = data.user;
+      await new Promise((r) => setTimeout(r, 700));
+      await cargarPerfilCloud();
+      await renderPanelCuenta();
+    } finally {
+      if (btn) btn.disabled = false;
     }
-
-    if (!data.session) {
-      mensaje(
-        "Cuenta creada. Revisa tu correo para confirmar la cuenta y luego inicia sesión."
-      );
-      return;
-    }
-
-    rehabCloudUser = data.user;
-    await new Promise((r) => setTimeout(r, 700));
-    await cargarPerfilCloud();
-    await renderPanelCuenta();
   }
 
   // -----------------------------------------------------
@@ -17893,22 +18082,63 @@ async function abrirInicioNav() {
   mostrarPantalla(pantallaInicio);
 }
 
+function rehabConfigurarDesplegable(idBoton, idFlecha, idContenido, abiertoPorDefecto) {
+  const boton = document.getElementById(idBoton);
+  const flecha = document.getElementById(idFlecha);
+  const contenido = document.getElementById(idContenido);
+  if (!boton || !contenido) return;
+
+  if (boton.dataset.rehabDesplegableListo === "1") return;
+  boton.dataset.rehabDesplegableListo = "1";
+
+  contenido.style.display = abiertoPorDefecto ? "" : "none";
+  if (flecha) flecha.textContent = abiertoPorDefecto ? "▴" : "▾";
+
+  boton.onclick = () => {
+    const abierto = contenido.style.display !== "none";
+    contenido.style.display = abierto ? "none" : "";
+    if (flecha) flecha.textContent = abierto ? "▾" : "▴";
+  };
+}
+
 async function abrirProgresoNav() {
   const cloudActiva = await navHaySesionCloud();
 
   mostrarProgreso();
   mostrarPantalla(pantallaProgreso);
 
+  // Los entrenamientos individuales (modos libres, no asignados por un
+  // profesional) solo existen en este dispositivo. Se muestran siempre,
+  // como sección desplegable para no saturar la pantalla.
+  const btnLocal = document.getElementById("rehabToggleProgresoLocal");
+  if (btnLocal) btnLocal.style.display = "";
+  rehabConfigurarDesplegable(
+    "rehabToggleProgresoLocal",
+    "rehabToggleProgresoLocalFlecha",
+    "contenidoProgresoLocal",
+    !cloudActiva // si no hay nube, esta es la única sección: se abre de una vez
+  );
+
+  const btnCloud = document.getElementById("rehabToggleProgresoCloud");
+
   if (!cloudActiva || typeof window.rehabV31RenderEnPantalla !== "function") {
+    if (btnCloud) btnCloud.style.display = "none";
     if (contenidoProgresoCloud) contenidoProgresoCloud.style.display = "none";
-    if (contenidoProgresoLocal) contenidoProgresoLocal.style.display = "";
     return;
   }
 
-  if (contenidoProgresoLocal) contenidoProgresoLocal.style.display = "none";
+  // Las rutinas asignadas por un profesional sí viven en la nube; es una
+  // sección desplegable adicional, no reemplaza a la anterior.
+  if (btnCloud) btnCloud.style.display = "";
+  rehabConfigurarDesplegable(
+    "rehabToggleProgresoCloud",
+    "rehabToggleProgresoCloudFlecha",
+    "contenidoProgresoCloud",
+    true
+  );
+
   if (contenidoProgresoCloud) {
-    contenidoProgresoCloud.style.display = "";
-    contenidoProgresoCloud.innerHTML = `<div class="rehabV31Aviso">Cargando progreso...</div>`;
+    contenidoProgresoCloud.innerHTML = `<div class="rehabV31Aviso">Cargando rutinas asignadas...</div>`;
 
     try {
       await window.rehabV31RenderEnPantalla("contenidoProgresoCloud", null);
@@ -17953,6 +18183,98 @@ if (btnProgreso) btnProgreso.onclick = abrirProgresoNav;
 // información vive dentro de Progreso, para no repetirla al usuario.
 if (btnCuentaMenu) btnCuentaMenu.onclick = abrirCuentaNav;
 if (btnVolverCuentaCloud) btnVolverCuentaCloud.onclick = abrirInicioNav;
+
+// =====================================================
+// RECUPERACIÓN DE CONTRASEÑA — completar desde el enlace del correo
+// =====================================================
+
+function rehabMostrarModalNuevaContrasena() {
+  if (document.getElementById("rehabModalNuevaContrasena")) return;
+
+  const overlay = document.createElement("div");
+  overlay.id = "rehabModalNuevaContrasena";
+  overlay.style.cssText = `
+    position:fixed;inset:0;z-index:999998;display:flex;align-items:center;
+    justify-content:center;padding:20px;background:rgba(0,0,0,.65);
+  `;
+
+  overlay.innerHTML = `
+    <div style="width:100%;max-width:420px;padding:22px;border-radius:16px;
+      background:var(--tarjeta);border:1px solid var(--borde);color:var(--texto);">
+      <h3 style="margin:0 0 10px;font-size:18px;">Crea tu nueva contraseña</h3>
+      <p style="font-size:13px;color:var(--texto2);margin:0 0 14px;">
+        Escribe la nueva contraseña para tu cuenta de RehabPod.
+      </p>
+      <label style="display:block;font-size:12px;color:var(--texto2);margin-bottom:4px;">Nueva contraseña</label>
+      <input id="rehabNuevaPass1" type="password" minlength="6" autocomplete="new-password"
+        style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--borde);
+        background:var(--tarjeta2);color:var(--texto);margin-bottom:10px;">
+      <label style="display:block;font-size:12px;color:var(--texto2);margin-bottom:4px;">Confirmar contraseña</label>
+      <input id="rehabNuevaPass2" type="password" minlength="6" autocomplete="new-password"
+        style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--borde);
+        background:var(--tarjeta2);color:var(--texto);margin-bottom:6px;">
+      <div id="rehabNuevaPassAviso" style="font-size:12px;color:var(--rojo);min-height:16px;margin-bottom:10px;"></div>
+      <button id="rehabNuevaPassGuardar" class="boton botonPrincipal" style="margin:0;">
+        Guardar contraseña
+      </button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  document.getElementById("rehabNuevaPassGuardar").onclick = async () => {
+    const btn = document.getElementById("rehabNuevaPassGuardar");
+    const aviso = document.getElementById("rehabNuevaPassAviso");
+    const p1 = document.getElementById("rehabNuevaPass1").value;
+    const p2 = document.getElementById("rehabNuevaPass2").value;
+
+    if (!rehabValidarPassword(p1)) {
+      aviso.textContent = "La contraseña debe tener al menos 6 caracteres.";
+      return;
+    }
+
+    if (p1 !== p2) {
+      aviso.textContent = "Las dos contraseñas no coinciden.";
+      return;
+    }
+
+    btn.disabled = true;
+
+    try {
+      const cloud = await window.rehabGetSupabaseClient();
+      const { error } = await cloud.auth.updateUser({ password: p1 });
+
+      if (error) {
+        aviso.textContent = rehabMensajeError(error);
+        return;
+      }
+
+      overlay.remove();
+      alert(
+        "Tu contraseña se actualizó correctamente. Ya puedes usarla para iniciar sesión."
+      );
+    } finally {
+      btn.disabled = false;
+    }
+  };
+}
+
+async function rehabConfigurarRecuperacionContrasena() {
+  if (typeof window.rehabGetSupabaseClient !== "function") return;
+
+  try {
+    const cloud = await window.rehabGetSupabaseClient();
+    cloud.auth.onAuthStateChange((evento) => {
+      if (evento === "PASSWORD_RECOVERY") {
+        rehabMostrarModalNuevaContrasena();
+      }
+    });
+  } catch (error) {
+    console.warn("No se pudo configurar la recuperación de contraseña:", error);
+  }
+}
+
+rehabConfigurarRecuperacionContrasena();
 
 console.log("RehabPod: navegación inferior (Inicio/Progreso/Historial/Cuenta) lista.");
 
