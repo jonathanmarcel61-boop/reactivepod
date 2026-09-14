@@ -1619,17 +1619,6 @@ function guardarPodRegistrado(indice, dispositivo) {
   }
 }
 
-function obtenerPodRegistrado(indice) {
-  try {
-    const guardados = JSON.parse(localStorage.getItem(CLAVE_PODS_BLE) || "{}");
-
-    return guardados[indice] || null;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-}
-
 // =====================================================
 // CONECTAR UN POD ENCONTRADO SIN MOSTRAR SELECTOR
 // =====================================================
@@ -3492,46 +3481,6 @@ function pintarControlesExperiencia() {
   actualizarResumenDificultad();
 }
 
-// =====================================================
-// V14 - ORDEN VISUAL DE LA CONFIGURACIÓN
-// Título -> descripción -> controles -> dificultad -> inicio
-// =====================================================
-function ordenarConfiguracionV14() {
-  if (!pantallaConfiguracion) return;
-
-  const bloqueCabecera = obtenerBloqueDirectoDePantallaV12(
-    tituloConfiguracion || nombrePerfilConfiguracion || btnVolverEntrenamientos,
-    pantallaConfiguracion
-  );
-  const bloqueDescripcion = obtenerBloqueDirectoDePantallaV12(
-    descripcionModo,
-    pantallaConfiguracion
-  );
-  const panel = document.getElementById("panelExperienciaReactiPod");
-  const bloqueInicio = obtenerBloqueDirectoDePantallaV12(
-    btnComenzar,
-    pantallaConfiguracion
-  );
-
-  if (!bloqueCabecera || !bloqueDescripcion || !panel) return;
-
-  // La cabecera del modo siempre debe ser lo primero que vea el usuario.
-  pantallaConfiguracion.insertBefore(
-    bloqueCabecera,
-    pantallaConfiguracion.firstElementChild
-  );
-
-  // La explicación del ejercicio queda inmediatamente bajo el título.
-  bloqueCabecera.insertAdjacentElement("afterend", bloqueDescripcion);
-
-  // Los controles propios del ejercicio quedan debajo de la descripción.
-  bloqueDescripcion.insertAdjacentElement("afterend", panel);
-
-  // El botón de inicio permanece al final. La dificultad ya está al final del panel.
-  if (bloqueInicio && bloqueInicio !== panel) {
-    pantallaConfiguracion.appendChild(bloqueInicio);
-  }
-}
 // =====================================================
 // V12 - CONFIGURACIÓN LIMPIA DEL MODO ENTRENADOR
 // =====================================================
@@ -7963,22 +7912,6 @@ mostrarGateTerminos();
 // Cabecera -> descripción -> finalizar por -> colores (si aplica)
 // -> dificultad -> sonidos/pods -> iniciar
 // =====================================================
-function bloqueDirectoConfiguracionV15(elemento) {
-  if (!elemento || !pantallaConfiguracion) return null;
-  let nodo = elemento;
-  while (nodo && nodo.parentElement && nodo.parentElement !== pantallaConfiguracion) {
-    nodo = nodo.parentElement;
-  }
-  return nodo && nodo.parentElement === pantallaConfiguracion ? nodo : null;
-}
-
-function insertarDespuesV15(referencia, nodo) {
-  if (!referencia || !nodo || referencia === nodo) return referencia || nodo;
-  if (nodo.parentElement !== pantallaConfiguracion) return referencia;
-  referencia.insertAdjacentElement("afterend", nodo);
-  return nodo;
-}
-
 function ordenarConfiguracionV15() {
   if (!pantallaConfiguracion || !descripcionModo) return;
 
@@ -12956,24 +12889,6 @@ console.log(
     document.head.appendChild(style);
   }
 
-  function rehabV24CrearBoton() {
-    if (document.getElementById("rehabV24BtnHistorial")) return;
-
-    const btnRutinas = document.getElementById("rehabV23BtnRutinas");
-    const btnEntrenamiento = document.getElementById("btnEntrenamiento");
-    const referencia = btnRutinas || btnEntrenamiento;
-    if (!referencia) return;
-
-    const boton = document.createElement("button");
-    boton.type = "button";
-    boton.id = "rehabV24BtnHistorial";
-    boton.className = "rehabV24BotonHistorial";
-    boton.innerHTML = "📊 HISTORIAL DE RUTINAS";
-    boton.addEventListener("click", rehabV24AbrirHistorial);
-
-    referencia.insertAdjacentElement("afterend", boton);
-  }
-
   function rehabV24CrearModal() {
     if (document.getElementById("rehabV24Overlay")) return;
 
@@ -13913,35 +13828,6 @@ window.rehabGetSupabaseClient = async function () {
   // CONFIGURACION PUBLICA DE SUPABASE
   // -----------------------------------------------------
 
-  async function cargarConfigPublica() {
-    if (
-      window.REHAB_SUPABASE_CONFIG?.url &&
-      window.REHAB_SUPABASE_CONFIG?.publishableKey
-    ) {
-      return true;
-    }
-
-    return new Promise((resolve) => {
-      const existente = document.getElementById("rehabSupabaseConfigPublica");
-      if (existente) {
-        existente.addEventListener(
-          "load",
-          () => resolve(!!window.REHAB_SUPABASE_CONFIG),
-          { once: true }
-        );
-        existente.addEventListener("error", () => resolve(false), { once: true });
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.id = "rehabSupabaseConfigPublica";
-      script.src = "supabase-config.js";
-      script.onload = () => resolve(!!window.REHAB_SUPABASE_CONFIG);
-      script.onerror = () => resolve(false);
-      document.head.appendChild(script);
-    });
-  }
-
   function configurado() {
     const cfg = window.REHAB_SUPABASE_CONFIG;
     return !!(
@@ -13951,29 +13837,6 @@ window.rehabGetSupabaseClient = async function () {
       typeof cfg.publishableKey === "string" &&
       cfg.publishableKey.length > 10
     );
-  }
-
-  function cargarSupabaseSDK() {
-    return new Promise((resolve, reject) => {
-      if (window.supabase && window.supabase.createClient) {
-        resolve();
-        return;
-      }
-
-      const existente = document.getElementById("rehabSupabaseSDK");
-      if (existente) {
-        existente.addEventListener("load", resolve, { once: true });
-        existente.addEventListener("error", reject, { once: true });
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.id = "rehabSupabaseSDK";
-      script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-      script.onload = resolve;
-      script.onerror = () => reject(new Error("No se pudo cargar Supabase JS."));
-      document.head.appendChild(script);
-    });
   }
 
   async function inicializarCloud() {
@@ -14757,57 +14620,6 @@ window.rehabGetSupabaseClient = async function () {
     };
 
     return estados[estado] || estado;
-  }
-
-  async function cargarSDK() {
-    if (window.supabase?.createClient) return true;
-
-    await new Promise((resolve, reject) => {
-      const existente = document.getElementById("rehabSupabaseSDK");
-      if (existente) {
-        if (window.supabase?.createClient) return resolve();
-        existente.addEventListener("load", resolve, { once: true });
-        existente.addEventListener("error", reject, { once: true });
-        return;
-      }
-
-      const s = document.createElement("script");
-      s.id = "rehabSupabaseSDK";
-      s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-      s.onload = resolve;
-      s.onerror = reject;
-      document.head.appendChild(s);
-    });
-
-    return !!window.supabase?.createClient;
-  }
-
-  async function cargarConfig() {
-    if (
-      window.REHAB_SUPABASE_CONFIG?.url &&
-      window.REHAB_SUPABASE_CONFIG?.publishableKey
-    ) {
-      return true;
-    }
-
-    await new Promise((resolve) => {
-      const existente = document.getElementById("rehabSupabaseConfigPublica");
-
-      if (existente) {
-        existente.addEventListener("load", resolve, { once: true });
-        existente.addEventListener("error", resolve, { once: true });
-        return;
-      }
-
-      const s = document.createElement("script");
-      s.id = "rehabSupabaseConfigPublica";
-      s.src = "supabase-config.js";
-      s.onload = resolve;
-      s.onerror = resolve;
-      document.head.appendChild(s);
-    });
-
-    return !!window.REHAB_SUPABASE_CONFIG;
   }
 
   async function iniciarCloud() {
@@ -15784,65 +15596,9 @@ window.rehabGetSupabaseClient = async function () {
     return V29_NOMBRES[modo] || modo || "Ejercicio";
   }
 
-  function v29Esperar(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
   // -----------------------------------------------------
   // SUPABASE
   // -----------------------------------------------------
-  async function v29CargarSDK() {
-    if (window.supabase?.createClient) return;
-
-    await new Promise((resolve, reject) => {
-      const existente = document.getElementById("rehabSupabaseSDK");
-
-      if (existente) {
-        if (window.supabase?.createClient) {
-          resolve();
-          return;
-        }
-
-        existente.addEventListener("load", resolve, { once: true });
-        existente.addEventListener("error", reject, { once: true });
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.id = "rehabSupabaseSDK";
-      script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-      script.onload = resolve;
-      script.onerror = reject;
-      document.head.appendChild(script);
-    });
-  }
-
-  async function v29CargarConfig() {
-    if (
-      window.REHAB_SUPABASE_CONFIG?.url &&
-      window.REHAB_SUPABASE_CONFIG?.publishableKey
-    ) {
-      return;
-    }
-
-    await new Promise((resolve) => {
-      const existente = document.getElementById("rehabSupabaseConfigPublica");
-
-      if (existente) {
-        existente.addEventListener("load", resolve, { once: true });
-        existente.addEventListener("error", resolve, { once: true });
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.id = "rehabSupabaseConfigPublica";
-      script.src = "supabase-config.js";
-      script.onload = resolve;
-      script.onerror = resolve;
-      document.head.appendChild(script);
-    });
-  }
-
   async function v29IniciarCloud() {
     v29Cloud = await window.rehabGetSupabaseClient();
 
@@ -17584,72 +17340,12 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
     }
   }
 
-  function v33OcultarHistorialAntiguo() {
-    const historialV24 = document.getElementById("rehabV24BtnHistorial");
-    if (historialV24) {
-      historialV24.style.display = "none";
-      historialV24.setAttribute("aria-hidden", "true");
-    }
-
-    // El botón inferior de estadísticas/historial deja de ser necesario:
-    // toda la información queda unificada en PROGRESO.
-    if (
-      typeof btnEstadisticas !== "undefined" &&
-      btnEstadisticas &&
-      !btnEstadisticas.dataset.v34Cuenta
-    ) {
-      btnEstadisticas.style.display = "none";
-      btnEstadisticas.setAttribute("aria-hidden", "true");
-    }
-  }
-
   function v33OcultarBotonProgresoCloudDuplicado() {
     const progresoCloud = document.getElementById("rehabV31HomeBtn");
     if (progresoCloud) {
       progresoCloud.style.display = "none";
       progresoCloud.setAttribute("aria-hidden", "true");
     }
-  }
-
-  async function v33AbrirProgresoUnificado() {
-    const cloud = await v33Cliente();
-
-    if (cloud) {
-      try {
-        const { data } = await cloud.auth.getSession();
-        const usuario = data?.session?.user || null;
-
-        if (usuario && typeof window.rehabV31Abrir === "function") {
-          await window.rehabV31Abrir();
-          return;
-        }
-      } catch (error) {
-        console.warn("V33 progreso cloud:", error);
-      }
-    }
-
-    // Si no hay cuenta Cloud, el usuario conserva el progreso local.
-    try {
-      if (typeof mostrarProgreso === "function") {
-        mostrarProgreso();
-      }
-      if (
-        typeof mostrarPantalla === "function" &&
-        typeof pantallaProgreso !== "undefined"
-      ) {
-        mostrarPantalla(pantallaProgreso);
-      }
-    } catch (error) {
-      console.error("V33 progreso local:", error);
-    }
-  }
-
-  function v33ConfigurarBotonProgreso() {
-    if (typeof btnProgreso === "undefined" || !btnProgreso) return;
-
-    btnProgreso.onclick = function () {
-      v33AbrirProgresoUnificado();
-    };
   }
 
   async function v33UsuarioTieneProfesional(userId) {
@@ -17752,24 +17448,6 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
     if (cloudBtn) {
       cloudBtn.textContent = "📊 PROGRESO";
     }
-  }
-
-  function v33ObservarBotonesDinamicos() {
-    const observer = new MutationObserver(function () {
-      v33OcultarHistorialAntiguo();
-      v33OcultarBotonProgresoCloudDuplicado();
-
-      const asignadas = document.getElementById("rehabV28HomeBtn");
-      if (asignadas && !asignadas.dataset.v33Preparado) {
-        asignadas.dataset.v33Preparado = "1";
-        v33ActualizarRutinasAsignadas();
-      }
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
   }
 
   async function v33Iniciar() {
@@ -17989,27 +17667,6 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
     if (btnRutinas && btnRutinas.textContent.trim() !== "📋 MIS RUTINAS") {
       btnRutinas.textContent = "📋 MIS RUTINAS";
     }
-  }
-
-  function v36ObservarInicio() {
-    let programado = false;
-
-    const observer = new MutationObserver(() => {
-      // Agrupamos varias mutaciones en una sola actualización.
-      if (programado) return;
-      programado = true;
-
-      requestAnimationFrame(() => {
-        programado = false;
-        v36OcultarResumenDuplicado();
-        v36LimpiarTextoInicio();
-      });
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
   }
 
   function v36Iniciar() {
