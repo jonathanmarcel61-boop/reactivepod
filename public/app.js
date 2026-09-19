@@ -186,6 +186,21 @@ let ajustesApp = {
 
   coloresPods: ["red", "green", "blue", "yellow"],
 
+  // Colores que sí pueden aparecer durante el entrenamiento (modos que no
+  // sean el modo entrenador). Por defecto, los 9 disponibles — nadie ve
+  // un cambio hasta que decida desactivar alguno.
+  coloresActivos: [
+    "red",
+    "green",
+    "blue",
+    "yellow",
+    "white",
+    "purple",
+    "cyan",
+    "orange",
+    "pink",
+  ],
+
   tema: "oscuro",
 
   // Aceptación general de Términos y Política de Privacidad (una vez por
@@ -2940,19 +2955,37 @@ const CLAVES_COLORES_REACTIPOD = [
 
 let ultimoColorAleatorioPorPod = [null, null, null, null];
 
+// Los 4 Pods necesitan poder mostrar 4 colores distintos entre sí al mismo
+// tiempo, así que nunca dejamos que queden menos de 4 colores activos.
+const MINIMO_COLORES_ACTIVOS = 4;
+
+function obtenerClavesColoresActivos() {
+  const guardadas = Array.isArray(ajustesApp?.coloresActivos)
+    ? ajustesApp.coloresActivos
+    : [];
+
+  const validas = CLAVES_COLORES_REACTIPOD.filter((clave) => guardadas.includes(clave));
+
+  return validas.length >= MINIMO_COLORES_ACTIVOS ? validas : CLAVES_COLORES_REACTIPOD;
+}
+
 function obtenerColorAleatorioParaPod(indice, excluidos = []) {
   const bloqueados = new Set(excluidos.filter(Boolean));
   const ultimo = ultimoColorAleatorioPorPod[indice];
+  const paleta = obtenerClavesColoresActivos();
 
-  let disponibles = CLAVES_COLORES_REACTIPOD.filter(
-    (clave) => !bloqueados.has(clave) && clave !== ultimo
-  );
+  let disponibles = paleta.filter((clave) => !bloqueados.has(clave) && clave !== ultimo);
 
   if (!disponibles.length) {
-    disponibles = CLAVES_COLORES_REACTIPOD.filter((clave) => !bloqueados.has(clave));
+    disponibles = paleta.filter((clave) => !bloqueados.has(clave));
   }
 
-  const clave = disponibles[Math.floor(Math.random() * disponibles.length)] || "red";
+  if (!disponibles.length) {
+    disponibles = paleta;
+  }
+
+  const clave =
+    disponibles[Math.floor(Math.random() * disponibles.length)] || paleta[0] || "red";
 
   ultimoColorAleatorioPorPod[indice] = clave;
   return catalogoColoresPersonalizados[clave];
@@ -11309,6 +11342,9 @@ console.log(
     },
   ];
 
+  window.REHAB_V22_MODOS = REHAB_V22_MODOS;
+  window.REHAB_V22_CATEGORIAS = REHAB_V22_CATEGORIAS;
+
   function rehabV22AgregarEstilos() {
     if (document.getElementById("rehabV22Estilos")) return;
 
@@ -13649,6 +13685,18 @@ console.log(
 window.rehabSupabaseClient = window.rehabSupabaseClient || null;
 window.rehabSupabasePromise = window.rehabSupabasePromise || null;
 
+// Sin esto, en un dispositivo sin internet el navegador puede tardar
+// muchísimo (a veces 30-60 segundos, según la red) antes de darse por
+// vencido intentando cargar un script externo. Con este límite de 6
+// segundos, la app se da por vencida rápido y muestra el contenido local
+// en vez de dejar la pantalla de Cuenta/Progreso "cargando" para siempre.
+function rehabConTiempoLimite(promesa, ms, mensaje) {
+  return Promise.race([
+    promesa,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(mensaje)), ms)),
+  ]);
+}
+
 window.rehabGetSupabaseClient = async function () {
   if (window.rehabSupabaseClient) {
     return window.rehabSupabaseClient;
@@ -13664,34 +13712,39 @@ window.rehabGetSupabaseClient = async function () {
       !window.REHAB_SUPABASE_CONFIG?.url ||
       !window.REHAB_SUPABASE_CONFIG?.publishableKey
     ) {
-      await new Promise((resolve, reject) => {
-        const existente = document.getElementById("rehabSupabaseConfigPublica");
+      await rehabConTiempoLimite(
+        new Promise((resolve, reject) => {
+          const existente = document.getElementById("rehabSupabaseConfigPublica");
 
-        if (existente) {
-          if (
-            window.REHAB_SUPABASE_CONFIG?.url &&
-            window.REHAB_SUPABASE_CONFIG?.publishableKey
-          ) {
-            resolve();
+          if (existente) {
+            if (
+              window.REHAB_SUPABASE_CONFIG?.url &&
+              window.REHAB_SUPABASE_CONFIG?.publishableKey
+            ) {
+              resolve();
+              return;
+            }
+
+            existente.addEventListener("load", resolve, { once: true });
+            existente.addEventListener(
+              "error",
+              () => reject(new Error("No se pudo cargar supabase-config.js.")),
+              { once: true }
+            );
             return;
           }
 
-          existente.addEventListener("load", resolve, { once: true });
-          existente.addEventListener(
-            "error",
-            () => reject(new Error("No se pudo cargar supabase-config.js.")),
-            { once: true }
-          );
-          return;
-        }
-
-        const script = document.createElement("script");
-        script.id = "rehabSupabaseConfigPublica";
-        script.src = "supabase-config.js";
-        script.onload = resolve;
-        script.onerror = () => reject(new Error("No se pudo cargar supabase-config.js."));
-        document.head.appendChild(script);
-      });
+          const script = document.createElement("script");
+          script.id = "rehabSupabaseConfigPublica";
+          script.src = "supabase-config.js";
+          script.onload = resolve;
+          script.onerror = () =>
+            reject(new Error("No se pudo cargar supabase-config.js."));
+          document.head.appendChild(script);
+        }),
+        6000,
+        "Sin conexión a internet."
+      );
     }
 
     if (
@@ -13703,31 +13756,35 @@ window.rehabGetSupabaseClient = async function () {
 
     // Cargar supabase-js una sola vez.
     if (!window.supabase?.createClient) {
-      await new Promise((resolve, reject) => {
-        const existente = document.getElementById("rehabSupabaseSDK");
+      await rehabConTiempoLimite(
+        new Promise((resolve, reject) => {
+          const existente = document.getElementById("rehabSupabaseSDK");
 
-        if (existente) {
-          if (window.supabase?.createClient) {
-            resolve();
+          if (existente) {
+            if (window.supabase?.createClient) {
+              resolve();
+              return;
+            }
+
+            existente.addEventListener("load", resolve, { once: true });
+            existente.addEventListener(
+              "error",
+              () => reject(new Error("No se pudo cargar Supabase JS.")),
+              { once: true }
+            );
             return;
           }
 
-          existente.addEventListener("load", resolve, { once: true });
-          existente.addEventListener(
-            "error",
-            () => reject(new Error("No se pudo cargar Supabase JS.")),
-            { once: true }
-          );
-          return;
-        }
-
-        const script = document.createElement("script");
-        script.id = "rehabSupabaseSDK";
-        script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-        script.onload = resolve;
-        script.onerror = () => reject(new Error("No se pudo cargar Supabase JS."));
-        document.head.appendChild(script);
-      });
+          const script = document.createElement("script");
+          script.id = "rehabSupabaseSDK";
+          script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+          script.onload = resolve;
+          script.onerror = () => reject(new Error("No se pudo cargar Supabase JS."));
+          document.head.appendChild(script);
+        }),
+        6000,
+        "Sin conexión a internet."
+      );
     }
 
     if (!window.supabase?.createClient) {
@@ -14530,7 +14587,6 @@ window.rehabGetSupabaseClient = async function () {
   // -----------------------------------------------------
   async function iniciar() {
     agregarEstilos();
-    crearBoton();
     crearModal();
     await inicializarCloud();
     console.log("RehabPod V27: cuentas Profesional/Usuario + nube preparadas.");
@@ -17759,16 +17815,29 @@ function rehabConfigurarDesplegable(idBoton, idFlecha, idContenido, abiertoPorDe
 }
 
 async function abrirProgresoNav() {
-  const cloudActiva = await navHaySesionCloud();
-
-  mostrarProgreso();
+  // La pantalla cambia YA, de inmediato. Todo lo que depende de la nube
+  // (más abajo) se resuelve después, sin bloquear esto.
   mostrarPantalla(pantallaProgreso);
+
+  try {
+    mostrarProgreso();
+  } catch (error) {
+    console.error("Error mostrando el progreso local:", error);
+  }
 
   // Los entrenamientos individuales (modos libres, no asignados por un
   // profesional) solo existen en este dispositivo. Se muestran siempre,
   // como sección desplegable para no saturar la pantalla.
   const btnLocal = document.getElementById("rehabToggleProgresoLocal");
   if (btnLocal) btnLocal.style.display = "";
+
+  let cloudActiva = false;
+  try {
+    cloudActiva = await navHaySesionCloud();
+  } catch (error) {
+    console.warn("No se pudo verificar la sesión Cloud:", error);
+  }
+
   rehabConfigurarDesplegable(
     "rehabToggleProgresoLocal",
     "rehabToggleProgresoLocalFlecha",
@@ -17936,6 +18005,226 @@ rehabConfigurarRecuperacionContrasena();
 console.log("RehabPod: navegación inferior (Inicio/Progreso/Historial/Cuenta) lista.");
 
 // =====================================================
+// ASISTENTE DE RUTINAS (para quien no tiene profesional vinculado)
+// =====================================================
+
+const REHAB_ASISTENTE_NIVEL_MODOS = {
+  principiante: ["simple", "colores", "libre"],
+  intermedio: [
+    "doble",
+    "persecucion",
+    "circuito",
+    "cazaColor",
+    "automatico",
+    "contrarreloj",
+  ],
+  avanzado: ["secuencia", "prohibido", "stroop"],
+};
+
+const REHAB_ASISTENTE_MODOS_EXCLUIDOS = ["entrenador"];
+
+const REHAB_ASISTENTE_DIFICULTAD_POR_NIVEL = {
+  principiante: "facil",
+  intermedio: "media",
+  avanzado: "dificil",
+};
+
+const REHAB_ASISTENTE_RONDAS_SUGERIDAS = {
+  corto: 10,
+  medio: 20,
+  largo: 30,
+};
+
+function rehabAsistenteElegirModo(categoriaClave, nivel) {
+  const categorias = window.REHAB_V22_CATEGORIAS || [];
+  const categoria = categorias.find((c) => c.clave === categoriaClave);
+  if (!categoria) return null;
+
+  const ordenNiveles = ["principiante", "intermedio", "avanzado"];
+  const ordenDesdeNivel = [nivel, ...ordenNiveles.filter((n) => n !== nivel)];
+
+  for (const n of ordenDesdeNivel) {
+    const candidatos = (REHAB_ASISTENTE_NIVEL_MODOS[n] || []).filter(
+      (modo) =>
+        categoria.modos.includes(modo) && !REHAB_ASISTENTE_MODOS_EXCLUIDOS.includes(modo)
+    );
+    if (candidatos.length > 0) return candidatos[0];
+  }
+
+  return (
+    categoria.modos.find((m) => !REHAB_ASISTENTE_MODOS_EXCLUIDOS.includes(m)) || null
+  );
+}
+
+function rehabAsistenteMostrarModal() {
+  if (document.getElementById("rehabAsistenteModal")) return;
+
+  const categorias = window.REHAB_V22_CATEGORIAS || [];
+
+  const overlay = document.createElement("div");
+  overlay.id = "rehabAsistenteModal";
+  overlay.style.cssText = `
+    position:fixed;inset:0;z-index:99996;display:flex;align-items:center;
+    justify-content:center;padding:20px;background:rgba(0,0,0,.65);
+  `;
+
+  const opcionesCategoria = categorias
+    .map(
+      (c, i) => `
+      <label class="rehabAsistenteOpcion">
+        <input type="radio" name="rehabAsistentePropósito" value="${c.clave}" ${i === 0 ? "checked" : ""}>
+        <span>${c.icono} ${c.titulo}</span>
+      </label>
+    `
+    )
+    .join("");
+
+  overlay.innerHTML = `
+    <div style="width:100%;max-width:440px;max-height:88vh;overflow-y:auto;
+      padding:22px;border-radius:16px;background:var(--tarjeta);
+      border:1px solid var(--borde);color:var(--texto);">
+
+      <h3 style="margin:0 0 14px;font-size:19px;">🎯 ¿Qué entrenamiento te conviene?</h3>
+
+      <div style="font-size:12px;color:var(--texto2);letter-spacing:.04em;margin-bottom:8px;">1. ¿CUÁL ES TU PROPÓSITO?</div>
+      <div style="display:grid;gap:8px;margin-bottom:16px;">${opcionesCategoria}</div>
+
+      <div id="rehabAsistenteAvisoProfesional" style="display:none;font-size:12px;color:var(--texto2);
+        background:var(--tarjeta2);border:1px solid var(--borde);border-radius:10px;padding:10px;margin-bottom:16px;">
+        Si estás trabajando una condición médica específica, te recomendamos vincularte con un
+        profesional real (Cuenta → Vincular) además de usar esta recomendación general.
+      </div>
+
+      <div style="font-size:12px;color:var(--texto2);letter-spacing:.04em;margin-bottom:8px;">2. ¿CUÁL ES TU NIVEL?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+        <label class="rehabAsistenteOpcion centrada">
+          <input type="radio" name="rehabAsistenteNivel" value="principiante" checked>
+          <span>Principiante</span>
+        </label>
+        <label class="rehabAsistenteOpcion centrada">
+          <input type="radio" name="rehabAsistenteNivel" value="intermedio">
+          <span>Intermedio</span>
+        </label>
+        <label class="rehabAsistenteOpcion centrada">
+          <input type="radio" name="rehabAsistenteNivel" value="avanzado">
+          <span>Avanzado</span>
+        </label>
+      </div>
+
+      <div style="font-size:12px;color:var(--texto2);letter-spacing:.04em;margin-bottom:8px;">3. ¿CUÁNTO TIEMPO TIENES?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px;">
+        <label class="rehabAsistenteOpcion centrada">
+          <input type="radio" name="rehabAsistenteTiempo" value="corto" checked>
+          <span>~5 min</span>
+        </label>
+        <label class="rehabAsistenteOpcion centrada">
+          <input type="radio" name="rehabAsistenteTiempo" value="medio">
+          <span>~15 min</span>
+        </label>
+        <label class="rehabAsistenteOpcion centrada">
+          <input type="radio" name="rehabAsistenteTiempo" value="largo">
+          <span>20+ min</span>
+        </label>
+      </div>
+
+      <div id="rehabAsistenteResultado"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+        <button id="rehabAsistenteCancelar" class="boton botonOscuro" style="margin:0;">Cerrar</button>
+        <button id="rehabAsistenteVer" class="boton botonPrincipal" style="margin:0;">Ver mi recomendación</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  if (!document.getElementById("rehabAsistenteEstilos")) {
+    const estilo = document.createElement("style");
+    estilo.id = "rehabAsistenteEstilos";
+    estilo.textContent = `
+      .rehabAsistenteOpcion {
+        display:flex;align-items:center;gap:8px;padding:10px 12px;
+        border-radius:10px;border:1px solid var(--borde);background:var(--tarjeta2);
+        cursor:pointer;font-size:13px;
+      }
+      .rehabAsistenteOpcion.centrada { justify-content:center; text-align:center; }
+      .rehabAsistenteOpcion:has(input:checked) {
+        border-color:var(--acento); background:rgba(198,255,77,.12);
+      }
+      .rehabAsistenteOpcion input { accent-color:var(--acento); }
+    `;
+    document.head.appendChild(estilo);
+  }
+
+  function cerrar() {
+    overlay.remove();
+  }
+
+  document.getElementById("rehabAsistenteCancelar").onclick = cerrar;
+
+  overlay.querySelectorAll('input[name="rehabAsistentePropósito"]').forEach((input) => {
+    input.addEventListener("change", () => {
+      const aviso = document.getElementById("rehabAsistenteAvisoProfesional");
+      if (aviso) {
+        aviso.style.display =
+          input.value === "fisioterapia" || input.value === "neurologia" ? "" : "none";
+      }
+    });
+  });
+
+  document.getElementById("rehabAsistenteVer").onclick = () => {
+    const categoriaClave = overlay.querySelector(
+      'input[name="rehabAsistentePropósito"]:checked'
+    ).value;
+    const nivel = overlay.querySelector(
+      'input[name="rehabAsistenteNivel"]:checked'
+    ).value;
+    const tiempo = overlay.querySelector(
+      'input[name="rehabAsistenteTiempo"]:checked'
+    ).value;
+
+    const modoElegido = rehabAsistenteElegirModo(categoriaClave, nivel);
+    const infoModo = (window.REHAB_V22_MODOS || {})[modoElegido] || {};
+    const rondas = REHAB_ASISTENTE_RONDAS_SUGERIDAS[tiempo] || 15;
+
+    const resultado = document.getElementById("rehabAsistenteResultado");
+
+    if (!modoElegido) {
+      resultado.innerHTML = `
+        <div style="padding:12px;border-radius:10px;background:var(--tarjeta2);border:1px solid var(--borde);font-size:13px;">
+          No encontramos un modo recomendado para esa combinación. Prueba con "Reacción aleatoria" para empezar.
+        </div>
+      `;
+      return;
+    }
+
+    resultado.innerHTML = `
+      <div style="padding:14px;border-radius:10px;background:var(--tarjeta2);border:1px solid var(--acento);">
+        <div style="font-size:11px;color:var(--texto2);letter-spacing:.04em;margin-bottom:4px;">TE RECOMENDAMOS</div>
+        <div style="font-size:16px;font-weight:800;margin-bottom:4px;">${infoModo.icono || ""} ${infoModo.titulo || modoElegido}</div>
+        <div style="font-size:12px;color:var(--texto2);line-height:1.5;margin-bottom:10px;">${infoModo.descripcion || ""}</div>
+        <div style="font-size:12px;color:var(--texto2);">Dificultad sugerida: <strong style="color:var(--texto);">${nivel}</strong> · Rondas sugeridas: <strong style="color:var(--texto);">~${rondas}</strong></div>
+      </div>
+      <button id="rehabAsistenteComenzar" class="boton botonPrincipal" style="margin-top:10px;">
+        Comenzar con este modo
+      </button>
+    `;
+
+    document.getElementById("rehabAsistenteComenzar").onclick = () => {
+      ajustesApp.dificultad = REHAB_ASISTENTE_DIFICULTAD_POR_NIVEL[nivel] || "media";
+      guardarAjustes();
+      cerrar();
+      seleccionarModo(modoElegido);
+    };
+  };
+}
+
+const btnAbrirAsistenteRutinas = document.getElementById("btnAbrirAsistenteRutinas");
+if (btnAbrirAsistenteRutinas) {
+  btnAbrirAsistenteRutinas.onclick = rehabAsistenteMostrarModal;
+}
+
+// =====================================================
 // REHABPOD V39
 // PROGRESO MEJORADO: filtros, tendencia, KPIs y sesiones
 // =====================================================
@@ -18093,6 +18382,16 @@ setTimeout(() => {
         display:flex;align-items:center;justify-content:space-between;gap:14px;padding:9px 0
       }
       .rehabV40Switch input{width:22px;height:22px;accent-color:#22c55e}
+      .rehabV40ColorSwatch{
+        display:flex;align-items:center;gap:8px;padding:8px;border-radius:10px;
+        border:1px solid rgba(148,163,184,.22);background:rgba(148,163,184,.06);
+        cursor:pointer;font-size:.82rem;
+      }
+      .rehabV40ColorSwatch input{width:16px;height:16px;flex-shrink:0}
+      .rehabV40ColorMuestra{
+        width:18px;height:18px;border-radius:50%;flex-shrink:0;
+        box-shadow:inset 0 0 0 1px rgba(255,255,255,.25);
+      }
       .rehabV40Relacion{
         display:flex;justify-content:space-between;align-items:center;gap:10px;
         padding:10px;border-radius:12px;background:rgba(148,163,184,.055);margin:7px 0
@@ -18450,6 +18749,41 @@ setTimeout(() => {
     `;
   }
 
+  function v40HtmlColores() {
+    const activos = new Set(
+      Array.isArray(ajustesApp?.coloresActivos)
+        ? ajustesApp.coloresActivos
+        : CLAVES_COLORES_REACTIPOD
+    );
+
+    const swatches = CLAVES_COLORES_REACTIPOD.map((clave) => {
+      const info = catalogoColoresPersonalizados[clave];
+      const marcado = activos.has(clave);
+      return `
+        <label class="rehabV40ColorSwatch">
+          <input type="checkbox" data-rehab-color="${clave}" ${marcado ? "checked" : ""}>
+          <span class="rehabV40ColorMuestra" style="background:${info.css}"></span>
+          <span>${info.nombre.charAt(0)}${info.nombre.slice(1).toLowerCase()}</span>
+        </label>
+      `;
+    }).join("");
+
+    return `
+      <div class="rehabV40Card">
+        <div class="rehabV40SecTitulo">COLORES DEL ENTRENAMIENTO</div>
+        <div style="font-size:.8rem;opacity:.68;line-height:1.5;margin-bottom:12px">
+          Desmarca los colores que te cuesta distinguir (por ejemplo, rosado, morado). No
+          aparecerán durante el entrenamiento. Se necesitan al menos ${MINIMO_COLORES_ACTIVOS}
+          colores activos.
+        </div>
+        <div id="rehabV40GridColores" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+          ${swatches}
+        </div>
+        <div id="rehabV40ColoresAviso" style="font-size:.78rem;color:var(--rojo,#ef4444);margin-top:10px;min-height:16px;"></div>
+      </div>
+    `;
+  }
+
   function v40HtmlSesion() {
     if (!v40User) return "";
 
@@ -18519,6 +18853,7 @@ setTimeout(() => {
           ${tieneCloud ? v40HtmlRelaciones() : ""}
           ${tieneCloud ? v40HtmlSeguridad() : ""}
           ${v40HtmlPreferencias()}
+          ${v40HtmlColores()}
           ${tieneCloud ? v40HtmlSesion() : ""}
           ${v40HtmlPrivacidad()}
           ${v40HtmlAcerca()}
@@ -18533,6 +18868,7 @@ setTimeout(() => {
           ${v40HtmlLocal()}
           <div class="rehabV40Aviso">${v40Esc(rehabMensajeError(error))}</div>
           ${v40HtmlPreferencias()}
+          ${v40HtmlColores()}
           ${v40HtmlPrivacidad()}
           ${v40HtmlAcerca()}
         </div>
@@ -18758,6 +19094,34 @@ setTimeout(() => {
         }
       };
     }
+
+    const checksColores = document.querySelectorAll("[data-rehab-color]");
+    const avisoColores = document.getElementById("rehabV40ColoresAviso");
+
+    checksColores.forEach((check) => {
+      check.onchange = function () {
+        const seleccionados = Array.from(checksColores)
+          .filter((c) => c.checked)
+          .map((c) => c.dataset.rehabColor);
+
+        if (seleccionados.length < MINIMO_COLORES_ACTIVOS) {
+          // No dejamos bajar del mínimo: se revierte esta casilla y se
+          // avisa por qué, en vez de guardar una configuración que
+          // rompería el entrenamiento (los 4 Pods no podrían mostrar
+          // colores distintos entre sí).
+          check.checked = true;
+          if (avisoColores) {
+            avisoColores.textContent = `Necesitas al menos ${MINIMO_COLORES_ACTIVOS} colores activos.`;
+          }
+          return;
+        }
+
+        if (avisoColores) avisoColores.textContent = "";
+
+        ajustesApp.coloresActivos = seleccionados;
+        guardarAjustes();
+      };
+    });
 
     document.querySelectorAll("[data-v40-desvincular]").forEach((btn) => {
       btn.onclick = async function () {
