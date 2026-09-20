@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">ReactiPod</string>
-    <string name="title_activity_main">ReactiPod</string>
-    <string name="package_name">com.reactipod.app</string>
-    <string name="custom_url_scheme">com.reactipod.app</string>
-</resources>

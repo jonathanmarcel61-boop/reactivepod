@@ -1,5 +1,11 @@
 {
   "appId": "com.reactipod.app",
   "appName": "ReactiPod",
-  "webDir": "public"
+  "webDir": "public",
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_notification",
+      "iconColor": "#7ACB22"
+    }
+  }
 }

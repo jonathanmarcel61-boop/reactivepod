@@ -175,6 +175,74 @@
         </div>
 
 
+        <!-- MIS RUTINAS (guardadas y favoritas, js/misrutinas.js) -->
+
+        <div class="tarjeta" id="tarjetaMisRutinas">
+
+            <div class="tituloFila">
+
+                <div>
+
+                    <small class="etiquetaTitulo">
+                        GUARDADAS Y FAVORITAS
+                    </small>
+
+                    <h3>
+                        ⭐ Mis rutinas
+                    </h3>
+
+                </div>
+
+                <button type="button" id="btnVerMisRutinas" class="botonSecundarioPequeno" hidden>
+                    Ver y editar
+                </button>
+
+            </div>
+
+            <ul class="rut-lista" id="listaMisRutinasInicio" aria-label="Tus rutinas guardadas"></ul>
+
+            <p class="textoSecundario" id="misRutinasVacio">
+                Aún no tienes rutinas guardadas. Guarda la que te arme el asistente o crea una a tu manera.
+            </p>
+
+            <button type="button" id="btnCrearRutina" class="boton botonOscuro" style="margin-top: 8px">
+                Crear rutina a mi manera
+            </button>
+
+        </div>
+
+
+        <!-- DOS JUGADORES (js/dosjugadores.js) -->
+
+        <div class="tarjeta" id="tarjetaDosJugadores">
+
+            <div class="tituloFila">
+
+                <div>
+
+                    <small class="etiquetaTitulo">
+                        RETO ENTRE DOS
+                    </small>
+
+                    <h3>
+                        🤝 Dos jugadores
+                    </h3>
+
+                </div>
+
+            </div>
+
+            <p class="textoSecundario">
+                Compitan con el mismo teléfono: por turnos o en un duelo de colores donde gana quien golpea antes su Pod.
+            </p>
+
+            <button type="button" id="btnDosJugadores" class="boton botonOscuro" style="margin-top: 8px">
+                Jugar de a dos
+            </button>
+
+        </div>
+
+
         <!-- CONEXIÓN -->
 
         <div class="tarjeta">
@@ -1483,6 +1551,63 @@
         </div>
 
 
+        <!-- PROGRESO CLARO (gráficos SVG, js/progreso.js) -->
+
+        <div class="tarjeta" id="progresoClaro">
+
+            <div class="tituloFila">
+
+                <div>
+
+                    <small class="etiquetaTitulo">
+                        TU EVOLUCIÓN
+                    </small>
+
+                    <h3>
+                        ¿Cómo vas?
+                    </h3>
+
+                </div>
+
+            </div>
+
+            <div class="segmentado" id="progresoPeriodo" role="group" aria-label="Periodo a mostrar">
+                <button type="button" data-dias="7" aria-pressed="false">7 días</button>
+                <button type="button" data-dias="30" aria-pressed="true">30 días</button>
+                <button type="button" data-dias="0" aria-pressed="false">Todo</button>
+            </div>
+
+            <label class="campoFiltro" for="progresoModo">
+                <span>Ejercicio</span>
+                <select id="progresoModo">
+                    <option value="">Todos los ejercicios</option>
+                </select>
+            </label>
+
+            <p id="progresoFrase" class="progresoFrase" aria-live="polite"></p>
+
+            <figure class="progresoFigura" id="progresoFigReaccion">
+                <figcaption>Tiempo de reacción <small>menos segundos es mejor</small></figcaption>
+                <div id="progresoGrafReaccion"></div>
+            </figure>
+
+            <figure class="progresoFigura" id="progresoFigPrecision">
+                <figcaption>Precisión <small>más porcentaje es mejor</small></figcaption>
+                <div id="progresoGrafPrecision"></div>
+            </figure>
+
+            <figure class="progresoFigura" id="progresoFigSemanas">
+                <figcaption>Constancia <small>días entrenados por semana</small></figcaption>
+                <div id="progresoGrafSemanas"></div>
+            </figure>
+
+            <button type="button" class="boton botonOscuro" id="btnInformePDF" style="width: 100%; margin-top: 4px">
+                📄 Informe profesional (PDF)
+            </button>
+
+        </div>
+
+
         <!-- RUTINAS ASIGNADAS (NUBE) - desplegable -->
 
         <button
@@ -2026,6 +2151,51 @@
 
             <div class="filaAjuste">
 
+                <div>
+
+                    <strong>
+                        Recordatorios
+                    </strong>
+
+                    <small id="ajusteRecordatorioEstado">
+                        Un aviso en el teléfono para que no olvides entrenar
+                    </small>
+
+                </div>
+
+                <input
+                    id="ajusteRecordatorio" aria-label="Recordatorios de entrenamiento"
+                    type="checkbox"
+                >
+
+            </div>
+
+            <div class="recordatorioOpc" id="recordatorioOpciones" hidden>
+
+                <div class="segmentado segmentado--7" id="recordatorioDias" role="group" aria-label="Días del recordatorio">
+                    <button type="button" data-dia="1" aria-pressed="false" aria-label="Lunes">L</button>
+                    <button type="button" data-dia="2" aria-pressed="false" aria-label="Martes">M</button>
+                    <button type="button" data-dia="3" aria-pressed="false" aria-label="Miércoles">X</button>
+                    <button type="button" data-dia="4" aria-pressed="false" aria-label="Jueves">J</button>
+                    <button type="button" data-dia="5" aria-pressed="false" aria-label="Viernes">V</button>
+                    <button type="button" data-dia="6" aria-pressed="false" aria-label="Sábado">S</button>
+                    <button type="button" data-dia="7" aria-pressed="false" aria-label="Domingo">D</button>
+                </div>
+
+                <label class="campoFiltro" for="recordatorioHora">
+                    <span>Hora del aviso</span>
+                    <input type="time" id="recordatorioHora" value="18:00">
+                </label>
+
+                <button type="button" class="boton botonOscuro" id="recordatorioPrueba" style="width: 100%">
+                    Enviar un aviso de prueba
+                </button>
+
+            </div>
+            <div class="separador"></div>
+
+            <div class="filaAjuste">
+
               <div>
 
               <strong>
@@ -2174,13 +2344,24 @@
 <script src="js/utils.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/plan.js"></script>
+<script src="js/duelo.js"></script>
+<script src="js/rutinas.js"></script>
 <script src="js/metas.js"></script>
+<script src="js/recordatorios.js"></script>
+<script src="js/graficos.js"></script>
+<script src="js/pdf.js"></script>
+<script src="js/informe.js"></script>
 <script src="js/voz.js"></script>
 <script src="js/compartir.js"></script>
 <script src="js/bienvenida.js"></script>
 <script src="app.js"></script>
 <script src="js/asistente.js"></script>
+<script src="js/misrutinas.js"></script>
+<script src="js/dosjugadores.js"></script>
 <script src="js/motivacion.js"></script>
+<script src="js/progreso.js"></script>
+<script src="js/informe-ui.js"></script>
+<script src="js/recordatorios-ui.js"></script>
 
 </body>
 

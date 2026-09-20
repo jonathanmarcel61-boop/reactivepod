@@ -41,6 +41,7 @@
     restante: 0,
     prefs: null,
     notaVista: "",
+    rutinaId: null,
   };
 
   // -----------------------------------------------------
@@ -238,13 +239,20 @@
       </li>`;
   }
 
-  function mostrarVistaPrevia(plan, nota) {
+  /**
+   * opciones: { fija: true } para una rutina guardada (sin "Otra propuesta"),
+   * titulo, id (de la rutina guardada), alVolver (función del botón Volver).
+   */
+  function mostrarVistaPrevia(plan, nota, opciones) {
+    const op = opciones || {};
     const v = ventanaAsistente();
     S.plan = plan;
     S.notaVista = nota || "";
+    S.rutinaId = op.id || null;
     const objetivos = plan.objetivos.map((k) => P.OBJETIVOS[k].titulo).join(" + ");
+    const puedeGuardar = !op.fija && window.rehabRutinas;
 
-    v.titulo.textContent = "Tu rutina de " + plan.minutos + " min";
+    v.titulo.textContent = op.titulo || "Tu rutina de " + plan.minutos + " min";
     v.cuerpo.innerHTML = `
       <p class="asis-intro"><b>${escaparHTML(objetivos)}</b> · nivel ${NOMBRE_NIVEL[plan.nivel]}</p>
       ${nota ? `<p class="asis-nota asis-nota--resalta" role="status">${escaparHTML(nota)}</p>` : ""}
@@ -259,8 +267,9 @@
       <p id="asisAvisoPods" class="asis-error" role="alert"></p>
       <div class="asis-acciones">
         <button type="button" id="asisComenzar" class="boton botonPrincipal">Comenzar rutina</button>
-        <button type="button" id="asisOtra" class="boton botonOscuro">Otra propuesta</button>
-        <button type="button" id="asisVolver" class="boton botonOscuro">Cambiar preferencias</button>
+        ${op.fija ? "" : `<button type="button" id="asisOtra" class="boton botonOscuro">Otra propuesta</button>`}
+        ${puedeGuardar ? `<button type="button" id="asisGuardar" class="boton botonOscuro"></button>` : ""}
+        <button type="button" id="asisVolver" class="boton botonOscuro">${op.fija ? "Volver a mis rutinas" : "Cambiar preferencias"}</button>
       </div>
     `;
 
@@ -268,10 +277,11 @@
       const virtual = v.cuerpo.querySelector("#asisVirtual").checked;
       comenzar(plan, virtual, v.cuerpo.querySelector("#asisAvisoPods"));
     });
-    v.cuerpo.querySelector("#asisOtra").addEventListener("click", () => {
-      mostrarVistaPrevia(generar(modosDe(plan)), "");
-    });
-    v.cuerpo.querySelector("#asisVolver").addEventListener("click", abrirFormulario);
+    const otra = v.cuerpo.querySelector("#asisOtra");
+    if (otra) otra.addEventListener("click", () => mostrarVistaPrevia(generar(modosDe(plan)), ""));
+    const guardar = v.cuerpo.querySelector("#asisGuardar");
+    if (guardar) window.rehabRutinas.enlazarBotonGuardar(guardar, plan);
+    v.cuerpo.querySelector("#asisVolver").addEventListener("click", op.fija && op.alVolver ? op.alVolver : abrirFormulario);
 
     v.abrir();
     enfocarTitulo(v);
@@ -533,6 +543,7 @@
     }
     if (aviso) aviso.textContent = "";
     ventanaAsistente().cerrar();
+    emitir("inicio", { rutinaId: S.rutinaId || null });
     iniciarPlan(plan, { virtual: !!virtual });
   }
 
@@ -556,6 +567,7 @@
     detenerIntervalo();
     ventanaEjecucion().cerrar();
     restaurar();
+    emitir("cancelada", { mensaje: mensaje || "" });
     if (mensaje) avisarRehab(mensaje, { tipo: tipo || "info" });
     try {
       mostrarPantalla(pantallaInicio);
@@ -745,5 +757,5 @@
   if (boton) boton.onclick = abrirFormulario;
 
   // Se expone para pruebas automáticas y para abrirlo desde otras pantallas.
-  window.rehabAsistente = { abrir: abrirFormulario, iniciarPlan, estado: S, cancelar: () => abortar("", "info") };
+  window.rehabAsistente = { virtual: { fijar: fijarVirtual, sugerido: virtualSugerido }, abrir: abrirFormulario, iniciarPlan, vistaPrevia: mostrarVistaPrevia, estado: S, cancelar: () => abortar("", "info") };
 })();

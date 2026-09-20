@@ -15,7 +15,7 @@
 // nueva en vez de seguir usando la vieja del caché.
 // =====================================================
 
-const CACHE_VERSION = "rehabpod-v14";
+const CACHE_VERSION = "rehabpod-v15";
 
 const ARCHIVOS_DEL_CASCARON = [
   "./",
@@ -24,12 +24,23 @@ const ARCHIVOS_DEL_CASCARON = [
   "./js/utils.js",
   "./js/ui.js",
   "./js/plan.js",
+  "./js/rutinas.js",
+  "./js/duelo.js",
   "./js/metas.js",
+  "./js/recordatorios.js",
+  "./js/graficos.js",
+  "./js/pdf.js",
+  "./js/informe.js",
   "./js/voz.js",
   "./js/compartir.js",
   "./js/bienvenida.js",
-  "./js/motivacion.js",
   "./js/asistente.js",
+  "./js/misrutinas.js",
+  "./js/dosjugadores.js",
+  "./js/motivacion.js",
+  "./js/progreso.js",
+  "./js/informe-ui.js",
+  "./js/recordatorios-ui.js",
   "./fonts/inter-latin-wght-normal.woff2",
   "./fonts/jetbrains-mono-latin-wght-normal.woff2",
   "./fonts/barlow-condensed-latin-700-normal.woff2",

@@ -207,6 +207,8 @@
     }
 
     if (d.tipo === "fin") {
+      // En el modo de dos jugadores el resumen se sustituye por el cambio de turno.
+      if (window.rehabDosJugadores && window.rehabDosJugadores.activo) return;
       hablar("¡Rutina completada! Buen trabajo.");
       const acciones = document.querySelector("#asisEjecCuerpo .asis-acciones");
       if (acciones && C && !document.getElementById("asisCompartir")) {
