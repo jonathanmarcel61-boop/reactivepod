@@ -101,7 +101,7 @@
        estado/campana < bloqueos (términos, splash, confirmaciones) < avisos. */
     --z-nav: 50;
     --z-pantalla: 1000;   /* introducción, consentimiento, celebración, asistente */
-    --z-modal: 1100;      /* modales: 1100 + 0..8 según quién se abre sobre quién */
+    --z-modal: 1100;      /* modales: 1100 + 0..10 según quién se abre sobre quién */
     --z-bloqueo: 2000;    /* splash, términos y confirmaciones: por encima de todo */
     --z-toast: 2100;      /* avisos siempre visibles */
 
@@ -3654,17 +3654,6 @@ select {
         font-size:.87rem;line-height:1.55
       }
 
-/* ---------- rehabAsistenteMostrarModal ---------- */
-      .rehabAsistenteOpcion {
-        display:flex;align-items:center;gap:8px;padding:10px 12px;
-        border-radius:10px;border:1px solid var(--borde);background:var(--tarjeta2);
-        cursor:pointer;font-size:13px;
-      }
-      .rehabAsistenteOpcion.centrada { justify-content:center; text-align:center; }
-      .rehabAsistenteOpcion:has(input:checked) {
-        border-color:var(--acento); background:rgba(198,255,77,.12);
-      }
-      .rehabAsistenteOpcion input { accent-color:var(--acento); }
 
 
 /* =====================================================
@@ -3850,4 +3839,340 @@ h2 {
     min-height: 44px;
     padding: 0 var(--esp-4);
     margin: 0;
+}
+
+
+/* =====================================================
+   ASISTENTE DE RUTINAS A MEDIDA (js/asistente.js)
+   ===================================================== */
+
+.asis-modal .rp-modal__titulo:focus {
+    outline: none;
+}
+
+.asis-intro {
+    margin: 0 0 var(--esp-4);
+    color: var(--texto2);
+    line-height: 1.5;
+}
+
+.asis-grupo {
+    margin: 0 0 var(--esp-5);
+    padding: 0;
+    border: 0;
+}
+
+.asis-grupo legend {
+    padding: 0;
+    margin-bottom: var(--esp-2);
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--texto);
+}
+
+.asis-grupo legend small {
+    margin-left: 6px;
+    font-weight: 500;
+    color: var(--texto2);
+}
+
+.asis-lista {
+    display: grid;
+    gap: var(--esp-2);
+}
+
+.asis-fila {
+    display: grid;
+    gap: var(--esp-2);
+}
+
+.asis-fila--3 { grid-template-columns: repeat(3, 1fr); }
+.asis-fila--5 { grid-template-columns: repeat(5, 1fr); }
+
+.asis-op {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 10px 12px;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-m);
+    background: var(--tarjeta2);
+    color: var(--texto);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.asis-op input {
+    flex: none;
+    accent-color: var(--acento);
+}
+
+.asis-op:has(input:checked) {
+    border-color: var(--acento);
+    background: var(--acento-suave);
+}
+
+.asis-op:has(input:focus-visible) {
+    outline: 2px solid var(--acento);
+    outline-offset: 2px;
+}
+
+.asis-op--centro {
+    justify-content: center;
+    text-align: center;
+    padding: 10px 6px;
+}
+
+/* Los radios de las filas compactas se ocultan: la tarjeta marcada ya lo indica. */
+.asis-op--centro input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.asis-op--centro {
+    position: relative;
+}
+
+.asis-op__txt {
+    display: grid;
+    gap: 2px;
+}
+
+.asis-op__txt b {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.asis-op__txt small {
+    font-size: 12px;
+    color: var(--texto2);
+}
+
+.asis-nota {
+    margin: var(--esp-2) 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--texto2);
+}
+
+.asis-nota--resalta {
+    padding: 10px 12px;
+    border: 1px solid var(--acento);
+    border-radius: var(--radio-m);
+    background: var(--acento-suave);
+    color: var(--texto);
+    font-size: 14px;
+}
+
+.asis-error {
+    min-height: 1.2em;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #f87171;
+}
+
+.tema-claro .asis-error {
+    color: #b91c1c;
+}
+
+.asis-acciones {
+    display: grid;
+    gap: var(--esp-2);
+    margin-top: var(--esp-4);
+}
+
+.asis-acciones .boton {
+    margin: 0;
+}
+
+/* Vista previa: lista de ejercicios */
+.asis-bloques {
+    display: grid;
+    gap: var(--esp-2);
+    margin: var(--esp-3) 0;
+    padding: 0;
+    list-style: none;
+}
+
+.asis-bloque {
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-m);
+    background: var(--tarjeta2);
+}
+
+.asis-bloque__n {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--acento-suave);
+    color: var(--acento-texto);
+    font-family: var(--fuente-dato);
+    font-weight: 700;
+}
+
+.asis-bloque__txt {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.asis-bloque__txt small {
+    font-size: 12px;
+    color: var(--texto2);
+}
+
+.asis-bloque__t {
+    font-family: var(--fuente-dato);
+    font-size: 14px;
+    color: var(--texto);
+    white-space: nowrap;
+}
+
+/* Rutina en curso: prepárate / descanso / resumen */
+.asis-ejec {
+    text-align: center;
+}
+
+.asis-ejec .rp-modal__titulo {
+    margin: 0 0 var(--esp-3);
+    font-size: 28px;
+}
+
+.asis-eyebrow {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--texto2);
+}
+
+.asis-progreso {
+    height: 6px;
+    margin: var(--esp-3) 0;
+    border-radius: 999px;
+    background: var(--tarjeta3);
+    overflow: hidden;
+}
+
+.asis-progreso span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--acento);
+    transition: width 0.4s ease;
+}
+
+.asis-previo {
+    margin: var(--esp-2) 0;
+    font-size: 14px;
+    color: var(--texto2);
+}
+
+.asis-previo b {
+    color: var(--texto);
+    font-family: var(--fuente-dato);
+}
+
+.asis-siguiente {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: var(--esp-3) 0 var(--esp-1);
+    text-align: left;
+}
+
+.asis-siguiente b {
+    display: block;
+    font-size: 20px;
+}
+
+.asis-siguiente small {
+    font-size: 14px;
+    color: var(--texto2);
+}
+
+.asis-siguiente__icono {
+    font-size: 36px;
+}
+
+.asis-desc {
+    margin: var(--esp-2) 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--texto2);
+}
+
+.asis-cuenta {
+    margin: var(--esp-3) 0 0;
+    font-family: var(--fuente-dato);
+    font-size: 64px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--acento-texto);
+}
+
+.asis-resumen {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--esp-2);
+    margin: var(--esp-3) 0;
+}
+
+.asis-resumen div {
+    padding: 10px 4px;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-m);
+    background: var(--tarjeta2);
+}
+
+.asis-resumen b {
+    display: block;
+    font-family: var(--fuente-dato);
+    font-size: 20px;
+}
+
+.asis-resumen small {
+    font-size: 12px;
+    color: var(--texto2);
+}
+
+.asis-tabla {
+    display: grid;
+    gap: 6px;
+    margin: var(--esp-3) 0;
+    padding: 0;
+    list-style: none;
+    text-align: left;
+    font-size: 14px;
+}
+
+.asis-tabla li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radio-s);
+    background: var(--tarjeta2);
+}
+
+.asis-tabla li span:last-child {
+    color: var(--texto2);
+    font-family: var(--fuente-dato);
+    white-space: nowrap;
+}
+
+@media (max-width: 380px) {
+    .asis-fila--5 { grid-template-columns: repeat(3, 1fr); }
+    .asis-resumen { grid-template-columns: repeat(2, 1fr); }
 }

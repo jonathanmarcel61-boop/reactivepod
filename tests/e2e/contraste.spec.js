@@ -14,6 +14,15 @@ const PANTALLAS = [
   ["Ajustes", async (p) => { await p.evaluate(() => mostrarPantalla(pantallaAjustes)); }],
   ["Perfiles", async (p) => { await p.evaluate(() => mostrarPantalla(pantallaPerfiles)); }],
   ["Pods", async (p) => { await p.evaluate(() => mostrarPantalla(pantallaPods)); }],
+  ["Asistente: formulario", async (p) => {
+    await p.evaluate(() => mostrarPantalla(pantallaInicio));
+    await p.locator("#btnAbrirAsistenteRutinas").click();
+    await p.locator('label:has(input[value="memoria"])').click();
+  }],
+  ["Asistente: vista previa", async (p) => { await p.locator("#asisArmar").click(); }],
+  ["Asistente: prepárate", async (p) => {
+    await p.locator("#asisComenzar").evaluate(() => window.rehabAsistente.iniciarPlan(window.rehabAsistente.estado.plan));
+  }],
 ];
 
 for (const tema of ["oscuro", "claro"]) {
