@@ -9,7 +9,17 @@
         content="width=device-width, initial-scale=1.0"
     >
 
+    <meta name="color-scheme" content="dark light">
+
     <title>RehabPod</title>
+
+    <link
+        rel="preload"
+        href="fonts/inter-latin-wght-normal.woff2"
+        as="font"
+        type="font/woff2"
+        crossorigin
+    >
 
     <link
         rel="stylesheet"
@@ -18,6 +28,17 @@
 </head>
 
 <body>
+
+<!-- Iconos (línea, heredan el color del texto). Uso: <svg class="ic" aria-hidden="true"><use href="#ic-NOMBRE"/></svg> -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="ic-inicio" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="ic-progreso" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-9"/><path d="M15 6h6v6"/></symbol>
+    <symbol id="ic-cuenta" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></symbol>
+    <symbol id="ic-rayo" viewBox="0 0 24 24"><path d="M13 3 5 14h6l-1 7 8-11h-6z"/></symbol>
+    <symbol id="ic-volver" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m11 6-6 6 6 6"/></symbol>
+</svg>
+
+<main id="contenidoApp">
 
 
 <!-- ================================================= -->
@@ -106,6 +127,17 @@
         </div>
 
 
+        <!-- BOTÓN PRINCIPAL (justo bajo el perfil: es la acción más importante de Inicio) -->
+
+        <button
+            id="btnEntrenamiento"
+            class="boton botonPrincipal"
+        >
+            <svg class="ic" aria-hidden="true"><use href="#ic-rayo"/></svg>
+            INICIAR ENTRENAMIENTO
+        </button>
+
+
         <!-- ASISTENTE DE RUTINAS -->
 
         <div class="tarjeta" id="rehabAsistenteTarjeta">
@@ -133,7 +165,7 @@
             <button
                 id="btnAbrirAsistenteRutinas"
                 class="boton botonOscuro"
-                style="margin-top: 8px; border: 1px solid var(--acento); color: var(--acento)"
+                style="margin-top: 8px; border: 1px solid var(--acento); color: var(--acento-texto)"
             >
                 Recomiéndame una rutina
             </button>
@@ -167,7 +199,7 @@
                         class="indicador desconectado"
                     ></span>
 
-                    <span id="textoEstadoPods">
+                    <span id="textoEstadoPods" aria-live="polite">
                         0 de 4
                     </span>
 
@@ -205,16 +237,6 @@
             </button>
 
         </div>
-
-
-        <!-- BOTÓN PRINCIPAL -->
-
-        <button
-            id="btnEntrenamiento"
-            class="boton botonPrincipal"
-        >
-            ⚡ INICIAR ENTRENAMIENTO
-        </button>
 
 
         <!-- RESUMEN -->
@@ -294,16 +316,15 @@
 
         <!-- NAVEGACIÓN INFERIOR -->
 
-        <div class="menuPrincipal">
+        <nav class="menuPrincipal" aria-label="Navegación principal">
 
             <button
                 id="btnInicioMenu"
                 class="menuItem activo"
+                aria-current="page"
             >
 
-                <span>
-                    🏠
-                </span>
+                <svg class="ic" aria-hidden="true"><use href="#ic-inicio"/></svg>
 
                 Inicio
 
@@ -315,9 +336,7 @@
                 class="menuItem"
             >
 
-                <span>
-                    📈
-                </span>
+                <svg class="ic" aria-hidden="true"><use href="#ic-progreso"/></svg>
 
                 Progreso
 
@@ -331,7 +350,7 @@
                 aria-hidden="true"
             >
 
-                <span>
+                <span aria-hidden="true">
                     📊
                 </span>
 
@@ -345,15 +364,13 @@
                 class="menuItem"
             >
 
-                <span>
-                    👤
-                </span>
+                <svg class="ic" aria-hidden="true"><use href="#ic-cuenta"/></svg>
 
                 Cuenta
 
             </button>
 
-        </div>
+        </nav>
 
     </div>
 
@@ -376,8 +393,9 @@
             <button
                 id="btnVolverDesdePods"
                 class="botonVolver"
+                aria-label="Volver"
             >
-                ←
+                <svg class="ic" aria-hidden="true"><use href="#ic-volver"/></svg>
             </button>
 
             <div>
@@ -557,8 +575,9 @@
             <button
                 id="btnVolverPerfiles"
                 class="botonVolver"
+                aria-label="Volver"
             >
-                ←
+                <svg class="ic" aria-hidden="true"><use href="#ic-volver"/></svg>
             </button>
 
             <div>
@@ -611,8 +630,9 @@
             <button
                 id="btnVolverTipos"
                 class="botonVolver"
+                aria-label="Volver"
             >
-                ←
+                <svg class="ic" aria-hidden="true"><use href="#ic-volver"/></svg>
             </button>
 
             <div>
@@ -788,8 +808,9 @@
             <button
                 id="btnVolverEntrenamientos"
                 class="botonVolver"
+                aria-label="Volver"
             >
-                ←
+                <svg class="ic" aria-hidden="true"><use href="#ic-volver"/></svg>
             </button>
 
             <div>
@@ -927,7 +948,7 @@
                 </div>
 
                 <input
-                    id="sonidosActivados"
+                    id="sonidosActivados" aria-label="Sonidos"
                     type="checkbox"
                     checked
                 >
@@ -1197,7 +1218,7 @@
 
 
             <div
-                id="mensajeResultado"
+                id="mensajeResultado" aria-live="polite"
                 class="mensajeResultado"
             >
             </div>
@@ -1389,8 +1410,9 @@
             <button
                 id="btnVolverProgreso"
                 class="botonVolver"
+                aria-label="Volver"
             >
-                ←
+                <svg class="ic" aria-hidden="true"><use href="#ic-volver"/></svg>
             </button>
 
             <div>
@@ -1584,7 +1606,7 @@
 
 
             <p
-                id="textoObjetivoProgreso"
+                id="textoObjetivoProgreso" aria-live="polite"
                 class="textoProgreso"
             >
                 Realiza entrenamientos para comenzar.
@@ -1622,7 +1644,7 @@
 
 
             <p
-                id="mensajeProgreso"
+                id="mensajeProgreso" aria-live="polite"
                 class="mensajeProgreso"
             >
             </p>
@@ -1667,8 +1689,9 @@
             <button
                 id="btnVolverCuentaCloud"
                 class="botonVolver"
+                aria-label="Volver"
             >
-                ←
+                <svg class="ic" aria-hidden="true"><use href="#ic-volver"/></svg>
             </button>
 
             <div>
@@ -1708,8 +1731,9 @@
             <button
                 id="btnEstadisticasInicio"
                 class="botonVolver"
+                aria-label="Volver"
             >
-                ←
+                <svg class="ic" aria-hidden="true"><use href="#ic-volver"/></svg>
             </button>
 
             <div>
@@ -1852,8 +1876,9 @@
             <button
                 id="btnVolverAjustes"
                 class="botonVolver"
+                aria-label="Volver"
             >
-                ←
+                <svg class="ic" aria-hidden="true"><use href="#ic-volver"/></svg>
             </button>
 
             <div>
@@ -1888,7 +1913,7 @@
                 </div>
 
                 <input
-                    id="ajusteSonidos"
+                    id="ajusteSonidos" aria-label="Sonidos"
                     type="checkbox"
                     checked
                 >
@@ -1905,12 +1930,16 @@
         </strong>
 
         <small>
-            Elige fondo claro u oscuro
+            Automático sigue el modo claro u oscuro del teléfono
         </small>
 
     </div>
 
-    <select id="ajusteTema">
+    <select id="ajusteTema" aria-label="Tema de la app">
+
+        <option value="auto">
+                 Automático (del teléfono)
+                </option>
 
         <option value="oscuro">
                  Oscuro
@@ -1943,7 +1972,7 @@
                 </div>
 
                 <input
-                    id="ajusteVibracion"
+                    id="ajusteVibracion" aria-label="Vibración"
                     type="checkbox"
                     disabled
                 >
@@ -2011,6 +2040,10 @@
 </section>
 
 
+</main>
+
+<script src="js/utils.js"></script>
+<script src="js/ui.js"></script>
 <script src="app.js"></script>
 
 </body>

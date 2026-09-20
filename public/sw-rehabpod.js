@@ -15,12 +15,18 @@
 // nueva en vez de seguir usando la vieja del caché.
 // =====================================================
 
-const CACHE_VERSION = "rehabpod-v3";
+const CACHE_VERSION = "rehabpod-v11";
 
 const ARCHIVOS_DEL_CASCARON = [
   "./",
   "./index.html",
   "./style.css",
+  "./js/utils.js",
+  "./js/ui.js",
+  "./fonts/inter-latin-wght-normal.woff2",
+  "./fonts/jetbrains-mono-latin-wght-normal.woff2",
+  "./fonts/barlow-condensed-latin-700-normal.woff2",
+  "./fonts/barlow-condensed-latin-800-normal.woff2",
   "./app.js",
   "./supabase-config.js",
   "./logo-icon.png",
