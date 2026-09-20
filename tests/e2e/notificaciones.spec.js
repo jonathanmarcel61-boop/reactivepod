@@ -2,19 +2,21 @@ const { test, expect } = require("@playwright/test");
 const { abrirApp, vigilarErrores } = require("./helpers");
 
 test.describe("Notificaciones", () => {
-  test("la opción está en la barra inferior y explica cómo activarla sin sesión", async ({ page }) => {
+  test("la barra inferior ofrece Ajustes (y ya no hay un botón de Avisos duplicado)", async ({ page }) => {
     const errores = vigilarErrores(page);
     await abrirApp(page);
 
-    const boton = page.locator("#btnNotificacionesMenu");
+    await expect(page.locator("#btnNotificacionesMenu")).toHaveCount(0);
+    const boton = page.locator("#btnAjustesMenu");
     await expect(boton).toBeVisible();
-    await expect(boton).toContainText("Avisos");
-
-    const caja = await boton.boundingBox();
-    expect(caja.height).toBeGreaterThanOrEqual(44);
+    await expect(boton).toContainText("Ajustes");
+    expect((await boton.boundingBox()).height).toBeGreaterThanOrEqual(44);
 
     await boton.click();
-    await expect(page.locator(".rp-aviso")).toContainText("Inicia sesión");
+    await expect(page.locator("#pantallaAjustes")).toHaveClass(/activa/);
+    // Desde ahí se llega a los recordatorios y a las notificaciones.
+    await expect(page.locator("#ajusteRecordatorio")).toBeVisible();
+    await expect(page.locator("#btnAjusteNotificaciones")).toBeVisible();
     expect(errores).toEqual([]);
   });
 
@@ -27,7 +29,7 @@ test.describe("Notificaciones", () => {
     await expect(page.locator(".rp-aviso")).toContainText("Inicia sesión");
   });
 
-  test("con sesión abre el centro y muestra el contador de no leídas", async ({ page }) => {
+  test("con sesión, la campana muestra el contador de no leídas y abre el centro", async ({ page }) => {
     await abrirApp(page);
 
     // Simula sesión de la nube y notificaciones (sin red).
@@ -53,10 +55,10 @@ test.describe("Notificaciones", () => {
       await window.rehabV41ActualizarNotificaciones(false);
     });
 
-    await expect(page.locator("#menuBadgeNotificaciones")).toHaveText("2");
-    await expect(page.locator("#btnNotificacionesMenu")).toHaveAttribute("aria-label", /2 sin leer/);
+    await expect(page.locator("#rehabV41Badge")).toHaveText("2");
+    await expect(page.locator("#ajusteNotificacionesEstado")).toContainText("2 sin leer");
 
-    await page.locator("#btnNotificacionesMenu").click();
+    await page.locator("#rehabV41Bell").click();
     await expect(page.locator("#rehabV41Overlay")).toBeVisible();
     await expect(page.locator("#rehabV41Lista")).toContainText("Nueva rutina");
   });

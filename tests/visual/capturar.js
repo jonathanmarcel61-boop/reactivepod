@@ -21,7 +21,7 @@ const ESTADOS = [
   ["progreso", async (p) => { await p.click("#btnProgreso"); }],
   ["ajustes", async (p) => { await p.evaluate(() => mostrarPantalla(pantallaAjustes)); }],
   ["perfiles", async (p) => { await p.click("#btnPerfiles"); }],
-  ["mis-rutinas", async (p) => { await p.click("#rehabV23BtnRutinas"); await p.waitForTimeout(300); }],
+  ["mis-rutinas", async (p) => { await p.evaluate(() => rehabV23AbrirRutinas()); await p.waitForTimeout(300); }],
   ["confirmar", async (p) => {
     await p.evaluate(() => { confirmarRehab({ titulo: "Borrar", mensaje: "¿Seguro?", peligro: true, icono: "⚠️" }); avisarRehab("Guardado", { tipo: "exito", duracion: 0 }); });
     await p.waitForTimeout(300);

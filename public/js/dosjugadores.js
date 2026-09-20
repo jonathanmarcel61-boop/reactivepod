@@ -695,10 +695,27 @@
   }
 
   // -----------------------------------------------------
-  // Botón de Inicio
+  // Entrada en "Entrenamientos" (no en Inicio, para no sobrecargarlo)
   // -----------------------------------------------------
-  const boton = document.getElementById("btnDosJugadores");
-  if (boton) boton.addEventListener("click", abrirAjustes);
+  function colocarEntrada() {
+    const lista = document.getElementById("rehabV22Categorias");
+    if (!lista) return;
+    document.getElementById("btnDosJugadores")?.remove();
+    const b = document.createElement("button");
+    b.type = "button";
+    b.id = "btnDosJugadores";
+    b.className = "rehabV22Categoria rehabV22Categoria--dos";
+    b.innerHTML = `
+      <div class="rehabV22CategoriaIcono" aria-hidden="true">🤝</div>
+      <div class="rehabV22CategoriaTitulo">Dos jugadores</div>
+      <div class="rehabV22CategoriaSubtitulo">Reto entre dos con el mismo teléfono: por turnos o duelo de colores</div>
+      <div class="rehabV22CategoriaCantidad">2 modalidades</div>`;
+    b.addEventListener("click", abrirAjustes);
+    lista.appendChild(b);
+  }
+
+  document.addEventListener("rehabpod:categorias", colocarEntrada);
+  colocarEntrada();
 
   api.abrir = abrirAjustes;
   api.compararTurnos = compararTurnos;

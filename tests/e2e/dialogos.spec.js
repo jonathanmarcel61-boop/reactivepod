@@ -99,7 +99,7 @@ test("Mis rutinas: borrar una rutina pide confirmación", async ({ page }) => {
       JSON.stringify([{ id: "r1", nombre: "Rutina rodilla", categoria: "fisioterapia", ejercicios: [] }])
     )
   );
-  await page.click("#rehabV23BtnRutinas");
+  await page.evaluate(() => rehabV23AbrirRutinas());
   await page.locator("[data-borrar]").first().click();
   await expect(page.locator('[role="alertdialog"]')).toContainText('¿Borrar la rutina "Rutina rodilla"?');
 

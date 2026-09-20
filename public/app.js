@@ -5391,6 +5391,10 @@ btnAjustes.onclick = () => {
   mostrarPantalla(pantallaAjustes);
 };
 
+// Acceso visible a Ajustes desde la barra inferior de Inicio.
+const btnAjustesMenu = document.getElementById("btnAjustesMenu");
+if (btnAjustesMenu) btnAjustesMenu.onclick = () => mostrarPantalla(pantallaAjustes);
+
 btnVolverAjustes.onclick = () => {
   mostrarPantalla(pantallaInicio);
 };
@@ -9674,6 +9678,10 @@ console.log(
     }
 
     rehabV22MostrarCategorias();
+
+    // Permite que otros módulos (p. ej. "Dos jugadores") añadan su entrada aquí.
+    document.dispatchEvent(new CustomEvent("rehabpod:categorias"));
+
     console.log(
       "RehabPod V22: categorias Deportista / Fisioterapia / Neurologia activadas."
     );
@@ -10235,7 +10243,9 @@ console.log(
 
   function rehabV23Iniciar() {
     rehabV23ColocarLogo();
-    rehabV23CrearBotonRutinas();
+    // El botón "MIS RUTINAS" ya no está en Inicio: las rutinas de cada persona
+    // se guardan desde el asistente (js/misrutinas.js). Este editor sigue
+    // disponible para PROFESIONALES en Cuenta y nube ("Rutinas para asignar").
     rehabV23CrearModal();
 
     console.log("RehabPod V23: logo y rutinas activados.");
@@ -10538,7 +10548,7 @@ console.log(
         <div class="rehabV24Vacio">
           <strong>No tienes rutinas guardadas.</strong>
           <div style="margin-top:6px;">
-            Primero crea una rutina desde “MIS RUTINAS”.
+            Primero crea una rutina en Cuenta y nube → «Rutinas para asignar».
           </div>
 
           <div class="rehabV24Acciones" style="justify-content:center;">
@@ -11605,6 +11615,12 @@ window.rehabGetSupabaseClient = async function () {
 
     host.innerHTML = `
       <div class="rehabV27Card">
+        <h3>Rutinas para asignar</h3>
+        <p style="opacity:.76">Crea aquí las rutinas (ejercicios, tiempos y videos) que luego asignas a tus usuarios.</p>
+        <button id="rehabV27AbrirRutinas" class="rehabV27Btn" type="button">📋 CREAR Y EDITAR RUTINAS</button>
+      </div>
+
+      <div class="rehabV27Card">
         <h3>Vincular usuario</h3>
         <p style="opacity:.76">El usuario te comparte su código. Puede ser un deportista, paciente, cliente de gimnasio u otra persona que utilice RehabPod.</p>
         <div class="rehabV27Campo">
@@ -11621,6 +11637,12 @@ window.rehabGetSupabaseClient = async function () {
     `;
 
     document.getElementById("rehabV27Vincular").onclick = vincularUsuario;
+    document.getElementById("rehabV27AbrirRutinas").onclick = () => {
+      // El editor de rutinas se abre encima: se cierra antes esta ventana.
+      const cuenta = document.getElementById("rehabV27Overlay");
+      if (cuenta) cuenta.hidden = true;
+      if (typeof window.rehabV23AbrirRutinas === "function") window.rehabV23AbrirRutinas();
+    };
     await cargarUsuariosVinculados();
   }
 
@@ -15740,25 +15762,11 @@ setTimeout(() => {
     return data || [];
   }
 
-  // Refleja el estado en la barra inferior y en Ajustes. `total` es el número
-  // de notificaciones sin leer, o null si no hay sesión de la nube.
+  // Refleja el estado en Ajustes. `total` es el número de notificaciones sin
+  // leer, o null si no hay sesión de la nube. (La campana flotante lleva su
+  // propio contador.)
   function v41PintarEstado(total) {
-    const menuBadge = document.getElementById("menuBadgeNotificaciones");
-    const boton = document.getElementById("btnNotificacionesMenu");
     const estado = document.getElementById("ajusteNotificacionesEstado");
-
-    if (menuBadge) {
-      const hay = total !== null && total > 0;
-      menuBadge.hidden = !hay;
-      menuBadge.textContent = total > 99 ? "99+" : String(total || "");
-    }
-
-    if (boton) {
-      boton.setAttribute(
-        "aria-label",
-        total ? `Notificaciones, ${total} sin leer` : "Notificaciones"
-      );
-    }
 
     if (estado) {
       estado.textContent =
@@ -15770,7 +15778,7 @@ setTimeout(() => {
     }
   }
 
-  // Acceso desde la barra inferior y Ajustes: siempre visible; sin sesión
+  // Acceso desde Ajustes: siempre visible; sin sesión
   // explica qué hacer en lugar de no mostrar nada.
   async function v41AbrirDesdeMenu() {
     const cloud = await v41Cliente();
@@ -16005,9 +16013,7 @@ setTimeout(() => {
   async function v41Iniciar() {
     v41CrearUI();
 
-    const btnMenu = document.getElementById("btnNotificacionesMenu");
     const btnAjuste = document.getElementById("btnAjusteNotificaciones");
-    if (btnMenu) btnMenu.onclick = v41AbrirDesdeMenu;
     if (btnAjuste) btnAjuste.onclick = v41AbrirDesdeMenu;
     v41PintarEstado(null);
 

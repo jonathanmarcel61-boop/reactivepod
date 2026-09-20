@@ -34,6 +34,7 @@
     <symbol id="ic-inicio" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
     <symbol id="ic-progreso" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-9"/><path d="M15 6h6v6"/></symbol>
     <symbol id="ic-cuenta" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></symbol>
+    <symbol id="ic-ajustes" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
     <symbol id="ic-campana" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
     <symbol id="ic-rayo" viewBox="0 0 24 24"><path d="M13 3 5 14h6l-1 7 8-11h-6z"/></symbol>
     <symbol id="ic-llama" viewBox="0 0 24 24"><path d="M12 3c1 3.5 5 5.5 5 10.5a5 5 0 0 1-10 0c0-2 .8-3.3 2-4.5.2 1.6 1 2.5 2 2.7C11 9.5 10.5 6 12 3z"/></symbol>
@@ -207,37 +208,6 @@
 
             <button type="button" id="btnCrearRutina" class="boton botonOscuro" style="margin-top: 8px">
                 Crear rutina a mi manera
-            </button>
-
-        </div>
-
-
-        <!-- DOS JUGADORES (js/dosjugadores.js) -->
-
-        <div class="tarjeta" id="tarjetaDosJugadores">
-
-            <div class="tituloFila">
-
-                <div>
-
-                    <small class="etiquetaTitulo">
-                        RETO ENTRE DOS
-                    </small>
-
-                    <h3>
-                        🤝 Dos jugadores
-                    </h3>
-
-                </div>
-
-            </div>
-
-            <p class="textoSecundario">
-                Compitan con el mismo teléfono: por turnos o en un duelo de colores donde gana quien golpea antes su Pod.
-            </p>
-
-            <button type="button" id="btnDosJugadores" class="boton botonOscuro" style="margin-top: 8px">
-                Jugar de a dos
             </button>
 
         </div>
@@ -457,22 +427,6 @@
 
 
             <button
-                id="btnNotificacionesMenu"
-                class="menuItem"
-                aria-label="Notificaciones"
-            >
-
-                <span class="menuIcono">
-                    <svg class="ic" aria-hidden="true"><use href="#ic-campana"/></svg>
-                    <span id="menuBadgeNotificaciones" class="menuBadge" hidden></span>
-                </span>
-
-                Avisos
-
-            </button>
-
-
-            <button
                 id="btnCuentaMenu"
                 class="menuItem"
             >
@@ -480,6 +434,18 @@
                 <svg class="ic" aria-hidden="true"><use href="#ic-cuenta"/></svg>
 
                 Cuenta
+
+            </button>
+
+
+            <button
+                id="btnAjustesMenu"
+                class="menuItem"
+            >
+
+                <svg class="ic" aria-hidden="true"><use href="#ic-ajustes"/></svg>
+
+                Ajustes
 
             </button>
 

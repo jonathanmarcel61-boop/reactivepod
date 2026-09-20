@@ -42,7 +42,8 @@ test("navegación: Progreso, Cuenta, Pods y selección de modos abren y vuelven"
 
   await page.click("#btnEntrenamiento");
   expect(await pantallaActiva(page)).toEqual(["pantallaTiposEntrenamiento"]);
-  await expect(page.locator(".rehabV22Categoria")).toHaveCount(3);
+  await expect(page.locator(".rehabV22Categoria:not(.rehabV22Categoria--dos)")).toHaveCount(3);
+  await expect(page.locator(".rehabV22Categoria--dos")).toHaveCount(1); // Dos jugadores
   await tocar(page, "#btnVolverTipos");
   expect(await pantallaActiva(page)).toEqual(["pantallaInicio"]);
 

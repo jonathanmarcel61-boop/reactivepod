@@ -9,7 +9,7 @@ const visible = (page, sel) =>
   }, sel);
 
 const MODALES = [
-  { nombre: "Mis rutinas", abrir: "#rehabV23BtnRutinas", overlay: "#rehabV23Overlay", titulo: /Mis rutinas/ },
+  { nombre: "Mis rutinas", abrir: null, abrirJS: "rehabV23AbrirRutinas()", overlay: "#rehabV23Overlay", titulo: /Mis rutinas/ },
   { nombre: "Historial", abrir: null, abrirJS: "rehabV24AbrirHistorial()", overlay: "#rehabV24Overlay", titulo: /Historial/ },
   { nombre: "Rutinas asignadas", abrir: "#rehabV28HomeBtn", overlay: "#rehabV28Overlay", titulo: /Rutinas asignadas/ },
 ];

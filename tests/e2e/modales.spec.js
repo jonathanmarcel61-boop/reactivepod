@@ -11,7 +11,7 @@ const VISIBLE = (page, sel) =>
 test("Mis rutinas: se abre y se cierra con el botón ×", async ({ page }) => {
   const errores = vigilarErrores(page);
   await abrirApp(page);
-  await page.click("#rehabV23BtnRutinas");
+  await page.evaluate(() => rehabV23AbrirRutinas());
   await expect.poll(() => VISIBLE(page, "#rehabV23Overlay")).toBe(true);
   await page.click("#rehabV23Cerrar");
   await expect.poll(() => VISIBLE(page, "#rehabV23Overlay")).toBe(false);

@@ -17,7 +17,7 @@ test("Mis rutinas: muestra las rutinas guardadas y escapa el HTML del nombre", a
       ])
     );
   }, XSS);
-  await page.click("#rehabV23BtnRutinas");
+  await page.evaluate(() => rehabV23AbrirRutinas());
   const contenido = page.locator("#rehabV23Overlay");
   await expect(contenido).toContainText("Rutina rodilla");
   await expect(contenido).toContainText("onerror"); // se ve como texto, no se ejecuta
@@ -61,7 +61,7 @@ test("datos dañados en localStorage no rompen las pantallas", async ({ page }) 
     localStorage.setItem("rehabpodRutinas", "{esto no es json");
     localStorage.setItem("rehabpodHistorialRutinas", '{"no":"es lista"}');
   });
-  await page.click("#rehabV23BtnRutinas");
+  await page.evaluate(() => rehabV23AbrirRutinas());
   await expect(page.locator("#rehabV23Overlay")).toBeVisible();
   await page.evaluate(() => {
     document.getElementById("rehabV24Overlay").hidden = false;

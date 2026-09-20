@@ -4871,3 +4871,10 @@ h2 {
     box-sizing: border-box;
 }
 .filaAjuste input[type="checkbox"] { flex: none; }
+
+/* Entrada "Dos jugadores" dentro de Entrenamientos */
+.rehabV22Categoria--dos { border-color: var(--acento); }
+.rehabV22Categoria--dos .rehabV22CategoriaCantidad { color: var(--acento-texto); }
+
+/* La lista de áreas se oculta de verdad al entrar en un área (antes `display:grid` ignoraba [hidden]) */
+#rehabV22Categorias[hidden] { display: none; }

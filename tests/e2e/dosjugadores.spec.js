@@ -9,7 +9,9 @@ async function tiemposRapidos(page, extra = {}) {
 }
 
 async function abrirAjustes(page) {
+  // La entrada está en Entrenamientos (INICIAR ENTRENAMIENTO), no en Inicio.
   await page.evaluate(() => mostrarPantalla(pantallaInicio));
+  await page.locator("#btnEntrenamiento").click();
   await page.locator("#btnDosJugadores").click();
   await expect(page.locator("#dosJugadoresOverlay")).toBeVisible();
 }
@@ -22,6 +24,24 @@ async function ganarRonda(page, quien) {
 }
 
 test.describe("Dos jugadores", () => {
+  test("no ocupa lugar en Inicio: se encuentra dentro de Iniciar entrenamiento", async ({ page }) => {
+    const errores = vigilarErrores(page);
+    await abrirApp(page);
+    await expect(page.locator("#tarjetaDosJugadores")).toHaveCount(0);
+    await expect(page.locator("#pantallaInicio #btnDosJugadores")).toHaveCount(0);
+    await page.locator("#btnEntrenamiento").click();
+    const entrada = page.locator("#pantallaTiposEntrenamiento #btnDosJugadores");
+    await expect(entrada).toBeVisible();
+    await expect(entrada).toContainText("Dos jugadores");
+    await page.screenshot({ path: "test-results/dos-en-entrenamientos.png", fullPage: true });
+    // Entrar en una categoría oculta la entrada; volver la muestra otra vez.
+    await page.locator(".rehabV22Categoria").first().click();
+    await expect(entrada).toBeHidden();
+    await page.locator("#rehabV22Volver").click();
+    await expect(entrada).toBeVisible();
+    expect(errores).toEqual([]);
+  });
+
   test("ajustes: cambia entre duelo y turnos, evita colores repetidos y avisa si faltan Pods", async ({ page }) => {
     const errores = vigilarErrores(page);
     await abrirApp(page, { virtual: false });
