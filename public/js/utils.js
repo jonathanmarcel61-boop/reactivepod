@@ -111,6 +111,33 @@ function guardarJSON(clave, valor, etiqueta = "RehabPod") {
   }
 }
 
+/**
+ * Convierte un error de Bluetooth en un mensaje claro y con siguiente paso.
+ * Devuelve null si la persona simplemente canceló la ventana de selección.
+ */
+function mensajeErrorPod(error) {
+  const nombre = String((error && error.name) || "");
+  const texto = String((error && error.message) || error || "").toLowerCase();
+
+  if (nombre === "NotFoundError" && /cancel/.test(texto)) return null;
+  if (/permission|denied|notallowed|not allowed|unauthori[sz]ed/.test(nombre + " " + texto)) {
+    return "Falta el permiso de Bluetooth. Actívalo en los ajustes del teléfono e inténtalo de nuevo.";
+  }
+  if (/location/.test(texto)) {
+    return "Activa la ubicación del teléfono: Android la necesita para buscar Pods cercanos.";
+  }
+  if (/powered off|not enabled|disabled|adapter|bluetooth.*(off|unavailable)/.test(texto)) {
+    return "El Bluetooth está apagado. Enciéndelo e inténtalo de nuevo.";
+  }
+  if (/timeout|timed out|not found|no device|no devices|notfound/.test(nombre.toLowerCase() + " " + texto)) {
+    return "No encontramos tus Pods. Enciéndelos y acércalos al teléfono, y vuelve a intentarlo.";
+  }
+  if (/disconnect|gatt|connection|connect/.test(texto)) {
+    return "Se perdió la conexión con el Pod. Acércalo al teléfono e inténtalo de nuevo.";
+  }
+  return "No pudimos conectar el Pod. Revisa que esté encendido y cerca del teléfono, y vuelve a intentarlo.";
+}
+
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     escaparHTML,
@@ -123,5 +150,6 @@ if (typeof module !== "undefined" && module.exports) {
     formatoHora,
     leerLista,
     guardarJSON,
+    mensajeErrorPod,
   };
 }

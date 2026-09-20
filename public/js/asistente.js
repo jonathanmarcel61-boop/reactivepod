@@ -252,6 +252,11 @@
         ${plan.bloques.map(filaBloqueHTML).join("")}
       </ol>
       <p class="asis-nota">${plan.bloques.length} ejercicios seguidos, con ${plan.descanso} s de descanso entre ellos. Si te va muy bien o muy mal, ajustamos la dificultad del siguiente.</p>
+      <label class="asis-op asis-op--virtual">
+        <input type="checkbox" id="asisVirtual" ${virtualSugerido() ? "checked" : ""}>
+        <span class="asis-op__txt"><b>Usar Pods simulados</b><small>Sin Pods físicos: tocas los Pods en la pantalla del teléfono.</small></span>
+      </label>
+      <p id="asisAvisoPods" class="asis-error" role="alert"></p>
       <div class="asis-acciones">
         <button type="button" id="asisComenzar" class="boton botonPrincipal">Comenzar rutina</button>
         <button type="button" id="asisOtra" class="boton botonOscuro">Otra propuesta</button>
@@ -259,7 +264,10 @@
       </div>
     `;
 
-    v.cuerpo.querySelector("#asisComenzar").addEventListener("click", () => comenzar(plan));
+    v.cuerpo.querySelector("#asisComenzar").addEventListener("click", () => {
+      const virtual = v.cuerpo.querySelector("#asisVirtual").checked;
+      comenzar(plan, virtual, v.cuerpo.querySelector("#asisAvisoPods"));
+    });
     v.cuerpo.querySelector("#asisOtra").addEventListener("click", () => {
       mostrarVistaPrevia(generar(modosDe(plan)), "");
     });
@@ -301,6 +309,13 @@
         ov.hidden = true;
       },
     };
+  }
+
+  /** Avisa a otros módulos (voz, compartir, metas) sin acoplarlos a este archivo. */
+  function emitir(tipo, detalle) {
+    try {
+      document.dispatchEvent(new CustomEvent("rehabpod:rutina", { detail: Object.assign({ tipo }, detalle) }));
+    } catch (_) {}
   }
 
   function detenerIntervalo() {
@@ -351,6 +366,7 @@
     `;
     w.abrir();
     w.titulo.focus({ preventScroll: true });
+    emitir("transicion", { primera, titulo: w.titulo.textContent, ejercicio: m.titulo, numero: i + 1, total: S.bloques.length, nota });
 
     S.restante = segundos;
     const pintar = () => {
@@ -462,7 +478,30 @@
       dificultad: ajustesApp.dificultad,
       tipo: document.getElementById("tipoFinalGeneralReactiPod")?.value,
       cantidad: cantidadPodsSeleccionada,
+      virtual: !!rehabModoVirtual,
     };
+  }
+
+  /** Enciende o apaga los Pods simulados igual que el interruptor de Ajustes. */
+  function fijarVirtual(valor) {
+    if (!!rehabModoVirtual === !!valor) return;
+    rehabModoVirtual = !!valor;
+    try {
+      localStorage.setItem(REHABPOD_CLAVE_MODO_VIRTUAL, rehabModoVirtual ? "true" : "false");
+    } catch (_) {}
+    try {
+      rehabActualizarModoVirtual();
+      rehabActualizarControlCantidadPods();
+      rehabActualizarVisualesPodsActivos();
+      actualizarEstadoGeneralPods();
+    } catch (error) {
+      console.error("Asistente: Pods simulados", error);
+    }
+  }
+
+  /** Por defecto se sugieren Pods simulados si no hay 4 Pods físicos. */
+  function virtualSugerido() {
+    return !!rehabModoVirtual || cantidadConectados() < 4;
   }
 
   function restaurar() {
@@ -476,6 +515,7 @@
       const tipo = document.getElementById("tipoFinalGeneralReactiPod");
       if (tipo && o.tipo) tipo.value = o.tipo;
       cantidadPodsSeleccionada = o.cantidad;
+      fijarVirtual(o.virtual);
     }
     document.querySelectorAll("option[data-asis]").forEach((op) => op.remove());
     S.original = null;
@@ -484,17 +524,20 @@
     } catch (_) {}
   }
 
-  function comenzar(plan) {
-    if (cantidadConectados() < 4) {
-      avisarRehab("Debes conectar los 4 Pods antes de empezar la rutina.", { tipo: "error" });
+  function comenzar(plan, virtual, aviso) {
+    if (!virtual && cantidadConectados() < 4) {
+      const msg = "No encontramos los 4 Pods. Enciéndelos y acércalos al teléfono, o marca «Usar Pods simulados».";
+      if (aviso) aviso.textContent = msg;
+      avisarRehab(msg, { tipo: "error" });
       return;
     }
+    if (aviso) aviso.textContent = "";
     ventanaAsistente().cerrar();
-    iniciarPlan(plan);
+    iniciarPlan(plan, { virtual: !!virtual });
   }
 
   /** Arranca la ejecución de un plan (también lo usan las pruebas). */
-  function iniciarPlan(plan) {
+  function iniciarPlan(plan, opciones) {
     S.plan = plan;
     S.bloques = plan.bloques.map((b) => Object.assign({}, b, { dificultadPlan: b.dificultad }));
     S.indice = 0;
@@ -503,6 +546,7 @@
     S.inicioMs = Date.now();
     S.activa = true;
     guardarOriginal();
+    if (opciones && opciones.virtual) fijarVirtual(true);
     mostrarTransicion(0, null, "");
   }
 
@@ -662,6 +706,14 @@
     `;
     w.abrir();
     w.titulo.focus({ preventScroll: true });
+    emitir("fin", {
+      minutos: S.plan.minutos,
+      objetivos: S.plan.objetivos.map((k) => P.OBJETIVOS[k].titulo).join(" + "),
+      aciertos: totalA,
+      errores: totalE,
+      ejercicios: S.resultados.length,
+      mejor: mejor.length ? Math.min(...mejor) : null,
+    });
 
     document.getElementById("asisTerminar").onclick = () => {
       w.cerrar();
@@ -693,5 +745,5 @@
   if (boton) boton.onclick = abrirFormulario;
 
   // Se expone para pruebas automáticas y para abrirlo desde otras pantallas.
-  window.rehabAsistente = { abrir: abrirFormulario, iniciarPlan, estado: S };
+  window.rehabAsistente = { abrir: abrirFormulario, iniciarPlan, estado: S, cancelar: () => abortar("", "info") };
 })();

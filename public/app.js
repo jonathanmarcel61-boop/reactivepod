@@ -2251,6 +2251,11 @@ function calcularResumenPerfil() {
 }
 
 function calcularRacha(historial) {
+  // La lógica vive en js/metas.js (con pruebas); aquí solo se delega.
+  if (window.RehabMetas) {
+    return window.RehabMetas.calcularRacha(historial).racha;
+  }
+
   if (historial.length === 0) {
     return 0;
   }
@@ -3235,7 +3240,7 @@ function tono(frecuencia, duracion) {
 
 function iniciarEntrenamiento() {
   if (cantidadConectados() < 4) {
-    avisarRehab("Debes conectar los 4 Pods antes de iniciar.", { tipo: "error" });
+    avisarRehab("Conecta los 4 Pods para empezar, o activa «Pods simulados» para entrenar sin ellos.", { tipo: "error" });
 
     return;
   }
@@ -5737,93 +5742,10 @@ if (btnEliminarMiCuenta) {
 // =====================================================
 
 function crearPantallaInicioApp() {
-  const splash = document.createElement("div");
-
-  splash.id = "splashReactiPod";
-
-  splash.style.cssText = `
-        position:fixed;
-        inset:0;
-        z-index:var(--z-bloqueo);
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        justify-content:center;
-        gap:14px;
-        background:
-
-            radial-gradient(circle at center, #123525 0%, #07111f 48%, #030712 100%);
-        color:white;
-        font-family:Arial, sans-serif;
-        transition:opacity .45s ease;
-        `;
-
-  const perfil = obtenerPerfilActivo();
-
-  const nombreBienvenida = perfil?.nombre || "deportista";
-
-  splash.innerHTML = `
-        <img
-            src="logo-full.png"
-            alt="RehabPod"
-            style="
-                width:220px;
-                max-width:70vw;
-                filter:drop-shadow(0 0 30px rgba(198,255,77,.18));
-            "
-        >
- 
-        <div
-            style="
-                margin-top:4px;
-                font-size:20px;
-                font-weight:800;
-                color:#ffffff;
-            "
-        >
-            ¡Bienvenido, ${escaparHTML(nombreBienvenida)}!
-        </div>
- 
-        <div
-            style="
-                color:#9ca3af;
-                font-size:14px;
-            "
-        >
-            Prepárate para reaccionar más rápido.
-        </div>
- 
-        <div
-            style="
-                margin-top:16px;
-                width:38px;
-                height:38px;
-                border:4px solid rgba(255,255,255,.15);
-                border-top-color:#22c55e;
-
-                border-radius:50%;
-                animation:reactiPodSpin .8s linear infinite;
-            "
-        ></div>
- 
-        <style>
-            @keyframes reactiPodSpin {
-                to { transform: rotate(360deg); }
-            }
-        </style>
-        `;
-
-  document.body.appendChild(splash);
-
-  setTimeout(
-    () => {
-      splash.style.opacity = "0";
-
-      setTimeout(() => splash.remove(), 500);
-    },
-
-    2400
-  );
+  // La animación, el saludo y el mensaje personalizado viven en js/bienvenida.js.
+  if (window.RehabBienvenida) {
+    window.RehabBienvenida.mostrar(obtenerPerfilActivo());
+  }
 }
 
 // =====================================================
@@ -6685,7 +6607,8 @@ conectarPodNativo = async function (indice) {
   } catch (error) {
     console.error("Error conectando RehabPod:", error);
     marcarPodNoConectado(indice, "No conectado");
-    avisarRehab("No se pudo conectar el Pod seleccionado.", { tipo: "error" });
+    const mensajePod = mensajeErrorPod(error);
+    if (mensajePod) avisarRehab(mensajePod, { tipo: "error" });
   }
 };
 
@@ -6750,6 +6673,8 @@ conectarPodWeb = async function (indice) {
     console.error(error);
     estadosConexion[indice].textContent = "No conectado";
     actualizarEstadoGeneralPods();
+    const mensajePod = mensajeErrorPod(error);
+    if (mensajePod) avisarRehab(mensajePod, { tipo: "error" });
   }
 };
 
@@ -9920,9 +9845,9 @@ console.log(
       <div id="rehabV23Lista" class="rehabV23Lista"></div>
 
       <div class="rehabV23Aviso">
-        En V23 las rutinas se guardan en este dispositivo.
-        Todavía no se ejecutan automáticamente una detrás de otra;
-        primero estamos creando y guardando la estructura de cada rutina.
+        Estas rutinas se guardan en este dispositivo.
+        Para una rutina armada a tu medida y que se ejecuta sola,
+        usa «Armar mi rutina» en Inicio.
       </div>
     `;
 
@@ -15341,8 +15266,8 @@ setTimeout(() => {
           <strong>RehabPod v0.3</strong>
         </div>
         <div style="font-size:.8rem;opacity:.62;line-height:1.45;margin-top:9px">
-          Aplicación experimental para entrenamiento de reacción,
-          velocidad, coordinación y rehabilitación.
+          Entrenamiento de reacción, velocidad, coordinación y memoria
+          con Pods de luz, pensado para acompañar tu rehabilitación.
         </div>
       </div>
     `;

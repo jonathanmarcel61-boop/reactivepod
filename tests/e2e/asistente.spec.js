@@ -221,4 +221,49 @@ test.describe("Asistente de rutinas a medida", () => {
       expect(errores).toEqual([]);
     });
   }
+
+  test.describe("Pods simulados (sin Pods físicos)", () => {
+    async function armarVistaPrevia(page) {
+      await abrirAsistente(page);
+      await page.locator('label:has(input[value="reaccion"])').click();
+      await page.locator('label:has(input[name="asisMinutos"][value="5"])').click();
+      await page.locator("#asisArmar").click();
+      await expect(page.locator("#asisVirtual")).toBeVisible();
+    }
+
+    test("sin Pods conectados se sugieren simulados, la rutina arranca y al acabar se restaura el estado", async ({ page }) => {
+      const errores = vigilarErrores(page);
+      await abrirApp(page, { virtual: false });
+      expect(await page.evaluate(() => rehabModoVirtual)).toBe(false);
+
+      await armarVistaPrevia(page);
+      await expect(page.locator("#asisVirtual")).toBeChecked();
+
+      await page.locator("#asisComenzar").click();
+      await expect(page.locator("#asisEjecTitulo")).toHaveText("Prepárate");
+      expect(await page.evaluate(() => rehabModoVirtual)).toBe(true);
+
+      await page.locator("#asisYa").click();
+      await expect.poll(() => page.evaluate(() => entrenamientoActivo)).toBe(true);
+      // Los Pods de pantalla se pueden tocar durante la rutina.
+      await expect(page.locator('.pod[data-pod="0"]')).toHaveAttribute("role", "button");
+
+      // Cancelar la rutina devuelve la app a como estaba: sin simulación.
+      await page.evaluate(() => window.rehabAsistente.estado.plan && window.rehabAsistente.cancelar());
+      await expect.poll(() => page.evaluate(() => rehabModoVirtual)).toBe(false);
+      expect(await page.evaluate(() => localStorage.getItem("rehabpodModoVirtual"))).toBe("false");
+      expect(errores).toEqual([]);
+    });
+
+    test("sin marcar 'simulados' y sin Pods físicos, avisa con un mensaje útil y no arranca", async ({ page }) => {
+      await abrirApp(page, { virtual: false });
+      await armarVistaPrevia(page);
+      await page.locator("#asisVirtual").uncheck();
+      await page.locator("#asisComenzar").click();
+      await expect(page.locator("#asisAvisoPods")).toContainText("Enciéndelos");
+      await expect(page.locator("#asisAvisoPods")).toContainText("Pods simulados");
+      await expect(page.locator("#asisEjecOverlay")).toBeHidden();
+      expect(await page.evaluate(() => window.rehabAsistente.estado.activa)).toBe(false);
+    });
+  });
 });

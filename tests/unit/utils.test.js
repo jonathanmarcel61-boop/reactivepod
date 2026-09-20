@@ -119,3 +119,14 @@ test("guardarJSON devuelve false (sin lanzar) si localStorage falla", () => {
     console.warn = silenciar;
   }
 });
+
+test("mensajeErrorPod: mensajes claros con siguiente paso", () => {
+  const { mensajeErrorPod } = require("../../public/js/utils.js");
+  assert.equal(mensajeErrorPod({ name: "NotFoundError", message: "User cancelled the requestDevice() chooser." }), null);
+  assert.match(mensajeErrorPod({ name: "NotAllowedError", message: "Permission denied" }), /permiso de Bluetooth/);
+  assert.match(mensajeErrorPod(new Error("Bluetooth adapter is powered off")), /Bluetooth está apagado/);
+  assert.match(mensajeErrorPod(new Error("Location services disabled")), /ubicación/);
+  assert.match(mensajeErrorPod(new Error("Connection timeout")), /No encontramos tus Pods/);
+  assert.match(mensajeErrorPod(new Error("GATT server disconnected")), /perdió la conexión/);
+  assert.match(mensajeErrorPod(undefined), /No pudimos conectar/);
+});

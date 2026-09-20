@@ -36,6 +36,7 @@
     <symbol id="ic-cuenta" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></symbol>
     <symbol id="ic-campana" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
     <symbol id="ic-rayo" viewBox="0 0 24 24"><path d="M13 3 5 14h6l-1 7 8-11h-6z"/></symbol>
+    <symbol id="ic-llama" viewBox="0 0 24 24"><path d="M12 3c1 3.5 5 5.5 5 10.5a5 5 0 0 1-10 0c0-2 .8-3.3 2-4.5.2 1.6 1 2.5 2 2.7C11 9.5 10.5 6 12 3z"/></symbol>
     <symbol id="ic-volver" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m11 6-6 6 6 6"/></symbol>
 </svg>
 
@@ -311,6 +312,33 @@
                 </strong>
 
             </div>
+
+        </div>
+
+
+        <!-- META SEMANAL -->
+
+        <div class="tarjeta metaSemanal" id="tarjetaMetaSemanal">
+
+            <div class="metaSemanal__cab">
+
+                <svg class="ic metaSemanal__llama" aria-hidden="true"><use href="#ic-llama"/></svg>
+
+                <div>
+
+                    <strong id="metaSemanalTitulo">
+                        0 de 3 días esta semana
+                    </strong>
+
+                    <small id="metaSemanalSub">
+                        Entrena hoy para empezar tu semana.
+                    </small>
+
+                </div>
+
+            </div>
+
+            <ol class="metaSemanal__dias" id="metaSemanalDias" aria-label="Días entrenados esta semana"></ol>
 
         </div>
 
@@ -1400,6 +1428,14 @@
 
 
         <button
+            id="btnCompartirResultado"
+            class="boton botonOscuro"
+        >
+            COMPARTIR POR WHATSAPP
+        </button>
+
+
+        <button
             id="btnResultadosInicio"
             class="boton botonOscuro"
         >
@@ -1940,6 +1976,56 @@
 
             <div class="filaAjuste">
 
+                <div>
+
+                    <strong>
+                        Voz en español
+                    </strong>
+
+                    <small id="ajusteVozEstado">
+                        Cuenta atrás y felicitaciones habladas
+                    </small>
+
+                </div>
+
+                <input
+                    id="ajusteVoz" aria-label="Voz en español"
+                    type="checkbox"
+                    checked
+                >
+
+            </div>
+            <div class="separador"></div>
+
+            <div class="filaAjuste">
+
+                <div>
+
+                    <strong>
+                        Meta semanal
+                    </strong>
+
+                    <small>
+                        Días de entrenamiento por semana
+                    </small>
+
+                </div>
+
+                <select id="ajusteMetaSemanal" aria-label="Meta semanal de días">
+                    <option value="1">1 día</option>
+                    <option value="2">2 días</option>
+                    <option value="3">3 días</option>
+                    <option value="4">4 días</option>
+                    <option value="5">5 días</option>
+                    <option value="6">6 días</option>
+                    <option value="7">7 días</option>
+                </select>
+
+            </div>
+            <div class="separador"></div>
+
+            <div class="filaAjuste">
+
               <div>
 
               <strong>
@@ -2088,8 +2174,13 @@
 <script src="js/utils.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/plan.js"></script>
+<script src="js/metas.js"></script>
+<script src="js/voz.js"></script>
+<script src="js/compartir.js"></script>
+<script src="js/bienvenida.js"></script>
 <script src="app.js"></script>
 <script src="js/asistente.js"></script>
+<script src="js/motivacion.js"></script>
 
 </body>
 

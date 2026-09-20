@@ -3936,6 +3936,10 @@ h2 {
     position: relative;
 }
 
+.asis-op--virtual {
+    margin: var(--esp-3) 0 var(--esp-2);
+}
+
 .asis-op__txt {
     display: grid;
     gap: 2px;
@@ -4175,4 +4179,162 @@ h2 {
 @media (max-width: 380px) {
     .asis-fila--5 { grid-template-columns: repeat(3, 1fr); }
     .asis-resumen { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* =====================================================
+   BIENVENIDA ANIMADA (js/bienvenida.js)
+   Fondo oscuro fijo en ambos temas: es la marca, no la interfaz.
+   ===================================================== */
+.apertura {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-bloqueo);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 24px;
+    text-align: center;
+    color: #ffffff;
+    background: radial-gradient(circle at center, #123525 0%, #07111f 48%, #030712 100%);
+    cursor: pointer;
+    transition: opacity 0.45s ease;
+}
+
+.apertura--sale {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.apertura__logo {
+    width: 220px;
+    max-width: 70vw;
+    filter: drop-shadow(0 0 30px rgba(198, 255, 77, 0.18));
+    animation: aperturaEntra 0.6s ease both;
+}
+
+.apertura__pods {
+    display: flex;
+    gap: 14px;
+    margin: 6px 0 10px;
+}
+
+.apertura__pod {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    animation: aperturaPod 0.5s ease both;
+}
+
+.apertura__pod--1 { --pod: #22c55e; animation-delay: 0.35s; }
+.apertura__pod--2 { --pod: #3b82f6; animation-delay: 0.65s; }
+.apertura__pod--3 { --pod: #f59e0b; animation-delay: 0.95s; }
+.apertura__pod--4 { --pod: #ef4444; animation-delay: 1.25s; }
+
+.apertura__saludo {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    animation: aperturaEntra 0.6s ease 0.5s both;
+}
+
+.apertura__mensaje {
+    margin: 0;
+    max-width: 30ch;
+    font-size: 15px;
+    line-height: 1.4;
+    color: #d1d5db;
+    animation: aperturaEntra 0.6s ease 0.8s both;
+}
+
+.apertura__saltar {
+    position: absolute;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    margin: 0;
+    font-size: 12px;
+    color: #9ca3af;
+    animation: aperturaEntra 0.6s ease 1.4s both;
+}
+
+@keyframes aperturaEntra {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes aperturaPod {
+    0% { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.2); transform: scale(1); box-shadow: none; }
+    60% { transform: scale(1.35); }
+    100% { background: var(--pod); border-color: var(--pod); transform: scale(1); box-shadow: 0 0 16px var(--pod); }
+}
+
+/* =====================================================
+   META SEMANAL (js/motivacion.js)
+   ===================================================== */
+.metaSemanal {
+    margin-top: var(--esp-3);
+}
+
+.metaSemanal__cab {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.metaSemanal__cab strong {
+    display: block;
+    font-size: 16px;
+}
+
+.metaSemanal__cab small {
+    display: block;
+    margin-top: 2px;
+    font-size: 13px;
+    color: var(--texto2);
+}
+
+.metaSemanal__llama {
+    width: 28px;
+    height: 28px;
+    color: var(--naranja-texto);
+}
+
+.metaSemanal--cumplida .metaSemanal__llama {
+    fill: var(--naranja);
+}
+
+.metaSemanal__dias {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.metaDia {
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--borde-fuerte);
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--texto2);
+    background: transparent;
+    aspect-ratio: 1;
+    max-width: 44px;
+    justify-self: center;
+    width: 100%;
+}
+
+.metaDia--hecho {
+    border-color: var(--acento);
+    background: var(--acento);
+    color: var(--acento-tinta);
+}
+
+.metaDia--hoy {
+    box-shadow: 0 0 0 2px var(--fondo), 0 0 0 4px var(--acento-texto);
 }
