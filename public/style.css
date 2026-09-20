@@ -54,6 +54,11 @@
 }
 
 :root {
+    /* Movimiento */
+    --mov-pantalla: 0.24s;
+    --mov-ventana: 0.26s;
+    --mov-curva: cubic-bezier(0.22, 0.8, 0.24, 1);
+
     /* Superficies */
     --fondo: #0a0d0c;
     --tarjeta: #141917;
@@ -231,14 +236,29 @@ input:focus-visible {
     padding: 22px;
 }
 
+/* Cambio de pantalla: entra deslizando desde la derecha (avanzar) o desde la
+   izquierda (volver a Inicio), con fundido. "backwards" evita que quede un
+   transform permanente al terminar. */
 .pantalla.activa {
     display: block;
-    animation: entradaPantalla 0.28s ease both;
+    animation: entradaPantalla var(--mov-pantalla) var(--mov-curva) backwards;
+}
+
+.pantalla.activa[data-entrada="atras"] {
+    animation-name: entradaPantallaAtras;
 }
 
 @keyframes entradaPantalla {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateX(28px); }
+}
+
+@keyframes entradaPantallaAtras {
+    from { opacity: 0; transform: translateX(-28px); }
+}
+
+/* El deslizamiento no debe crear barra de scroll horizontal. */
+#contenidoApp {
+    overflow-x: clip;
 }
 
 .contenedorApp {
@@ -561,7 +581,7 @@ input:focus-visible {
     padding: 7px;
 
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 6px;
 
     background: var(--nav-fondo);
@@ -1495,6 +1515,32 @@ select {
     display: none !important;
 }
 
+/* Abrir ventana: el fondo se oscurece y la ventana sube con un ligero zoom.
+   Los modales se muestran quitando `hidden`, lo que reinicia la animación. */
+.rp-overlay:not([hidden]) {
+    animation: rp-fondo-entra 0.2s ease-out backwards;
+}
+
+.rp-overlay:not([hidden]) > .rp-modal {
+    animation: rp-modal-entra var(--mov-ventana) var(--mov-curva) backwards;
+}
+
+.rp-overlay--dialogo:not([hidden]) > .rp-modal {
+    animation-name: rp-dialogo-entra;
+}
+
+@keyframes rp-fondo-entra {
+    from { opacity: 0; }
+}
+
+@keyframes rp-modal-entra {
+    from { opacity: 0; transform: translateY(28px) scale(0.98); }
+}
+
+@keyframes rp-dialogo-entra {
+    from { opacity: 0; transform: scale(0.94); }
+}
+
 /* Confirmaciones y entradas de texto van por encima de cualquier modal. */
 .rp-overlay--dialogo {
     --rp-z: calc(var(--z-bloqueo) + 1);
@@ -1852,16 +1898,6 @@ select {
         }
 
 /* ---------- aplicarMejorasVisualesV7 ---------- */
-        /* Transiciones suaves entre pantallas */
-        .pantalla.activa {
-            animation: entradaPantallaV7 .28s ease both;
-        }
- 
-        @keyframes entradaPantallaV7 {
-            from { opacity:0; transform:translateY(8px); }
-            to { opacity:1; transform:translateY(0); }
-        }
- 
         /* Tarjetas de modos más modernas */
         .tarjetaEntrenamientoModo {
             position:relative;
@@ -2209,14 +2245,8 @@ select {
             --rp-muted:#94a3b8;
         }
  
-        .pantalla.activa {
-            animation: rpEntradaPantallaV8 .34s cubic-bezier(.2,.8,.2,1) both !important;
-        }
- 
-        @keyframes rpEntradaPantallaV8 {
-            from { opacity:0; transform:translateY(14px) scale(.992); }
-            to { opacity:1; transform:translateY(0) scale(1); }
-        }
+        /* (La animación de entrada de pantallas vive ahora en la sección
+           PANTALLAS, con dirección y sin transform permanente.) */
  
         /* Encabezado de selección */
         #encabezadoModosV8 {
@@ -3777,4 +3807,47 @@ h2 {
 #btnResultadosInicio {
     background: transparent;
     color: var(--texto2);
+}
+
+
+/* Notificaciones en la barra inferior: contador sobre el icono */
+.menuItem .menuIcono {
+    position: relative;
+    display: block;
+    width: 22px;
+    margin: 0 auto 4px;
+    font-size: inherit;
+}
+
+.menuItem .menuIcono .ic {
+    margin: 0;
+}
+
+.menuItem .menuBadge {
+    position: absolute;
+    display: block;
+    margin: 0;
+    top: -6px;
+    right: -12px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: #dc2626;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 18px;
+    text-align: center;
+}
+
+.menuItem .menuBadge[hidden] {
+    display: none;
+}
+
+#btnAjusteNotificaciones {
+    width: auto;
+    min-height: 44px;
+    padding: 0 var(--esp-4);
+    margin: 0;
 }

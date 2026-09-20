@@ -844,6 +844,10 @@ function mostrarPantalla(pantalla) {
 
   pantallas.forEach((p) => p && p.classList.remove("activa"));
 
+  // Dirección de la animación: volver a Inicio entra desde la izquierda;
+  // el resto de pantallas entran desde la derecha.
+  pantalla.dataset.entrada = pantalla === pantallaInicio ? "atras" : "adelante";
+
   pantalla.classList.add("activa");
 }
 
@@ -16005,6 +16009,52 @@ setTimeout(() => {
     return data || [];
   }
 
+  // Refleja el estado en la barra inferior y en Ajustes. `total` es el número
+  // de notificaciones sin leer, o null si no hay sesión de la nube.
+  function v41PintarEstado(total) {
+    const menuBadge = document.getElementById("menuBadgeNotificaciones");
+    const boton = document.getElementById("btnNotificacionesMenu");
+    const estado = document.getElementById("ajusteNotificacionesEstado");
+
+    if (menuBadge) {
+      const hay = total !== null && total > 0;
+      menuBadge.hidden = !hay;
+      menuBadge.textContent = total > 99 ? "99+" : String(total || "");
+    }
+
+    if (boton) {
+      boton.setAttribute(
+        "aria-label",
+        total ? `Notificaciones, ${total} sin leer` : "Notificaciones"
+      );
+    }
+
+    if (estado) {
+      estado.textContent =
+        total === null
+          ? "Inicia sesión en Cuenta para recibirlas"
+          : total > 0
+            ? `${total} sin leer`
+            : "Todo al día";
+    }
+  }
+
+  // Acceso desde la barra inferior y Ajustes: siempre visible; sin sesión
+  // explica qué hacer en lugar de no mostrar nada.
+  async function v41AbrirDesdeMenu() {
+    const cloud = await v41Cliente();
+
+    if (!cloud || !v41User) {
+      avisarRehab(
+        "Inicia sesión en Cuenta para ver y recibir notificaciones.",
+        { tipo: "info" }
+      );
+      return;
+    }
+
+    v41AbrirCentro();
+  }
+
   async function v41ActualizarBadge(mostrarAvisos = false) {
     const bell = document.getElementById("rehabV41Bell");
     const badge = document.getElementById("rehabV41Badge");
@@ -16017,6 +16067,7 @@ setTimeout(() => {
         bell.style.display = "none";
         badge.style.display = "none";
         document.body.classList.remove("hay-campana");
+        v41PintarEstado(null);
         return;
       }
 
@@ -16028,6 +16079,7 @@ setTimeout(() => {
 
       badge.textContent = nuevas.length > 99 ? "99+" : String(nuevas.length);
       badge.style.display = nuevas.length ? "flex" : "none";
+      v41PintarEstado(nuevas.length);
 
       if (mostrarAvisos && typeof Notification !== "undefined") {
         if (Notification.permission === "granted") {
@@ -16221,6 +16273,13 @@ setTimeout(() => {
 
   async function v41Iniciar() {
     v41CrearUI();
+
+    const btnMenu = document.getElementById("btnNotificacionesMenu");
+    const btnAjuste = document.getElementById("btnAjusteNotificaciones");
+    if (btnMenu) btnMenu.onclick = v41AbrirDesdeMenu;
+    if (btnAjuste) btnAjuste.onclick = v41AbrirDesdeMenu;
+    v41PintarEstado(null);
+
     v41ActivarCancelaciones();
     await v41PrepararAuth();
     await v41ActualizarBadge(false);

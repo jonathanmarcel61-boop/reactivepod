@@ -34,6 +34,7 @@
     <symbol id="ic-inicio" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
     <symbol id="ic-progreso" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-9"/><path d="M15 6h6v6"/></symbol>
     <symbol id="ic-cuenta" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></symbol>
+    <symbol id="ic-campana" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
     <symbol id="ic-rayo" viewBox="0 0 24 24"><path d="M13 3 5 14h6l-1 7 8-11h-6z"/></symbol>
     <symbol id="ic-volver" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m11 6-6 6 6 6"/></symbol>
 </svg>
@@ -355,6 +356,22 @@
                 </span>
 
                 Historial
+
+            </button>
+
+
+            <button
+                id="btnNotificacionesMenu"
+                class="menuItem"
+                aria-label="Notificaciones"
+            >
+
+                <span class="menuIcono">
+                    <svg class="ic" aria-hidden="true"><use href="#ic-campana"/></svg>
+                    <span id="menuBadgeNotificaciones" class="menuBadge" hidden></span>
+                </span>
+
+                Avisos
 
             </button>
 
@@ -1976,6 +1993,32 @@
                     type="checkbox"
                     disabled
                 >
+
+            </div>
+
+            <div class="separador"></div>
+
+            <div class="filaAjuste">
+
+                <div>
+
+                    <strong>
+                        Notificaciones
+                    </strong>
+
+                    <small id="ajusteNotificacionesEstado">
+                        Avisos de rutinas asignadas y completadas
+                    </small>
+
+                </div>
+
+                <button
+                    id="btnAjusteNotificaciones"
+                    class="boton botonOscuro"
+                    type="button"
+                >
+                    Abrir
+                </button>
 
             </div>
 
