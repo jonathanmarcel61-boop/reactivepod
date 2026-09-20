@@ -70,6 +70,8 @@ for (const m of MODALES) {
         expect(dentro, `Shift+Tab #${i + 1} salió del diálogo`).toBe(true);
       }
 
+      // La ventana entra con una animación de zoom: se mide ya asentada.
+      await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => {}))));
       const caja = await page.locator(`${m.overlay} .rp-modal__cerrar`).boundingBox();
       expect(caja.width).toBeGreaterThanOrEqual(44);
       expect(caja.height).toBeGreaterThanOrEqual(44);

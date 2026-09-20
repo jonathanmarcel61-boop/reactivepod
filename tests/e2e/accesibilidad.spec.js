@@ -51,14 +51,14 @@ test("el estado de los pods y los resultados son regiones aria-live", async ({ p
 test("los iconos del menú y de volver son SVG decorativos que existen en el sprite", async ({ page }) => {
   await abrirApp(page);
   await expect(page.locator("#btnInicioMenu")).toHaveAttribute("aria-current", "page");
-  await expect(page.locator("nav.menuPrincipal svg.ic[aria-hidden='true']")).toHaveCount(3);
+  await expect(page.locator("nav.menuPrincipal svg.ic[aria-hidden='true']")).toHaveCount(4);
   const rotos = await page.evaluate(() =>
     [...document.querySelectorAll("svg.ic use")]
       .map((u) => u.getAttribute("href"))
       .filter((h) => !document.querySelector(h))
   );
   expect(rotos).toEqual([]);
-  expect(await page.locator("svg.ic use").count()).toBeGreaterThanOrEqual(11); // 3 menú + 8 volver
+  expect(await page.locator("svg.ic use").count()).toBeGreaterThanOrEqual(12); // 4 menú + 8 volver
   // el icono se pinta (tiene trazo visible), no queda vacío
   const caja = await page.locator("#btnProgreso svg.ic").boundingBox();
   expect(caja.width).toBeGreaterThan(16);
