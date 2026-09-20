@@ -9848,6 +9848,9 @@ console.log(
         <button type="button" id="rehabV23Nueva" class="rehabV23Btn">
           + CREAR NUEVA RUTINA
         </button>
+        <button type="button" id="rehabV23Biblioteca" class="rehabV23Btn secundario" hidden>
+          📚 RUTINAS DE USUARIOS
+        </button>
       </div>
 
       <div id="rehabV23Lista" class="rehabV23Lista"></div>
@@ -9862,6 +9865,9 @@ console.log(
     document.getElementById("rehabV23Nueva").addEventListener("click", function () {
       rehabV23AbrirEditor(null);
     });
+
+    // Los profesionales ven aquí la biblioteca de rutinas compartidas (js/profesional.js).
+    document.dispatchEvent(new CustomEvent("rehabpod:v23lista"));
 
     const lista = document.getElementById("rehabV23Lista");
 
@@ -15177,71 +15183,6 @@ setTimeout(() => {
     `;
   }
 
-  function v40HtmlPreferencias() {
-    const sonidos = !!ajustesApp?.sonidos;
-    const tema = ajustesApp?.tema || "auto";
-
-    return `
-      <div class="rehabV40Card">
-        <div class="rehabV40SecTitulo">PREFERENCIAS</div>
-
-        <div class="rehabV40Switch">
-          <div>
-            <strong>Sonidos</strong>
-            <div style="font-size:.8rem;opacity:.63;margin-top:3px">
-              Aciertos, errores y cuenta regresiva.
-            </div>
-          </div>
-          <input id="rehabV40Sonidos" type="checkbox" ${sonidos ? "checked" : ""}>
-        </div>
-
-        <div class="rehabV40Campo">
-          <label>TEMA</label>
-          <select id="rehabV40Tema">
-            <option value="auto" ${tema === "auto" ? "selected" : ""}>Automático (del teléfono)</option>
-            <option value="oscuro" ${tema === "oscuro" ? "selected" : ""}>Oscuro</option>
-            <option value="claro" ${tema === "claro" ? "selected" : ""}>Claro</option>
-          </select>
-        </div>
-      </div>
-    `;
-  }
-
-  function v40HtmlColores() {
-    const activos = new Set(
-      Array.isArray(ajustesApp?.coloresActivos)
-        ? ajustesApp.coloresActivos
-        : CLAVES_COLORES_REACTIPOD
-    );
-
-    const swatches = CLAVES_COLORES_REACTIPOD.map((clave) => {
-      const info = catalogoColoresPersonalizados[clave];
-      const marcado = activos.has(clave);
-      return `
-        <label class="rehabV40ColorSwatch">
-          <input type="checkbox" data-rehab-color="${clave}" ${marcado ? "checked" : ""}>
-          <span class="rehabV40ColorMuestra" style="background:${info.css}"></span>
-          <span>${info.nombre.charAt(0)}${info.nombre.slice(1).toLowerCase()}</span>
-        </label>
-      `;
-    }).join("");
-
-    return `
-      <div class="rehabV40Card">
-        <div class="rehabV40SecTitulo">COLORES DEL ENTRENAMIENTO</div>
-        <div style="font-size:.8rem;opacity:.68;line-height:1.5;margin-bottom:12px">
-          Desmarca los colores que te cuesta distinguir (por ejemplo, rosado, morado). No
-          aparecerán durante el entrenamiento. Se necesitan al menos ${MINIMO_COLORES_ACTIVOS}
-          colores activos.
-        </div>
-        <div id="rehabV40GridColores" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
-          ${swatches}
-        </div>
-        <div id="rehabV40ColoresAviso" style="font-size:.78rem;color:var(--rojo,#ef4444);margin-top:10px;min-height:16px;"></div>
-      </div>
-    `;
-  }
-
   function v40HtmlSesion() {
     if (!v40User) return "";
 
@@ -15261,36 +15202,16 @@ setTimeout(() => {
     `;
   }
 
-  function v40HtmlPrivacidad() {
+  function v40HtmlAjustes() {
     return `
       <div class="rehabV40Card">
-        <div class="rehabV40SecTitulo">PRIVACIDAD Y DATOS</div>
+        <div class="rehabV40SecTitulo">AJUSTES DE LA APP</div>
         <div style="font-size:.82rem;opacity:.75;line-height:1.5;margin-bottom:10px">
-          Puedes descargar todo lo que RehabPod guarda del perfil activo,
-          o eliminarlo por completo de este dispositivo.
+          Sonidos, voz, tema, colores, recordatorios y privacidad de tus datos están en Ajustes.
         </div>
-        <button id="rehabV40Descargar" class="rehabV40Btn sec" type="button" style="width:100%;margin-bottom:8px">
-          ⬇️ Descargar mis datos
+        <button id="rehabV40AbrirAjustes" class="rehabV40Btn sec" type="button" style="width:100%">
+          Abrir Ajustes
         </button>
-        <button id="rehabV40EliminarDatos" class="rehabV40Btn peligro" type="button" style="width:100%">
-          🗑️ Eliminar mi cuenta y mis datos
-        </button>
-      </div>
-    `;
-  }
-
-  function v40HtmlAcerca() {
-    return `
-      <div class="rehabV40Card">
-        <div class="rehabV40SecTitulo">ACERCA DE REHABPOD</div>
-        <div class="rehabV40Dato">
-          <span>Versión</span>
-          <strong>RehabPod v0.3</strong>
-        </div>
-        <div style="font-size:.8rem;opacity:.62;line-height:1.45;margin-top:9px">
-          Entrenamiento de reacción, velocidad, coordinación y memoria
-          con Pods de luz, pensado para acompañar tu rehabilitación.
-        </div>
       </div>
     `;
   }
@@ -15310,11 +15231,8 @@ setTimeout(() => {
           ${tieneCloud ? v40HtmlCloud() : v40HtmlSinCloud()}
           ${tieneCloud ? v40HtmlRelaciones() : ""}
           ${tieneCloud ? v40HtmlSeguridad() : ""}
-          ${v40HtmlPreferencias()}
-          ${v40HtmlColores()}
           ${tieneCloud ? v40HtmlSesion() : ""}
-          ${v40HtmlPrivacidad()}
-          ${v40HtmlAcerca()}
+          ${v40HtmlAjustes()}
         </div>
       `;
 
@@ -15325,10 +15243,7 @@ setTimeout(() => {
         <div class="rehabV40Wrap">
           ${v40HtmlLocal()}
           <div class="rehabV40Aviso">${escaparHTML(rehabMensajeError(error))}</div>
-          ${v40HtmlPreferencias()}
-          ${v40HtmlColores()}
-          ${v40HtmlPrivacidad()}
-          ${v40HtmlAcerca()}
+          ${v40HtmlAjustes()}
         </div>
       `;
       v40ActivarEventos(contentId);
@@ -15336,17 +15251,10 @@ setTimeout(() => {
   }
 
   function v40ActivarEventos(contentId) {
-    const descargar = document.getElementById("rehabV40Descargar");
-    if (descargar) {
-      descargar.onclick = function () {
-        if (typeof descargarMisDatos === "function") descargarMisDatos();
-      };
-    }
-
-    const eliminarDatos = document.getElementById("rehabV40EliminarDatos");
-    if (eliminarDatos) {
-      eliminarDatos.onclick = function () {
-        if (typeof eliminarMiCuentaYDatos === "function") eliminarMiCuentaYDatos();
+    const abrirAjustes = document.getElementById("rehabV40AbrirAjustes");
+    if (abrirAjustes) {
+      abrirAjustes.onclick = function () {
+        if (typeof mostrarPantalla === "function") mostrarPantalla(pantallaAjustes);
       };
     }
 
@@ -15516,70 +15424,6 @@ setTimeout(() => {
         }
       };
     }
-
-    const sonidos = document.getElementById("rehabV40Sonidos");
-    if (sonidos) {
-      sonidos.onchange = function () {
-        ajustesApp.sonidos = sonidos.checked;
-
-        try {
-          if (typeof ajusteSonidos !== "undefined" && ajusteSonidos) {
-            ajusteSonidos.checked = sonidos.checked;
-          }
-          if (typeof sonidosActivados !== "undefined" && sonidosActivados) {
-            sonidosActivados.checked = sonidos.checked;
-          }
-          guardarAjustes();
-        } catch (error) {
-          console.warn("V40 sonidos:", error);
-        }
-      };
-    }
-
-    const tema = document.getElementById("rehabV40Tema");
-    if (tema) {
-      tema.onchange = function () {
-        ajustesApp.tema = tema.value;
-
-        try {
-          if (typeof ajusteTema !== "undefined" && ajusteTema) {
-            ajusteTema.value = tema.value;
-          }
-          aplicarTema(tema.value);
-          guardarAjustes();
-        } catch (error) {
-          console.warn("V40 tema:", error);
-        }
-      };
-    }
-
-    const checksColores = document.querySelectorAll("[data-rehab-color]");
-    const avisoColores = document.getElementById("rehabV40ColoresAviso");
-
-    checksColores.forEach((check) => {
-      check.onchange = function () {
-        const seleccionados = Array.from(checksColores)
-          .filter((c) => c.checked)
-          .map((c) => c.dataset.rehabColor);
-
-        if (seleccionados.length < MINIMO_COLORES_ACTIVOS) {
-          // No dejamos bajar del mínimo: se revierte esta casilla y se
-          // avisa por qué, en vez de guardar una configuración que
-          // rompería el entrenamiento (los 4 Pods no podrían mostrar
-          // colores distintos entre sí).
-          check.checked = true;
-          if (avisoColores) {
-            avisoColores.textContent = `Necesitas al menos ${MINIMO_COLORES_ACTIVOS} colores activos.`;
-          }
-          return;
-        }
-
-        if (avisoColores) avisoColores.textContent = "";
-
-        ajustesApp.coloresActivos = seleccionados;
-        guardarAjustes();
-      };
-    });
 
     document.querySelectorAll("[data-v40-desvincular]").forEach((btn) => {
       btn.onclick = async function () {

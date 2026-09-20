@@ -20,6 +20,8 @@
   const NOMBRE_DIF = { facil: "Fácil", media: "Media", dificil: "Difícil" };
   const fmtSeg = (s) => (s % 60 ? `${Math.floor(s / 60)} min ${s % 60} s`.replace(/^0 min /, "") : `${s / 60} min`);
 
+  const nube = () => window.rehabRutinasNube;
+
   const perfilId = () => (obtenerPerfilActivo() || {}).id || "local";
 
   /** Modos que se pueden usar en una rutina (los que conoce el generador y la app). */
@@ -166,10 +168,11 @@
       <li class="rut-item" data-id="${escaparHTML(r.id)}">
         <button type="button" class="rut-estrella" data-accion="favorita" aria-pressed="${r.favorita}"
                 aria-label="${r.favorita ? "Quitar de favoritas" : "Marcar como favorita"}: ${nombre}">${r.favorita ? "★" : "☆"}</button>
-        <div class="rut-info"><b>${nombre}</b><small>${escaparHTML(res.texto)} · ${escaparHTML(objetivosTexto(r.plan))}</small></div>
+        <div class="rut-info"><b>${nombre}</b><small>${escaparHTML(res.texto)} · ${escaparHTML(objetivosTexto(r.plan))}${r.compartida ? ` · <span class="rut-compartida">Compartida con profesionales</span>` : ""}</small></div>
         <button type="button" class="boton botonPrincipal rut-ir" data-accion="iniciar" aria-label="Iniciar ${nombre}">Iniciar</button>
         <div class="rut-acciones">
           <button type="button" data-accion="editar" aria-label="Editar ${nombre}">Editar</button>
+          <button type="button" data-accion="compartir" aria-label="${r.compartida ? "Dejar de compartir" : "Compartir con profesionales"}: ${nombre}">${r.compartida ? "Dejar de compartir" : "Compartir"}</button>
           <button type="button" data-accion="renombrar" aria-label="Cambiar nombre de ${nombre}">Nombre</button>
           <button type="button" data-accion="duplicar" aria-label="Duplicar ${nombre}">Duplicar</button>
           <button type="button" data-accion="eliminar" class="rut-peligro" aria-label="Eliminar ${nombre}">Eliminar</button>
@@ -210,11 +213,18 @@
       return abrirLista();
     }
     if (que === "editar") return abrirConstructor(r);
+    if (que === "compartir") {
+      if (!nube()) return avisarRehab("Compartir no está disponible ahora.", { tipo: "info" });
+      await nube().alternar(r);
+      pintarInicio();
+      return abrirLista();
+    }
     if (que === "renombrar") {
       const nombre = await pedirTextoRehab({ titulo: "Cambiar nombre", etiqueta: "Nombre de la rutina", valor: r.nombre, maxLongitud: R.MAX_NOMBRE, aceptar: "Guardar", validar: (t) => (t ? null : "Escribe un nombre.") });
       if (nombre) {
         guardar(R.renombrar(lista, id, nombre));
         pintarInicio();
+        if (r.compartida && nube()) nube().sincronizar(leer().find((x) => x.id === id));
       }
       return abrirLista();
     }
@@ -232,6 +242,8 @@
         guardar(R.eliminar(lista, id));
         pintarInicio();
         avisarRehab("Rutina eliminada.", { tipo: "info" });
+        // Si estaba compartida, también deja de verse en la biblioteca.
+        if (r.compartida && nube()) nube().dejarDeCompartir(r, { silencioso: true });
       }
       return abrirLista();
     }
@@ -365,6 +377,7 @@
         pintarInicio();
         v.cerrar();
         avisarRehab(`Rutina «${rutina.nombre}» guardada.`, { tipo: "exito" });
+        if (existente && rutina.compartida && nube()) nube().sincronizar(rutina);
         if (empezar) iniciar(rutina.id);
         else abrirLista();
       };
@@ -395,7 +408,7 @@
   const crear = document.getElementById("btnCrearRutina");
   if (crear) crear.addEventListener("click", () => abrirConstructor());
 
-  window.rehabRutinas = { guardarPlan, enlazarBotonGuardar, abrirLista, abrirConstructor, pintarInicio, leer };
+  window.rehabRutinas = { guardarPlan, enlazarBotonGuardar, abrirLista, abrirConstructor, pintarInicio, leer, guardar };
   try {
     pintarInicio();
   } catch (_) {}

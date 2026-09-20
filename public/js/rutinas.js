@@ -135,6 +135,7 @@
       creada: o.ahora || Date.now(),
       usos: 0,
       ultimoUso: null,
+      compartida: null,
     };
     return { lista: [...lista, rutina], rutina, repetida: false, llena: false };
   }
@@ -147,6 +148,9 @@
     return cambiar(lista, id, (r) => ({ ...r, nombre: nombreUnico(otras, nombre || r.nombre) }));
   };
   const eliminar = (lista, id) => lista.filter((r) => r.id !== id);
+  /** Marca (o desmarca con null) que la rutina está compartida con los profesionales. */
+  const marcarCompartida = (lista, id, info) =>
+    cambiar(lista, id, (r) => ({ ...r, compartida: info ? { en: Number(info.en) || Date.now(), mostrarNombre: !!info.mostrarNombre } : null }));
   const registrarUso = (lista, id, ahora) => cambiar(lista, id, (r) => ({ ...r, usos: r.usos + 1, ultimoUso: ahora || Date.now() }));
   const reemplazarPlan = (lista, id, plan, validos) => {
     const p = sanearPlan(plan, validos);
@@ -182,6 +186,7 @@
         creada: Number(r.creada) || 0,
         usos: Math.max(0, Math.round(Number(r.usos) || 0)),
         ultimoUso: Number(r.ultimoUso) || null,
+        compartida: r.compartida && typeof r.compartida === "object" ? { en: Number(r.compartida.en) || 0, mostrarNombre: !!r.compartida.mostrarNombre } : null,
       });
       if (salida.length >= MAX_RUTINAS) break;
     }
@@ -208,7 +213,7 @@
   const API = {
     MAX_RUTINAS, MAX_BLOQUES, MAX_NOMBRE, SEG_MIN, SEG_MAX, DESCANSOS, DURACIONES_SEG, DIFICULTADES,
     objetivoDeModo, nuevoId: idNuevo, limpiarNombre, sanearPlan, planManual, resumen, nombreSugerido, nombreUnico,
-    agregar, alternarFavorita, renombrar, eliminar, registrarUso, reemplazarPlan, ordenar, normalizarLista, leer, guardar, firma,
+    agregar, alternarFavorita, renombrar, eliminar, marcarCompartida, registrarUso, reemplazarPlan, ordenar, normalizarLista, leer, guardar, firma,
   };
   raiz.RehabRutinas = API;
   if (typeof module !== "undefined" && module.exports) module.exports = API;
