@@ -1,6 +1,6 @@
 {
-  "appId": "com.reactipod.app",
-  "appName": "ReactiPod",
+  "appId": "com.rehabpod.app",
+  "appName": "RehabPod",
   "webDir": "public",
   "plugins": {
     "LocalNotifications": {

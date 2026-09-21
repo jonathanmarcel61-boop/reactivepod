@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">RehabPod</string>
+    <string name="title_activity_main">RehabPod</string>
+    <string name="package_name">com.rehabpod.app</string>
+    <string name="custom_url_scheme">com.rehabpod.app</string>
+</resources>

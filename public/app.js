@@ -103,7 +103,13 @@ function rehabValidarEmail(email) {
 }
 
 function rehabValidarPassword(password) {
-  return typeof password === "string" && password.length >= 6;
+  return (
+    typeof password === "string" &&
+    password.length >= 10 &&
+    /[a-z]/.test(password) &&
+    /[A-Z]/.test(password) &&
+    /[0-9]/.test(password)
+  );
 }
 
 // =====================================================
@@ -11065,7 +11071,9 @@ window.rehabGetSupabaseClient = async function () {
 
           const script = document.createElement("script");
           script.id = "rehabSupabaseSDK";
-          script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+          // SDK incluido con la aplicación: evita depender de un CDN y de
+          // cambios inesperados en una versión remota.
+          script.src = "vendor/supabase-2.57.4.js";
           script.onload = resolve;
           script.onerror = () => reject(new Error("No se pudo cargar Supabase JS."));
           document.head.appendChild(script);
@@ -11291,20 +11299,16 @@ window.rehabGetSupabaseClient = async function () {
         <div class="rehabV27Card">
           <h3>Crear cuenta</h3>
           <div class="rehabV27Campo"><label>Nombre</label><input id="rehabV27RegNombre" type="text" maxlength="80" autocomplete="name"></div>
-          <div class="rehabV27Campo">
-            <label>Tipo de cuenta</label>
-            <select id="rehabV27RegRol">
-              <option value="user">Usuario</option>
-              <option value="professional">Profesional</option>
-            </select>
+          <div class="rehabV27Ayuda">
+            Las cuentas nuevas se crean como usuario. La activación de una cuenta profesional
+            requiere verificación administrativa.
           </div>
-          <div id="rehabV27DescripcionRol" class="rehabV27Ayuda"></div>
           <div class="rehabV27Campo">
             <label id="rehabV27LabelEspecialidad">Tipo de uso</label>
             <select id="rehabV27RegEspecialidad"></select>
           </div>
           <div class="rehabV27Campo"><label>Correo</label><input id="rehabV27RegEmail" type="email" autocomplete="email"></div>
-          <div class="rehabV27Campo"><label>Contraseña</label><input id="rehabV27RegPass" type="password" minlength="6" autocomplete="new-password"></div>
+          <div class="rehabV27Campo"><label>Contraseña</label><input id="rehabV27RegPass" type="password" minlength="10" autocomplete="new-password"></div>
           <button id="rehabV27RegBtn" class="rehabV27Btn" type="button">CREAR CUENTA</button>
         </div>
       </div>
@@ -11314,28 +11318,18 @@ window.rehabGetSupabaseClient = async function () {
     document.getElementById("rehabV27LoginBtn").onclick = login;
     document.getElementById("rehabV27OlvideBtn").onclick = recuperarContrasena;
     document.getElementById("rehabV27RegBtn").onclick = registrar;
-    document.getElementById("rehabV27RegRol").onchange = actualizarRegistroRol;
     actualizarRegistroRol();
   }
 
   function actualizarRegistroRol() {
-    const role = document.getElementById("rehabV27RegRol")?.value || "user";
+    const role = "user";
     const sel = document.getElementById("rehabV27RegEspecialidad");
     const label = document.getElementById("rehabV27LabelEspecialidad");
-    const desc = document.getElementById("rehabV27DescripcionRol");
-    if (!sel || !label || !desc) return;
+    if (!sel || !label) return;
 
     sel.innerHTML = opcionesEspecialidad(role);
 
-    if (role === "professional") {
-      label.textContent = "Área profesional";
-      desc.textContent =
-        "Profesional: crea, sincroniza y posteriormente podrá asignar rutinas a otras personas.";
-    } else {
-      label.textContent = "Tipo de uso";
-      desc.textContent =
-        "Usuario: entrena con RehabPod por cuenta propia o puede vincularse con un profesional.";
-    }
+    label.textContent = "Tipo de uso";
   }
 
   function mensaje(texto) {
@@ -11437,7 +11431,8 @@ window.rehabGetSupabaseClient = async function () {
   async function registrar() {
     const btn = document.getElementById("rehabV27RegBtn");
     const full_name = document.getElementById("rehabV27RegNombre").value.trim();
-    const role = document.getElementById("rehabV27RegRol").value;
+    // El cliente nunca puede autoconcederse privilegios profesionales.
+    const role = "user";
     const specialty = document.getElementById("rehabV27RegEspecialidad").value;
     const email = document.getElementById("rehabV27RegEmail").value.trim();
     const password = document.getElementById("rehabV27RegPass").value;
@@ -11459,7 +11454,7 @@ window.rehabGetSupabaseClient = async function () {
     }
 
     if (!rehabValidarPassword(password)) {
-      mensaje("La contraseña debe tener al menos 6 caracteres.");
+      mensaje("Usa al menos 10 caracteres, con mayúscula, minúscula y número.");
       return;
     }
 
@@ -14711,11 +14706,11 @@ function rehabMostrarModalNuevaContrasena() {
         Escribe la nueva contraseña para tu cuenta de RehabPod.
       </p>
       <label style="display:block;font-size:12px;color:var(--texto2);margin-bottom:4px;">Nueva contraseña</label>
-      <input id="rehabNuevaPass1" type="password" minlength="6" autocomplete="new-password"
+      <input id="rehabNuevaPass1" type="password" minlength="10" autocomplete="new-password"
         style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--borde);
         background:var(--tarjeta2);color:var(--texto);margin-bottom:10px;">
       <label style="display:block;font-size:12px;color:var(--texto2);margin-bottom:4px;">Confirmar contraseña</label>
-      <input id="rehabNuevaPass2" type="password" minlength="6" autocomplete="new-password"
+      <input id="rehabNuevaPass2" type="password" minlength="10" autocomplete="new-password"
         style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--borde);
         background:var(--tarjeta2);color:var(--texto);margin-bottom:6px;">
       <div id="rehabNuevaPassAviso" style="font-size:12px;color:var(--rojo-texto);min-height:16px;margin-bottom:10px;"></div>
@@ -15073,15 +15068,9 @@ setTimeout(() => {
             )}">
           </div>
 
-          <div class="rehabV40Campo">
-            <label>TIPO DE CUENTA</label>
-            <select id="rehabV40Rol">
-              <option value="user" ${p.role === "user" ? "selected" : ""}>Usuario</option>
-              <option value="professional" ${p.role === "professional" ? "selected" : ""}>Profesional</option>
-            </select>
-            <div style="font-size:.76rem;opacity:.65;line-height:1.4;margin-top:2px">
-              Si cambias el tipo de cuenta, revisa también la especialidad/uso debajo.
-            </div>
+          <div class="rehabV40Dato">
+            <span>Tipo de cuenta</span>
+            <strong>${escaparHTML(v40Rol(p.role))}</strong>
           </div>
 
           <div class="rehabV40Campo">
@@ -15162,14 +15151,14 @@ setTimeout(() => {
 
         <div class="rehabV40Campo">
           <label>NUEVA CONTRASEÑA</label>
-          <input id="rehabV40Password1" type="password" minlength="8" autocomplete="new-password"
-            placeholder="Mínimo 8 caracteres">
+          <input id="rehabV40Password1" type="password" minlength="10" autocomplete="new-password"
+            placeholder="10+ caracteres, mayúscula, minúscula y número">
         </div>
 
 
         <div class="rehabV40Campo">
           <label>REPETIR CONTRASEÑA</label>
-          <input id="rehabV40Password2" type="password" minlength="8" autocomplete="new-password"
+          <input id="rehabV40Password2" type="password" minlength="10" autocomplete="new-password"
             placeholder="Repite la contraseña">
         </div>
 
@@ -15303,22 +15292,13 @@ setTimeout(() => {
       };
     }
 
-    const rolSelect = document.getElementById("rehabV40Rol");
     const especialidadSelect = document.getElementById("rehabV40Especialidad");
-    if (rolSelect && especialidadSelect) {
-      rolSelect.onchange = () => {
-        especialidadSelect.innerHTML = v40OpcionesEspecialidad(rolSelect.value, null);
-      };
-    }
 
     const guardarPerfil = document.getElementById("rehabV40GuardarPerfil");
     if (guardarPerfil) {
       guardarPerfil.onclick = async function () {
         const nombre = String(
           document.getElementById("rehabV40Nombre")?.value || ""
-        ).trim();
-        const rol = String(
-          document.getElementById("rehabV40Rol")?.value || v40Perfil.role
         ).trim();
         const specialty = String(
           document.getElementById("rehabV40Especialidad")?.value || ""
@@ -15340,7 +15320,6 @@ setTimeout(() => {
             .from("rehab_profiles")
             .update({
               full_name: nombre,
-              role: rol,
               specialty: specialty || "other",
             })
             .eq("user_id", v40User.id);
@@ -15386,10 +15365,10 @@ setTimeout(() => {
         const p1 = String(document.getElementById("rehabV40Password1")?.value || "");
         const p2 = String(document.getElementById("rehabV40Password2")?.value || "");
 
-        if (p1.length < 8) {
+        if (!rehabValidarPassword(p1)) {
           v40Mensaje(
             "rehabV40MensajePassword",
-            "La contraseña debe tener al menos 8 caracteres.",
+            "Usa al menos 10 caracteres, con mayúscula, minúscula y número.",
             "error"
           );
           return;

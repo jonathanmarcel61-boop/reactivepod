@@ -21,7 +21,7 @@ test("Mis rutinas: se abre y se cierra con el botón ×", async ({ page }) => {
 test("Rutinas asignadas: se abre y se cierra con el botón ×", async ({ page }) => {
   const errores = vigilarErrores(page);
   await abrirApp(page);
-  await page.click("#rehabV28HomeBtn");
+  await page.evaluate(() => window.rehabV28Abrir());
   await expect.poll(() => VISIBLE(page, "#rehabV28Overlay")).toBe(true);
   await page.click("#rehabV28Cerrar");
   await expect.poll(() => VISIBLE(page, "#rehabV28Overlay")).toBe(false);

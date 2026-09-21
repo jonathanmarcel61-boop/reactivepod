@@ -11,6 +11,12 @@
 
     <meta name="color-scheme" content="dark light">
 
+    <!-- Defensa adicional para la version web y el WebView de Android. -->
+    <meta
+        http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com; media-src 'self' blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self';"
+    >
+
     <title>RehabPod</title>
 
     <link
@@ -2344,6 +2350,7 @@
 <script src="js/voz.js"></script>
 <script src="js/compartir.js"></script>
 <script src="js/bienvenida.js"></script>
+<script src="vendor/supabase-2.57.4.js"></script>
 <script src="app.js"></script>
 <script src="js/asistente.js"></script>
 <script src="js/misrutinas.js"></script>
