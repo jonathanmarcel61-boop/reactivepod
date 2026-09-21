@@ -1901,8 +1901,23 @@ function mostrarGateTerminos() {
                     style="width:20px;height:20px;flex-shrink:0;margin-top:2px;accent-color:var(--acento);"
                 >
                 <span style="font-size:13px;line-height:1.5;color:var(--texto);">
-                    He leído y acepto los Términos de uso y la Política de Privacidad de
-                    RehabPod descritos arriba.
+                    He leído y acepto los
+                    <a
+                        href="privacidad.html#terminos"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style="color:var(--acento);"
+                        onclick="event.stopPropagation()"
+                    >Términos de uso</a>
+                    y la
+                    <a
+                        href="privacidad.html#privacidad"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style="color:var(--acento);"
+                        onclick="event.stopPropagation()"
+                    >Política de Privacidad</a>
+                    de RehabPod.
                 </span>
             </label>
 
@@ -3246,7 +3261,10 @@ function tono(frecuencia, duracion) {
 
 function iniciarEntrenamiento() {
   if (cantidadConectados() < 4) {
-    avisarRehab("Conecta los 4 Pods para empezar, o activa «Pods simulados» para entrenar sin ellos.", { tipo: "error" });
+    avisarRehab(
+      "Conecta los 4 Pods para empezar, o activa «Pods simulados» para entrenar sin ellos.",
+      { tipo: "error" }
+    );
 
     return;
   }
@@ -6567,7 +6585,9 @@ conectarPodNativo = async function (indice) {
     );
 
     if (duplicado >= 0) {
-      avisarRehab(`Ese Pod ya está conectado como RehabPod ${duplicado + 1}.`, { tipo: "error" });
+      avisarRehab(`Ese Pod ya está conectado como RehabPod ${duplicado + 1}.`, {
+        tipo: "error",
+      });
       estadosConexion[indice].textContent = "Selecciona otro Pod";
       return;
     }
@@ -6624,7 +6644,9 @@ conectarPodNativo = async function (indice) {
 
 conectarPodWeb = async function (indice) {
   if (!navigator.bluetooth) {
-    avisarRehab("Web Bluetooth no está disponible. Usa Chrome o Edge.", { tipo: "error" });
+    avisarRehab("Web Bluetooth no está disponible. Usa Chrome o Edge.", {
+      tipo: "error",
+    });
     return;
   }
 
@@ -6648,7 +6670,9 @@ conectarPodWeb = async function (indice) {
     );
 
     if (duplicado >= 0) {
-      avisarRehab(`Ese Pod ya está conectado como RehabPod ${duplicado + 1}.`, { tipo: "error" });
+      avisarRehab(`Ese Pod ya está conectado como RehabPod ${duplicado + 1}.`, {
+        tipo: "error",
+      });
       estadosConexion[indice].textContent = "Selecciona otro Pod";
       return;
     }
@@ -6855,7 +6879,9 @@ iniciarEntrenamiento = function () {
   localStorage.setItem(REHABPOD_CLAVE_CANTIDAD, String(cantidadPodsSeleccionada));
 
   if (cantidadPodsSeleccionada < minimo) {
-    avisarRehab(`Este modo necesita mínimo ${minimo} ${minimo === 1 ? "Pod" : "Pods"}.`, { tipo: "error" });
+    avisarRehab(`Este modo necesita mínimo ${minimo} ${minimo === 1 ? "Pod" : "Pods"}.`, {
+      tipo: "error",
+    });
     return;
   }
 
@@ -6869,7 +6895,9 @@ iniciarEntrenamiento = function () {
   }
 
   if (rehabIndicesPodsActivos().length < minimo) {
-    avisarRehab(`Este entrenamiento necesita al menos ${minimo} Pods activos.`, { tipo: "error" });
+    avisarRehab(`Este entrenamiento necesita al menos ${minimo} Pods activos.`, {
+      tipo: "error",
+    });
     return;
   }
 
@@ -11642,7 +11670,8 @@ window.rehabGetSupabaseClient = async function () {
       // El editor de rutinas se abre encima: se cierra antes esta ventana.
       const cuenta = document.getElementById("rehabV27Overlay");
       if (cuenta) cuenta.hidden = true;
-      if (typeof window.rehabV23AbrirRutinas === "function") window.rehabV23AbrirRutinas();
+      if (typeof window.rehabV23AbrirRutinas === "function")
+        window.rehabV23AbrirRutinas();
     };
     await cargarUsuariosVinculados();
   }
@@ -14011,7 +14040,9 @@ window.rehabGetSupabaseClient = async function () {
     const anterior = orden.slice(0, mitad);
     const reciente = orden.slice(mitad);
     const prom = (arr) =>
-      arr.length ? arr.reduce((s, x) => s + numeroSeguro(x.precision), 0) / arr.length : 0;
+      arr.length
+        ? arr.reduce((s, x) => s + numeroSeguro(x.precision), 0) / arr.length
+        : 0;
     const dif = prom(reciente) - prom(anterior);
     const texto =
       Math.abs(dif) < 0.5
@@ -15437,7 +15468,8 @@ setTimeout(() => {
       cerrar.onclick = async function () {
         const confirmar = await confirmarRehab({
           titulo: "Cerrar sesión",
-          mensaje: "¿Cerrar sesión en RehabPod?\n\nTus datos Cloud permanecerán guardados.",
+          mensaje:
+            "¿Cerrar sesión en RehabPod?\n\nTus datos Cloud permanecerán guardados.",
           aceptar: "Cerrar sesión",
         });
 
@@ -15564,7 +15596,7 @@ setTimeout(() => {
           <div id="rehabV41Lista">Cargando...</div>
         `,
       });
-    
+
       document.getElementById("rehabV41LeerTodas").onclick = v41MarcarTodasLeidas;
       document.getElementById("rehabV41Permiso").onclick = v41PedirPermiso;
     }
@@ -15607,10 +15639,9 @@ setTimeout(() => {
     const cloud = await v41Cliente();
 
     if (!cloud || !v41User) {
-      avisarRehab(
-        "Inicia sesión en Cuenta para ver y recibir notificaciones.",
-        { tipo: "info" }
-      );
+      avisarRehab("Inicia sesión en Cuenta para ver y recibir notificaciones.", {
+        tipo: "info",
+      });
       return;
     }
 
@@ -16039,7 +16070,9 @@ setTimeout(() => {
         );
         v42Sincronizar();
       } else {
-        avisarRehab("RehabPod está en línea y no hay resultados pendientes.", { tipo: "exito" });
+        avisarRehab("RehabPod está en línea y no hay resultados pendientes.", {
+          tipo: "exito",
+        });
       }
     };
     document.body.appendChild(el);
