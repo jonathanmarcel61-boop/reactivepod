@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RehabPod — Reacciona antes de pensarlo</title>
+<meta name="description" content="RehabPod conecta pods físicos con luces a tu celular: entrena reacción, coordinación y rehabilitación, y sigue tu progreso al milisegundo.">
+<link rel="icon" href="logo-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+
+:root{
+    --fondo:#0a0d0c;
+    --fondo2:#0e1210;
+    --tarjeta:#141917;
+    --tarjeta2:#1b211f;
+    --borde:#262f2b;
+    --acento:#c6ff4d;
+    --acento-tinta:#0a0d0c;
+    --texto:#f3f6f2;
+    --texto2:#8d998f;
+    --rojo:#ef4444;
+    --azul:#3b82f6;
+    --verde:#22c55e;
+    --amarillo:#f5c344;
+    --fuente-titulo:'Space Grotesk', var(--fuente-ui);
+    --fuente-ui:'Inter', -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --fuente-dato:'JetBrains Mono', "SFMono-Regular", Consolas, monospace;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+
+body{
+    margin:0;
+    background:var(--fondo);
+    color:var(--texto);
+    font-family:var(--fuente-ui);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.55;
+    overflow-x:hidden;
+}
+
+a{color:inherit;}
+img{max-width:100%;}
+
+.envoltura{max-width:1180px;margin:0 auto;padding:0 24px;}
+
+h1,h2,h3{
+    font-family:var(--fuente-titulo);
+    font-weight:700;
+    line-height:1.08;
+    margin:0;
+    letter-spacing:-0.01em;
+}
+
+p{color:var(--texto2);margin:0;}
+
+.etiqueta-mono{
+    font-family:var(--fuente-dato);
+    font-size:12.5px;
+    color:var(--acento);
+    letter-spacing:0.02em;
+}
+
+/* ============ NAV ============ */
+
+nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(10,13,12,.82);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--borde);
+}
+nav .envoltura{
+    display:flex;align-items:center;justify-content:space-between;
+    height:68px;
+}
+.nav-marca{display:flex;align-items:center;gap:10px;font-family:var(--fuente-titulo);font-weight:700;font-size:18px;}
+.nav-marca img{width:30px;height:30px;border-radius:8px;}
+.nav-links{display:flex;gap:30px;font-size:14.5px;color:var(--texto2);}
+.nav-links a{text-decoration:none;transition:color .15s ease;margin-right:4px;}
+.nav-links a:hover{color:var(--texto);}
+.nav-cta{
+    padding:10px 18px;border-radius:10px;background:var(--acento);color:var(--acento-tinta);
+    font-weight:600;font-size:14px;text-decoration:none;white-space:nowrap;
+}
+
+@media (max-width:760px){ .nav-links{display:none;} }
+
+/* ============ HERO ============ */
+
+.hero{
+    position:relative;
+    padding:88px 0 96px;
+    overflow:hidden;
+}
+.hero::before{
+    content:'';
+    position:absolute;inset:-20% -10% auto -10%;height:600px;
+    background:radial-gradient(ellipse at top, rgba(198,255,77,.10), transparent 60%);
+    pointer-events:none;
+}
+.hero .envoltura{
+    display:grid;grid-template-columns:1.05fr 0.95fr;gap:56px;align-items:center;
+    position:relative;
+}
+@media (max-width:900px){ .hero .envoltura{grid-template-columns:1fr;} }
+
+.hero h1{font-size:clamp(38px,5.4vw,60px);}
+.hero .sub{font-size:17px;max-width:480px;margin-top:20px;color:var(--texto2);}
+
+.hero-ctas{display:flex;gap:14px;margin-top:32px;flex-wrap:wrap;}
+.boton{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:14px 22px;border-radius:11px;font-weight:600;font-size:15px;
+    text-decoration:none;border:1px solid transparent;cursor:pointer;
+    transition:transform .15s ease, opacity .15s ease;
+}
+.boton:active{transform:scale(.97);}
+.boton-primario{background:var(--acento);color:var(--acento-tinta);}
+.boton-primario:hover{opacity:.9;}
+.boton-secundario{border-color:var(--borde);color:var(--texto);}
+.boton-secundario:hover{border-color:var(--texto2);}
+
+.hero-stats{display:flex;gap:32px;margin-top:44px;}
+.hero-stats div{margin-right:8px;}
+.hero-stats div strong{display:block;font-family:var(--fuente-dato);font-size:22px;color:var(--texto);}
+.hero-stats div span{font-size:12.5px;color:var(--texto2);}
+
+/* --- demo de pods --- */
+
+.pods-demo{
+    position:relative;
+    background:var(--tarjeta);
+    border:1px solid var(--borde);
+    border-radius:22px;
+    padding:38px;
+    display:flex;
+    flex-wrap:wrap;
+}
+.pod{
+    width:calc(50% - 11px);
+    padding-bottom:calc(50% - 11px);
+    height:0;
+    margin:0 22px 22px 0;
+    border-radius:50%;
+    background:var(--tarjeta2);
+    border:2px solid var(--borde);
+    position:relative;
+    transition:background .12s ease, border-color .12s ease, box-shadow .2s ease, transform .12s ease;
+}
+.pod:nth-child(2n){margin-right:0;}
+.pod::after{
+    content:'';position:absolute;inset:14%;border-radius:50%;
+    background:rgba(255,255,255,.05);
+}
+.pod.activo{transform:scale(1.04);}
+.pod.activo[data-c="rojo"]{background:var(--rojo);border-color:var(--rojo);box-shadow:0 0 34px rgba(239,68,68,.55);}
+.pod.activo[data-c="azul"]{background:var(--azul);border-color:var(--azul);box-shadow:0 0 34px rgba(59,130,246,.55);}
+.pod.activo[data-c="verde"]{background:var(--verde);border-color:var(--verde);box-shadow:0 0 34px rgba(34,197,94,.55);}
+.pod.activo[data-c="lima"]{background:var(--acento);border-color:var(--acento);box-shadow:0 0 34px rgba(198,255,77,.55);}
+
+.pods-demo-pie{
+    position:absolute;left:38px;right:38px;bottom:-18px;
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--fondo);border:1px solid var(--borde);border-radius:12px;
+    padding:10px 16px;font-family:var(--fuente-dato);font-size:13px;color:var(--texto2);
+}
+.pods-demo-pie strong{color:var(--acento);}
+
+/* ============ SECCIONES GENERALES ============ */
+
+section{padding:96px 0;}
+.titulo-seccion{max-width:600px;margin-bottom:52px;}
+.titulo-seccion h2{font-size:clamp(28px,3.6vw,38px);}
+.titulo-seccion p{margin-top:14px;font-size:16px;}
+
+.oculto{opacity:0;transform:translateY(18px);transition:opacity .6s ease, transform .6s ease;}
+.oculto.visible{opacity:1;transform:none;}
+
+/* ---- para quién es ---- */
+
+.para-quien{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+@media (max-width:860px){ .para-quien{grid-template-columns:1fr;} }
+.panel-quien{
+    border-radius:16px;padding:28px;
+    background:var(--tarjeta);
+    border:1px solid var(--borde);
+    border-top:3px solid var(--linea);
+}
+.panel-quien h3{font-size:19px;margin-bottom:10px;}
+.panel-quien p{font-size:14.5px;}
+.panel-quien[data-tema="deportista"]{--linea:var(--azul);}
+.panel-quien[data-tema="rehab"]{--linea:var(--verde);}
+.panel-quien[data-tema="profesional"]{--linea:var(--acento);}
+
+/* ---- funciones ---- */
+
+.grid-funciones{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--borde);border:1px solid var(--borde);border-radius:16px;overflow:hidden;}
+@media (max-width:860px){ .grid-funciones{grid-template-columns:1fr 1fr;} }
+@media (max-width:560px){ .grid-funciones{grid-template-columns:1fr;} }
+.funcion{background:var(--tarjeta);padding:28px;}
+.funcion h3{font-size:16px;margin-bottom:8px;}
+.funcion p{font-size:13.5px;}
+
+/* ---- cómo funciona ---- */
+
+.pasos{counter-reset:paso;}
+.paso{
+    display:grid;grid-template-columns:64px 1fr;gap:20px;
+    padding:26px 0;border-top:1px solid var(--borde);
+}
+.paso:last-child{border-bottom:1px solid var(--borde);}
+.paso-num{
+    counter-increment:paso;font-family:var(--fuente-dato);font-size:14px;color:var(--acento);
+    padding-top:2px;
+}
+.paso-num::before{content:"0" counter(paso);}
+.paso h3{font-size:17px;margin-bottom:6px;}
+.paso p{font-size:14.5px;max-width:520px;}
+
+/* ---- precios ---- */
+
+.precios{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+@media (max-width:760px){ .precios{grid-template-columns:1fr;} }
+.plan{
+    border-radius:18px;padding:32px;border:1px solid var(--borde);background:var(--tarjeta);
+    display:flex;flex-direction:column;
+}
+.plan.destacado{border-color:var(--acento);background:linear-gradient(180deg, rgba(198,255,77,.06), transparent 40%), var(--tarjeta);}
+.plan-etq{font-size:12.5px;color:var(--texto2);}
+.plan h3{font-size:24px;margin:8px 0 4px;}
+.plan .precio{font-family:var(--fuente-dato);font-size:15px;color:var(--texto2);margin-bottom:20px;}
+.plan ul{list-style:none;margin:0 0 26px;padding:0;display:flex;flex-direction:column;gap:11px;}
+.plan li{font-size:14px;color:var(--texto);padding-left:22px;position:relative;}
+.plan li::before{content:'';position:absolute;left:0;top:7px;width:8px;height:8px;border-radius:2px;background:var(--acento);}
+.plan .boton{justify-content:center;margin-top:auto;}
+
+/* ---- cta final ---- */
+
+.cta-final{
+    border-radius:24px;padding:64px 44px;text-align:center;
+    background:radial-gradient(ellipse at center, rgba(198,255,77,.10), transparent 65%), var(--tarjeta);
+    border:1px solid var(--borde);
+}
+.cta-final h2{font-size:clamp(26px,3.4vw,36px);max-width:640px;margin:0 auto;}
+.cta-final p{margin-top:16px;font-size:15.5px;}
+.cta-final .hero-ctas{justify-content:center;margin-top:30px;}
+
+/* ---- footer ---- */
+
+footer{border-top:1px solid var(--borde);padding:44px 0;}
+footer .envoltura{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+.footer-links{display:flex;gap:22px;font-size:13.5px;color:var(--texto2);}
+.footer-links a{text-decoration:none;}
+.footer-links a:hover{color:var(--texto);}
+.footer-marca{font-size:13px;color:var(--texto2);}
+
+@media (prefers-reduced-motion: reduce){
+    *{transition-duration:.001ms !important; animation-duration:.001ms !important;}
+}
+
+</style>
+</head>
+<body>
+
+<nav>
+    <div class="envoltura">
+        <div class="nav-marca">
+            <img src="logo-icon.png" alt="RehabPod">
+            RehabPod
+        </div>
+        <div class="nav-links">
+            <a href="#funciona">Cómo funciona</a>
+            <a href="#quien">Para quién es</a>
+            <a href="#precios">Precios</a>
+        </div>
+        <a class="nav-cta" href="#acceso">Solicitar acceso</a>
+    </div>
+</nav>
+
+<header class="hero">
+    <div class="envoltura">
+        <div>
+            <span class="etiqueta-mono">// entrenamiento de reacción y rehabilitación</span>
+            <h1 style="margin-top:14px;">Reacciona antes<br>de pensarlo.</h1>
+            <p class="sub">RehabPod conecta pods físicos con luces a tu celular. Mide tu tiempo de reacción al milisegundo, arma el plan de entrenamiento o rehabilitación que necesitas, y hace seguimiento de tu progreso — sin que tengas que adivinar qué hacer cada día.</p>
+            <div class="hero-ctas">
+                <a class="boton boton-primario" href="#acceso">Solicitar acceso anticipado</a>
+                <a class="boton boton-secundario" href="#funciona">Ver cómo funciona</a>
+            </div>
+            <div class="hero-stats">
+                <div><strong>4</strong><span>pods conectados por Bluetooth</span></div>
+                <div><strong>9</strong><span>colores, ajustables por daltonismo</span></div>
+                <div><strong>ms</strong><span>precisión de milisegundos</span></div>
+            </div>
+        </div>
+
+        <div class="pods-demo">
+            <div class="pod" data-c="rojo"></div>
+            <div class="pod" data-c="azul"></div>
+            <div class="pod" data-c="verde"></div>
+            <div class="pod" data-c="lima"></div>
+            <div class="pods-demo-pie">
+                <span>ELIGE UN POD</span>
+                <strong id="tiempoDemo">0.000 s</strong>
+            </div>
+        </div>
+    </div>
+</header>
+
+<section id="quien">
+    <div class="envoltura">
+        <div class="titulo-seccion oculto">
+            <h2>Un mismo sistema, tres formas de usarlo</h2>
+            <p>RehabPod se adapta a quien lo use, sin cambiar el hardware.</p>
+        </div>
+        <div class="para-quien oculto">
+            <div class="panel-quien" data-tema="deportista">
+                <h3>Deportistas</h3>
+                <p>Entrena reflejos, velocidad y coordinación con modos que van de principiante a avanzado. El asistente arma un plan según tu objetivo y el tiempo que tengas.</p>
+            </div>
+            <div class="panel-quien" data-tema="rehab">
+                <h3>Rehabilitación</h3>
+                <p>Ejercicios de reacción y coordinación pensados también para trabajo cognitivo y de equilibrio, con dificultad ajustable y sin exigir los 4 pods a la vez.</p>
+            </div>
+            <div class="panel-quien" data-tema="profesional">
+                <h3>Profesionales y clínicas</h3>
+                <p>Vincula a tus pacientes, asígnales rutinas con indicaciones propias, y revisa su progreso a distancia con informes en PDF listos para compartir.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="funciona">
+    <div class="envoltura">
+        <div class="titulo-seccion oculto">
+            <h2>Cómo funciona</h2>
+            <p>De la caja al primer entrenamiento, en cuatro pasos.</p>
+        </div>
+        <div class="pasos oculto">
+            <div class="paso">
+                <div class="paso-num"></div>
+                <div><h3>Conecta tus pods</h3><p>Enciende los pods y vincúlalos por Bluetooth desde la app — quedan reconectados automáticamente la próxima vez.</p></div>
+            </div>
+            <div class="paso">
+                <div class="paso-num"></div>
+                <div><h3>Elige un modo o pide una recomendación</h3><p>Responde 3 preguntas rápidas sobre tu objetivo, nivel y tiempo disponible, y el asistente arma el plan por ti.</p></div>
+            </div>
+            <div class="paso">
+                <div class="paso-num"></div>
+                <div><h3>Reacciona</h3><p>Los pods se iluminan, tú tocas el color correcto. La app mide cada tiempo de reacción al milisegundo.</p></div>
+            </div>
+            <div class="paso">
+                <div class="paso-num"></div>
+                <div><h3>Sigue tu progreso</h3><p>Revisa tu evolución con gráficos claros — y si eres profesional, el de cada paciente que tengas vinculado.</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="envoltura">
+        <div class="titulo-seccion oculto">
+            <h2>Lo que trae la app</h2>
+            <p>Pensada para que se use sola, sin fricción.</p>
+        </div>
+        <div class="grid-funciones oculto">
+            <div class="funcion"><h3>Modos de entrenamiento</h3><p>De reacción simple a modos de memoria y color prohibido, con dificultad ajustable.</p></div>
+            <div class="funcion"><h3>Asistente de rutinas</h3><p>Recomienda un modo y una dificultad según tu propósito, sin que tengas que decidir tú.</p></div>
+            <div class="funcion"><h3>Colores accesibles</h3><p>Desactiva los colores que te cuesta distinguir — la app entrena igual con los que queden.</p></div>
+            <div class="funcion"><h3>Vinculación profesional</h3><p>Comparte un código y tu profesional puede asignarte rutinas y ver tu avance.</p></div>
+            <div class="funcion"><h3>Informes en PDF</h3><p>Gráficos y tablas de sesiones, listos para compartir por WhatsApp o correo.</p></div>
+            <div class="funcion"><h3>Funciona sin conexión</h3><p>El entrenamiento local no depende de internet — tus datos quedan en tu celular.</p></div>
+            <div class="funcion"><h3>Dos jugadores</h3><p>Modo por turnos o duelo de colores, en el mismo celular.</p></div>
+            <div class="funcion"><h3>Narración por voz</h3><p>Indicaciones habladas mientras entrenas, sin tener que mirar la pantalla.</p></div>
+            <div class="funcion"><h3>Metas y rachas</h3><p>Objetivos semanales y seguimiento de constancia, para no perder el hábito.</p></div>
+        </div>
+    </div>
+</section>
+
+<section id="precios">
+    <div class="envoltura">
+        <div class="titulo-seccion oculto">
+            <h2>Precios</h2>
+            <p>El entrenamiento individual siempre es gratis. Solo se cobra la gestión de pacientes.</p>
+        </div>
+        <div class="precios oculto">
+            <div class="plan">
+                <span class="plan-etq">Para entrenar</span>
+                <h3>Gratis</h3>
+                <div class="precio">$0 / siempre</div>
+                <ul>
+                    <li>Todos los modos de entrenamiento</li>
+                    <li>Asistente de rutinas</li>
+                    <li>Progreso y metas semanales</li>
+                    <li>Hasta 2 pacientes vinculados (para Profesionales)</li>
+                </ul>
+                <a class="boton boton-secundario" href="#acceso">Solicitar acceso</a>
+            </div>
+            <div class="plan destacado">
+                <span class="plan-etq">Para clínicas y profesionales</span>
+                <h3>Profesional</h3>
+                <div class="precio">Escríbenos por el precio</div>
+                <ul>
+                    <li>Pacientes vinculados ilimitados</li>
+                    <li>Informes en PDF sin límite</li>
+                    <li>Biblioteca de rutinas compartidas</li>
+                    <li>Soporte prioritario</li>
+                </ul>
+                <a class="boton boton-primario" href="#acceso">Contáctanos</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="acceso">
+    <div class="envoltura">
+        <div class="cta-final oculto">
+            <span class="etiqueta-mono">RehabPod está en etapa de acceso anticipado</span>
+            <h2 style="margin-top:14px;">Sé de los primeros en probarlo</h2>
+            <p>Escríbenos y te avisamos apenas esté disponible para descargar en tu celular.</p>
+            <div class="hero-ctas">
+                <a class="boton boton-primario" href="mailto:[correo de contacto]?subject=Quiero%20probar%20RehabPod">Escribir a [correo de contacto]</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="envoltura">
+        <div class="footer-marca">© <span id="anio"></span> RehabPod. Todos los derechos reservados.</div>
+        <div class="footer-links">
+            <a href="privacidad.html#terminos">Términos de uso</a>
+            <a href="privacidad.html#privacidad">Privacidad</a>
+            <a href="mailto:[correo de contacto]">Contacto</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+document.getElementById("anio").textContent = new Date().getFullYear();
+
+// --- animación de los pods (secuencia tipo reacción, en loop) ---
+(function () {
+    var pods = document.querySelectorAll(".pod");
+    var tiempoEl = document.getElementById("tiempoDemo");
+    if (!pods.length) return;
+
+    var reducido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducido) {
+        pods[0].classList.add("activo");
+        return;
+    }
+
+    var indice = 0;
+    function encenderSiguiente() {
+        pods.forEach(function (p) { p.classList.remove("activo"); });
+        indice = Math.floor(Math.random() * pods.length);
+        pods[indice].classList.add("activo");
+
+        var tiempo = (Math.random() * 0.35 + 0.18).toFixed(3);
+        if (tiempoEl) tiempoEl.textContent = tiempo + " s";
+    }
+
+    encenderSiguiente();
+    setInterval(encenderSiguiente, 950);
+})();
+
+// --- aparición al hacer scroll ---
+(function () {
+    var elementos = document.querySelectorAll(".oculto");
+    if (!("IntersectionObserver" in window) || !elementos.length) {
+        elementos.forEach(function (el) { el.classList.add("visible"); });
+        return;
+    }
+    var observador = new IntersectionObserver(function (entradas) {
+        entradas.forEach(function (entrada) {
+            if (entrada.isIntersecting) {
+                entrada.target.classList.add("visible");
+                observador.unobserve(entrada.target);
+            }
+        });
+    }, { threshold: 0.15 });
+    elementos.forEach(function (el) { observador.observe(el); });
+})();
+</script>
+
+</body>
+</html>
