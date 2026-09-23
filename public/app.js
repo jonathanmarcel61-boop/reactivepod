@@ -7312,18 +7312,57 @@ var rehabColorMemoria = localStorage.getItem(REHABPOD_CLAVE_COLOR_MEMORIA) || "b
 
 // En Memoria NO se permiten rojo ni verde porque quedan reservados para
 // feedback de error/correcto al terminar la secuencia.
-var REHABPOD_COLORES_MEMORIA = CLAVES_COLORES_REACTIPOD.filter(function (clave) {
-  return clave !== "red" && clave !== "green";
-});
+function rehabObtenerColoresMemoriaActivos() {
+  // Respeta los colores habilitados por el usuario. Rojo y verde siguen
+  // reservados para el feedback de correcto/incorrecto.
+  var activos = obtenerClavesColoresActivos().filter(function (clave) {
+    return clave !== "red" && clave !== "green";
+  });
 
-if (!REHABPOD_COLORES_MEMORIA.includes(rehabColorMemoria)) {
-  rehabColorMemoria = "blue";
+  // Con el mínimo global de cuatro colores normalmente siempre habrá opciones.
+  // Este respaldo evita romper el modo si los ajustes guardados están dañados.
+  return activos.length
+    ? activos
+    : CLAVES_COLORES_REACTIPOD.filter(function (clave) {
+        return clave !== "red" && clave !== "green";
+      });
+}
+
+function rehabNormalizarColorMemoria() {
+  var permitidos = rehabObtenerColoresMemoriaActivos();
+
+  if (!permitidos.includes(rehabColorMemoria)) {
+    rehabColorMemoria = permitidos[0] || "blue";
+    localStorage.setItem(REHABPOD_CLAVE_COLOR_MEMORIA, rehabColorMemoria);
+  }
+
+  return permitidos;
 }
 
 function rehabObtenerColorMemoria() {
+  rehabNormalizarColorMemoria();
   return (
     catalogoColoresPersonalizados[rehabColorMemoria] || catalogoColoresPersonalizados.blue
   );
+}
+
+function rehabSincronizarSelectorColores(selector, permitidos, valorActual) {
+  if (!selector) return valorActual;
+
+  selector.replaceChildren();
+  permitidos.forEach(function (clave) {
+    var color = catalogoColoresPersonalizados[clave];
+    if (!color) return;
+
+    var opcion = document.createElement("option");
+    opcion.value = clave;
+    opcion.textContent = color.nombre;
+    selector.appendChild(opcion);
+  });
+
+  var valor = permitidos.includes(valorActual) ? valorActual : permitidos[0];
+  if (valor) selector.value = valor;
+  return valor;
 }
 
 // -----------------------------------------------------
@@ -7371,13 +7410,19 @@ function rehabCrearControlColorMemoria() {
   }
 
   var selector = panel.querySelector("#colorMemoriaRehabPod");
-  selector.value = rehabColorMemoria;
+  var coloresMemoria = rehabNormalizarColorMemoria();
+  rehabColorMemoria = rehabSincronizarSelectorColores(
+    selector,
+    coloresMemoria,
+    rehabColorMemoria
+  );
 
   selector.addEventListener("change", function () {
     var nuevo = selector.value;
+    var permitidos = rehabObtenerColoresMemoriaActivos();
 
-    if (!REHABPOD_COLORES_MEMORIA.includes(nuevo)) {
-      nuevo = "blue";
+    if (!permitidos.includes(nuevo)) {
+      nuevo = permitidos[0] || "blue";
     }
 
     rehabColorMemoria = nuevo;
@@ -7404,7 +7449,12 @@ function rehabActualizarControlColorMemoria() {
   }
 
   var selector = panel.querySelector("#colorMemoriaRehabPod");
-  selector.value = rehabColorMemoria;
+  var coloresMemoria = rehabNormalizarColorMemoria();
+  rehabColorMemoria = rehabSincronizarSelectorColores(
+    selector,
+    coloresMemoria,
+    rehabColorMemoria
+  );
 
   var color = rehabObtenerColorMemoria();
   selector.style.borderColor = color.css;
@@ -7782,10 +7832,23 @@ var rehabTiempoAutomaticoMs = Number(
   localStorage.getItem(REHABPOD_CLAVE_TIEMPO_AUTOMATICO) || 1000
 );
 
-var REHABPOD_COLORES_CAZA = CLAVES_COLORES_REACTIPOD.slice();
+function rehabObtenerColoresCazaActivos() {
+  // La paleta se consulta en cada estímulo para que un cambio en Ajustes
+  // se aplique sin conservar una copia antigua con los nueve colores.
+  return obtenerClavesColoresActivos().filter(function (clave) {
+    return Boolean(catalogoColoresPersonalizados[clave]);
+  });
+}
 
-if (!REHABPOD_COLORES_CAZA.includes(rehabColorCaza)) {
-  rehabColorCaza = "red";
+function rehabNormalizarColorCaza() {
+  var permitidos = rehabObtenerColoresCazaActivos();
+
+  if (!permitidos.includes(rehabColorCaza)) {
+    rehabColorCaza = permitidos[0] || "red";
+    localStorage.setItem(REHABPOD_CLAVE_COLOR_CAZA, rehabColorCaza);
+  }
+
+  return permitidos;
 }
 
 if (![500, 750, 1000, 1500, 2000, 3000].includes(rehabTiempoAutomaticoMs)) {
@@ -7800,13 +7863,14 @@ var rehabTemporizadorAutomatico = null;
 var rehabUltimoPodAutomatico = -1;
 
 function rehabObtenerColorCaza() {
+  rehabNormalizarColorCaza();
   return (
     catalogoColoresPersonalizados[rehabColorCaza] || catalogoColoresPersonalizados.red
   );
 }
 
 function rehabColoresCazaSecundarios() {
-  return REHABPOD_COLORES_CAZA.filter(function (clave) {
+  return rehabObtenerColoresCazaActivos().filter(function (clave) {
     return clave !== rehabColorCaza;
   })
     .map(function (clave) {
@@ -7958,12 +8022,14 @@ function rehabV19CrearControlColorCaza() {
   }
 
   var selector = panel.querySelector("#colorCazaRehabPod");
-  selector.value = rehabColorCaza;
+  var coloresCaza = rehabNormalizarColorCaza();
+  rehabColorCaza = rehabSincronizarSelectorColores(selector, coloresCaza, rehabColorCaza);
 
   selector.addEventListener("change", function () {
     rehabColorCaza = selector.value;
-    if (!REHABPOD_COLORES_CAZA.includes(rehabColorCaza)) {
-      rehabColorCaza = "red";
+    var permitidos = rehabObtenerColoresCazaActivos();
+    if (!permitidos.includes(rehabColorCaza)) {
+      rehabColorCaza = permitidos[0] || "red";
     }
 
     localStorage.setItem(REHABPOD_CLAVE_COLOR_CAZA, rehabColorCaza);
@@ -7983,7 +8049,8 @@ function rehabV19ActualizarControlColorCaza() {
 
   if (mostrar) {
     var selector = panel.querySelector("#colorCazaRehabPod");
-    selector.value = rehabColorCaza;
+    var coloresCaza = rehabNormalizarColorCaza();
+    rehabColorCaza = rehabSincronizarSelectorColores(selector, coloresCaza, rehabColorCaza);
     selector.style.borderColor = rehabObtenerColorCaza().css;
   }
 }
@@ -8482,10 +8549,11 @@ function rehabDificultad() {
 
 function rehabElegirColorClave(excluir) {
   excluir = excluir || [];
-  var disponibles = REHABPOD_COLORES_CAZA.filter(function (c) {
+  var paletaActiva = rehabObtenerColoresCazaActivos();
+  var disponibles = paletaActiva.filter(function (c) {
     return !excluir.includes(c) && catalogoColoresPersonalizados[c];
   });
-  if (!disponibles.length) disponibles = REHABPOD_COLORES_CAZA.slice();
+  if (!disponibles.length) disponibles = paletaActiva.slice();
   return disponibles[Math.floor(Math.random() * disponibles.length)];
 }
 
@@ -8641,7 +8709,7 @@ activarColorProhibido = async function () {
   indiceColorProhibido = mezclados[0]; // compatibilidad con variables antiguas
   coloresActuales = new Array(podsBLE.length).fill(null);
 
-  var clavesPermitidas = REHABPOD_COLORES_CAZA.filter(function (c) {
+  var clavesPermitidas = rehabObtenerColoresCazaActivos().filter(function (c) {
     return c !== claveProhibida;
   });
   var pos = 0;
@@ -8875,7 +8943,7 @@ async function rehabV20ActivarStroop() {
       ? rehabColorSemanticoStroop
       : rehabColorVisualStroop;
   var claveObjetivo = rehabReglaStroopActual === "palabra" ? clavePalabra : claveVisual;
-  var otrasClaves = REHABPOD_COLORES_CAZA.filter(function (c) {
+  var otrasClaves = rehabObtenerColoresCazaActivos().filter(function (c) {
     return c !== claveObjetivo;
   });
   otrasClaves = rehabMezclarCopia(otrasClaves);
