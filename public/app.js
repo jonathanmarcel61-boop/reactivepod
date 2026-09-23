@@ -103,7 +103,13 @@ function rehabValidarEmail(email) {
 }
 
 function rehabValidarPassword(password) {
-  return typeof password === "string" && password.length >= 6;
+  return (
+    typeof password === "string" &&
+    password.length >= 10 &&
+    /[a-z]/.test(password) &&
+    /[A-Z]/.test(password) &&
+    /[0-9]/.test(password)
+  );
 }
 
 // =====================================================
@@ -186,7 +192,23 @@ let ajustesApp = {
 
   coloresPods: ["red", "green", "blue", "yellow"],
 
-  tema: "oscuro",
+  // Colores que sí pueden aparecer durante el entrenamiento (modos que no
+  // sean el modo entrenador). Por defecto, los 9 disponibles — nadie ve
+  // un cambio hasta que decida desactivar alguno.
+  coloresActivos: [
+    "red",
+    "green",
+    "blue",
+    "yellow",
+    "white",
+    "purple",
+    "cyan",
+    "orange",
+    "pink",
+  ],
+
+  // "auto" sigue el modo claro/oscuro del teléfono; "oscuro" y "claro" lo fijan a mano.
+  tema: "auto",
 
   // Aceptación general de Términos y Política de Privacidad (una vez por
   // dispositivo). El consentimiento específico por deportista/perfil se
@@ -398,364 +420,6 @@ const lucesPods = [
 // V7 - MEJORAS VISUALES + INTRO DEL ENTRENAMIENTO
 // =====================================================
 
-function aplicarMejorasVisualesV7() {
-  if (document.getElementById("estilosReactiPodV7")) {
-    return;
-  }
-
-  const estilo = document.createElement("style");
-  estilo.id = "estilosReactiPodV7";
-  estilo.textContent = `
-        /* Transiciones suaves entre pantallas */
-        .pantalla.activa {
-            animation: entradaPantallaV7 .28s ease both;
-        }
- 
-        @keyframes entradaPantallaV7 {
-            from { opacity:0; transform:translateY(8px); }
-            to { opacity:1; transform:translateY(0); }
-        }
- 
-        /* Tarjetas de modos más modernas */
-        .tarjetaEntrenamientoModo {
-            position:relative;
-            overflow:hidden;
-            border-radius:20px !important;
-            border:1px solid rgba(148,163,184,.18) !important;
-            background:linear-gradient(145deg,#111b2e,#0a1220) !important;
-            padding:18px !important;
-            min-height:132px;
-            box-shadow:0 12px 28px rgba(0,0,0,.18);
-
-            transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
-        }
- 
-        .tarjetaEntrenamientoModo::before {
-            content:"";
-            position:absolute;
-            left:0;
-            top:0;
-            width:4px;
-            height:100%;
-            background:linear-gradient(#22c55e,#16a34a);
-            opacity:.9;
-        }
- 
-        .tarjetaEntrenamientoModo:active {
-            transform:scale(.985);
-            border-color:rgba(34,197,94,.55) !important;
-            box-shadow:0 8px 20px rgba(0,0,0,.22);
-        }
- 
-        /* Configuración con mejor separación visual */
-        #pantallaConfiguracion input,
-        #pantallaConfiguracion select {
-            min-height:46px;
-        }
- 
-        #panelExperienciaReactiPod {
-            border-color:rgba(34,197,94,.35) !important;
-            box-shadow:0 16px 38px rgba(0,0,0,.24) !important;
-        }
- 
-        /* Objetivo central más protagonista */
-        #colorObjetivo {
-            width:168px !important;
-            height:168px !important;
-            min-width:168px !important;
-            min-height:168px !important;
-            border-width:6px !important;
-            box-shadow:0 0 52px rgba(255,255,255,.18),0 14px 38px rgba(0,0,0,.28) !important;
-            animation: objetivoRespiraV7 1.4s ease-in-out infinite alternate;
-        }
- 
-        @keyframes objetivoRespiraV7 {
-            from { transform:scale(.985); }
-            to { transform:scale(1.025); }
-        }
- 
-        #textoFase {
-            letter-spacing:1.2px;
-            font-weight:800 !important;
-            color:#94a3b8 !important;
-
-        }
- 
-        #textoObjetivo {
-            font-size:32px !important;
-            text-shadow:0 3px 18px rgba(0,0,0,.25);
-        }
- 
-        #nombreColor {
-            font-size:34px !important;
-            text-shadow:0 3px 18px rgba(0,0,0,.22);
-        }
- 
-        #luzPod1,#luzPod2,#luzPod3,#luzPod4 {
-            width:42px !important;
-            height:42px !important;
-            min-width:42px !important;
-            min-height:42px !important;
-            border:2px solid rgba(255,255,255,.22) !important;
-        }
- 
-        #btnPausar {
-            border-radius:14px !important;
-            min-height:48px;
-            font-weight:900 !important;
-        }
- 
-        /* Resultados: acciones claras */
-        #btnRepetirEntrenamientoReactiPod {
-            min-height:52px;
-            font-size:15px !important;
-            letter-spacing:.3px;
-        }
- 
-        #btnNuevoEntrenamiento,
-        #btnResultadosInicio {
-            min-height:48px;
-            border-radius:14px !important;
-            font-weight:800 !important;
-        }
- 
-        /* Introducción previa al 3-2-1 */
-        #introEntrenamientoReactiPod {
-            position:fixed;
-            inset:0;
-            z-index:99997;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            padding:22px;
-            background:radial-gradient(circle at 50% 18%,rgba(34,197,94,.13),transparent 32%),#050b16;
-            color:white;
-            overflow:auto;
-        }
- 
-        .introCardV7 {
-            width:min(100%,440px);
-            border-radius:28px;
-            border:1px solid rgba(148,163,184,.20);
-            background:linear-gradient(160deg,#101a2d,#080f1c 72%);
-            box-shadow:0 24px 60px rgba(0,0,0,.38);
-            padding:24px 20px 20px;
-            text-align:center;
-            animation:introCardEntradaV7 .42s cubic-bezier(.2,.8,.2,1) both;
-        }
- 
-        @keyframes introCardEntradaV7 {
-            from { opacity:0; transform:translateY(18px) scale(.96); }
-            to { opacity:1; transform:translateY(0) scale(1); }
-        }
- 
-        .introEtiquetaV7 {
-            display:inline-flex;
-            align-items:center;
-            gap:7px;
-            padding:7px 11px;
-            border-radius:999px;
-            border:1px solid rgba(34,197,94,.35);
-            background:rgba(34,197,94,.09);
-            color:#86efac;
-            font-size:11px;
-            font-weight:900;
-            letter-spacing:1px;
-            text-transform:uppercase;
-        }
- 
-        .introIconoV7 {
-            font-size:58px;
-            line-height:1;
-            margin:18px 0 10px;
-            filter:drop-shadow(0 8px 22px rgba(0,0,0,.28));
-            animation:introIconoV7 1.15s ease-in-out infinite alternate;
-        }
- 
-        @keyframes introIconoV7 {
-            from { transform:translateY(2px) scale(.96); }
-            to { transform:translateY(-5px) scale(1.04); }
-        }
- 
-        .introTituloV7 {
-            font-size:27px;
-            line-height:1.1;
-            font-weight:950;
-            margin:0;
-
-        }
- 
-        .introDescripcionV7 {
-            margin:12px auto 0;
-            max-width:370px;
-            color:#cbd5e1;
-            font-size:14px;
-            line-height:1.55;
-        }
- 
-        .demoPodsV7 {
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            gap:14px;
-            margin:24px 0 20px;
-            min-height:70px;
-        }
- 
-        .demoPodV7 {
-            width:52px;
-            height:52px;
-            border-radius:50%;
-            background:#182235;
-            border:3px solid #334155;
-            box-shadow:inset 0 0 0 6px rgba(255,255,255,.02);
-            position:relative;
-        }
- 
-        .introPasosV7 {
-            display:grid;
-            gap:8px;
-            margin:0 0 20px;
-            text-align:left;
-        }
- 
-        .introPasoV7 {
-            display:flex;
-            gap:10px;
-            align-items:flex-start;
-            padding:10px 12px;
-            border-radius:13px;
-            background:#0d1627;
-            border:1px solid rgba(148,163,184,.12);
-            color:#dbe4f0;
-            font-size:13px;
-            line-height:1.35;
-        }
- 
-        .introPasoNumeroV7 {
-            width:24px;
-            height:24px;
-            min-width:24px;
-            border-radius:50%;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            background:#22c55e;
-            color:#05200e;
-            font-size:11px;
-            font-weight:950;
-        }
- 
-        .introAccionesV7 {
-            display:grid;
-            grid-template-columns:1fr 2fr;
-            gap:10px;
-        }
- 
-        .introBtnV7 {
-            min-height:50px;
-            border:none;
-            border-radius:14px;
-            font-size:13px;
-            font-weight:900;
-        }
- 
-
-        .introBtnVolverV7 {
-            background:#182235;
-            color:#cbd5e1;
-            border:1px solid #334155;
-        }
- 
-        .introBtnComenzarV7 {
-            background:#22c55e;
-            color:#05200e;
-            box-shadow:0 10px 26px rgba(34,197,94,.22);
-        }
- 
-        /* Animaciones según modo */
-        .intro-simple .demoPodV7:nth-child(2),
-        .intro-persecucion .demoPodV7:nth-child(1) {
-            animation:podVerdeV7 1.1s ease-in-out infinite;
-        }
- 
-        .intro-doble .demoPodV7:nth-child(1),
-        .intro-doble .demoPodV7:nth-child(4) {
-            animation:podVerdeV7 1.05s ease-in-out infinite;
-        }
- 
-        .intro-secuencia .demoPodV7:nth-child(1){animation:podVerdeV7 2s .0s infinite;}
-        .intro-secuencia .demoPodV7:nth-child(2){animation:podVerdeV7 2s .45s infinite;}
-        .intro-secuencia .demoPodV7:nth-child(4){animation:podVerdeV7 2s .9s infinite;}
- 
-        .intro-circuito .demoPodV7:nth-child(3){animation:podVerdeV7 2.2s .0s infinite;}
-        .intro-circuito .demoPodV7:nth-child(1){animation:podVerdeV7 2.2s .5s infinite;}
-        .intro-circuito .demoPodV7:nth-child(4){animation:podVerdeV7 2.2s 1s infinite;}
-        .intro-circuito .demoPodV7:nth-child(2){animation:podVerdeV7 2.2s 1.5s infinite;}
- 
-        .intro-contrarreloj .demoPodV7 {
-            animation:podVerdeV7 1.3s ease-in-out infinite;
-        }
-        .intro-contrarreloj .demoPodV7:nth-child(2){animation-delay:.25s;}
-        .intro-contrarreloj .demoPodV7:nth-child(3){animation-delay:.5s;}
-        .intro-contrarreloj .demoPodV7:nth-child(4){animation-delay:.75s;}
- 
-        .intro-libre .demoPodV7:nth-child(1){animation:podVerdeV7 1.6s .0s infinite;}
-        .intro-libre .demoPodV7:nth-child(2){animation:podVerdeV7 1.6s .3s infinite;}
-        .intro-libre .demoPodV7:nth-child(3){animation:podVerdeV7 1.6s .6s infinite;}
-        .intro-libre .demoPodV7:nth-child(4){animation:podVerdeV7 1.6s .9s infinite;}
- 
-        .intro-colores .demoPodV7:nth-child(1){background:#ef4444;border-color:#fecaca;box-shadow:0 0 24px rgba(239,68,68,.4);}
-        .intro-colores .demoPodV7:nth-child(2){background:#22c55e;border-color:#bbf7d0;box-shadow:0 0 24px rgba(34,197,94,.4);}
-        .intro-colores .demoPodV7:nth-child(3){background:#3b82f6;border-color:#bfdbfe;box-shadow:0 0 24px rgba(59,130,246,.4);}
-        .intro-colores .demoPodV7:nth-child(4){background:#facc15;border-color:#fef08a;box-shadow:0 0 24px rgba(250,204,21,.4);}
- 
-        .intro-prohibido .demoPodV7:nth-child(1){background:#ef4444;border-color:#fecaca;}
-        .intro-prohibido .demoPodV7:nth-child(2){background:#22c55e;border-color:#bbf7d0;}
-        .intro-prohibido .demoPodV7:nth-child(3){background:#3b82f6;border-color:#bfdbfe;}
-        .intro-prohibido .demoPodV7:nth-child(4){background:#facc15;border-color:#fef08a;}
-        .intro-prohibido .demoPodV7:nth-child(1)::after {
-            content:"×";
-            position:absolute;
-            inset:-10px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            color:white;
-            font-size:64px;
-            font-weight:300;
-            text-shadow:0 2px 6px rgba(0,0,0,.6);
-        }
- 
-        @keyframes podVerdeV7 {
-            0%,45%,100% { background:#182235;border-color:#334155;box-shadow:none;transform:scale(.92); }
-            15%,30% { background:#22c55e;border-color:#bbf7d0;box-shadow:0 0 30px rgba(34,197,94,.58);transform:scale(1.08); }
-        }
- 
-        @media(max-width:420px) {
-            .introCardV7 { padding:20px 15px 16px; border-radius:22px; }
-            .introIconoV7 { font-size:50px; margin-top:14px; }
-            .introTituloV7 { font-size:24px; }
-            .demoPodsV7 { gap:10px; margin:20px 0 16px; }
-            .demoPodV7 { width:46px;height:46px; }
-
-            .introAccionesV7 { grid-template-columns:1fr; }
-        }
- 
-        @media (prefers-reduced-motion: reduce) {
-            .pantalla.activa,
-            #colorObjetivo,
-            .introCardV7,
-            .introIconoV7,
-            .demoPodV7 {
-                animation:none !important;
-            }
-        }
-    `;
-
-  document.head.appendChild(estilo);
-}
-
 function obtenerGuiaModoV7() {
   const guias = {
     simple: {
@@ -878,8 +542,6 @@ function mostrarIntroduccionEntrenamiento() {
   if (anterior) {
     anterior.remove();
   }
-
-  aplicarMejorasVisualesV7();
 
   const guia = obtenerGuiaModoV7();
   const overlay = document.createElement("div");
@@ -1053,46 +715,6 @@ const btnVolverAjustes = document.getElementById("btnVolverAjustes");
 // COLORES
 // =====================================================
 
-const colores = [
-  {
-    nombre: "ROJO",
-
-    comando: "red",
-
-    css: "red",
-  },
-
-  {
-    nombre: "VERDE",
-
-    comando: "green",
-
-    css: "limegreen",
-  },
-
-  {
-    nombre: "AZUL",
-
-    comando: "blue",
-
-    css: "dodgerblue",
-  },
-
-  {
-    nombre: "AMARILLO",
-
-    comando: "yellow",
-
-    css: "gold",
-  },
-
-  { nombre: "BLANCO", comando: "white", css: "#f8fafc" },
-  { nombre: "MORADO", comando: "purple", css: "#a855f7" },
-  { nombre: "CIAN", comando: "cyan", css: "#22d3ee" },
-  { nombre: "NARANJA", comando: "orange", css: "#f97316" },
-  { nombre: "ROSADO", comando: "pink", css: "#ec4899" },
-];
-
 // =====================================================
 // VARIABLES ENTRENAMIENTO
 // =====================================================
@@ -1228,6 +850,10 @@ function mostrarPantalla(pantalla) {
 
   pantallas.forEach((p) => p && p.classList.remove("activa"));
 
+  // Dirección de la animación: volver a Inicio entra desde la izquierda;
+  // el resto de pantallas entran desde la derecha.
+  pantalla.dataset.entrada = pantalla === pantallaInicio ? "atras" : "adelante";
+
   pantalla.classList.add("activa");
 }
 
@@ -1312,164 +938,10 @@ async function conectarPod(indice) {
 // CONEXION ANDROID / CAPACITOR
 // =====================================================
 
-async function conectarPodNativo(indice) {
-  const pod = podsBLE[indice];
-
-  try {
-    await inicializarBLENativo();
-
-    estadosConexion[indice].textContent = "Buscando...";
-
-    const dispositivo = await BluetoothLe.requestDevice({
-      name: pod.nombre,
-
-      services: [SERVICE_UUID],
-
-      optionalServices: [SERVICE_UUID],
-    });
-
-    if (!dispositivo || !dispositivo.deviceId) {
-      throw new Error("No se obtuvo el identificador BLE.");
-    }
-
-    // Evita asociar por error el boton de un Pod con otro Pod.
-    if (dispositivo.name && dispositivo.name !== pod.nombre) {
-      alert(
-        `Seleccionaste ${dispositivo.name}.\n\n` +
-          `Para este boton debes seleccionar ${pod.nombre}.`
-      );
-
-      estadosConexion[indice].textContent = "Pod incorrecto";
-
-      return;
-    }
-
-    pod.deviceId = dispositivo.deviceId;
-
-    pod.device = dispositivo;
-
-    // Guardamos el identificador por si Android lo mantiene entre sesiones.
-    guardarPodRegistrado(indice, dispositivo);
-
-    estadosConexion[indice].textContent = "Conectando...";
-
-    await limpiarListenersPod(pod);
-
-    // Android puede conservar una conexion BLE anterior en estado intermedio.
-    try {
-      await BluetoothLe.disconnect({
-        deviceId: pod.deviceId,
-      });
-    } catch (error) {
-      // Es normal si no estaba conectado.
-    }
-
-    pod.disconnectListener = await BluetoothLe.addListener(
-      `disconnected|${pod.deviceId}`,
-
-      () => {
-        console.log(`${pod.nombre} desconectado`);
-
-        podDesconectado(indice);
-      }
-    );
-
-    await BluetoothLe.connect({
-      deviceId: pod.deviceId,
-    });
-
-    await prepararNotificacionesPod(indice);
-
-    marcarPodConectado(indice);
-
-    await enviarComandoPod(indice, "off");
-
-    console.log(`✅ ${pod.nombre} conectado manualmente`);
-  } catch (error) {
-    console.error(`Error conectando ${pod.nombre}:`, error);
-
-    marcarPodNoConectado(indice, "No conectado");
-
-    alert(`No se pudo conectar ${pod.nombre}.`);
-  }
-}
-
 // =====================================================
 // CONEXION EN NAVEGADOR / WEB BLUETOOTH
 // Se conserva para poder seguir probando desde PC.
 // =====================================================
-
-async function conectarPodWeb(indice) {
-  if (!navigator.bluetooth) {
-    alert("Web Bluetooth no está disponible. Usa Chrome o Edge.");
-
-    return;
-  }
-
-  const pod = podsBLE[indice];
-
-  try {
-    estadosConexion[indice].textContent = "Buscando...";
-
-    const device = await navigator.bluetooth.requestDevice({
-      filters: [
-        {
-          name: pod.nombre,
-        },
-      ],
-
-      optionalServices: [SERVICE_UUID],
-    });
-
-    pod.device = device;
-
-    device.addEventListener(
-      "gattserverdisconnected",
-
-      () => {
-        podDesconectado(indice);
-      }
-    );
-
-    const servidor = await device.gatt.connect();
-
-    const servicio = await servidor.getPrimaryService(SERVICE_UUID);
-
-    pod.commandChar = await servicio.getCharacteristic(COMMAND_UUID);
-
-    pod.buttonChar = await servicio.getCharacteristic(BUTTON_UUID);
-
-    await pod.buttonChar.startNotifications();
-
-    pod.buttonChar.addEventListener(
-      "characteristicvaluechanged",
-
-      (evento) => {
-        recibirBotonFisicoWeb(indice, evento);
-      }
-    );
-
-    pod.conectado = true;
-
-    estadosConexion[indice].textContent = "Conectado";
-
-    estadosConexion[indice].classList.add("conectadoTexto");
-
-    botonesConexion[indice].textContent = "CONECTADO";
-
-    botonesConexion[indice].classList.add("conectado");
-
-    await enviarComandoPod(indice, "off");
-
-    actualizarEstadoGeneralPods();
-  } catch (error) {
-    console.error(error);
-
-    estadosConexion[indice].textContent = "No conectado";
-
-    actualizarEstadoGeneralPods();
-  }
-}
 
 async function podDesconectado(indice) {
   const pod = podsBLE[indice];
@@ -2002,12 +1474,27 @@ function guardarDatos() {
   );
 }
 
+const consultaTemaClaro = window.matchMedia
+  ? window.matchMedia("(prefers-color-scheme: light)")
+  : null;
+
+/** Devuelve "claro" u "oscuro": el tema que realmente se ve para el ajuste dado. */
+function temaEfectivo(tema) {
+  if (tema === "claro" || tema === "oscuro") return tema;
+  return consultaTemaClaro && consultaTemaClaro.matches ? "claro" : "oscuro";
+}
+
 function aplicarTema(tema) {
-  if (tema === "claro") {
-    document.body.classList.add("tema-claro");
-  } else {
-    document.body.classList.remove("tema-claro");
-  }
+  const efectivo = temaEfectivo(tema);
+  document.body.classList.toggle("tema-claro", efectivo === "claro");
+  document.documentElement.style.colorScheme = efectivo === "claro" ? "light" : "dark";
+}
+
+// En modo automático, seguir al teléfono si cambia mientras la app está abierta.
+if (consultaTemaClaro && consultaTemaClaro.addEventListener) {
+  consultaTemaClaro.addEventListener("change", () => {
+    if ((ajustesApp.tema || "auto") === "auto") aplicarTema("auto");
+  });
 }
 
 function cargarAjustes() {
@@ -2029,9 +1516,9 @@ function cargarAjustes() {
 
   sonidosActivados.checked = ajustesApp.sonidos;
 
-  ajusteTema.value = ajustesApp.tema || "oscuro";
+  ajusteTema.value = ajustesApp.tema || "auto";
 
-  aplicarTema(ajustesApp.tema || "oscuro");
+  aplicarTema(ajustesApp.tema || "auto");
 }
 
 function guardarAjustes() {
@@ -2339,7 +1826,7 @@ function mostrarGateTerminos() {
   overlay.style.cssText = `
         position:fixed;
         inset:0;
-        z-index:999999;
+        z-index:calc(var(--z-bloqueo) + 1);
         display:flex;
         align-items:center;
         justify-content:center;
@@ -2414,8 +1901,23 @@ function mostrarGateTerminos() {
                     style="width:20px;height:20px;flex-shrink:0;margin-top:2px;accent-color:var(--acento);"
                 >
                 <span style="font-size:13px;line-height:1.5;color:var(--texto);">
-                    He leído y acepto los Términos de uso y la Política de Privacidad de
-                    RehabPod descritos arriba.
+                    He leído y acepto los
+                    <a
+                        href="privacidad.html#terminos"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style="color:var(--acento);"
+                        onclick="event.stopPropagation()"
+                    >Términos de uso</a>
+                    y la
+                    <a
+                        href="privacidad.html#privacidad"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style="color:var(--acento);"
+                        onclick="event.stopPropagation()"
+                    >Política de Privacidad</a>
+                    de RehabPod.
                 </span>
             </label>
 
@@ -2479,7 +1981,7 @@ function mostrarModalConsentimiento(nombre, alConfirmar, alCancelar) {
   overlay.style.cssText = `
         position:fixed;
         inset:0;
-        z-index:99997;
+        z-index:calc(var(--z-pantalla) + 1);
         display:flex;
         align-items:center;
         justify-content:center;
@@ -2621,28 +2123,26 @@ function mostrarModalConsentimiento(nombre, alConfirmar, alCancelar) {
   });
 }
 
-function crearPerfil() {
-  let nombre = prompt("Nombre del deportista:");
+async function crearPerfil() {
+  const nombre = await pedirTextoRehab({
+    titulo: "Nuevo deportista",
+    etiqueta: "Nombre del deportista",
+    maxLongitud: 30,
+    aceptar: "Continuar",
+    validar: (texto) => {
+      if (texto.length < 2 || texto.length > 30) {
+        return "El nombre debe tener entre 2 y 30 caracteres.";
+      }
+
+      const repetido = datosApp.perfiles.some(
+        (perfil) => perfil.nombre.toLowerCase() === texto.toLowerCase()
+      );
+
+      return repetido ? "Ya existe un deportista con ese nombre." : null;
+    },
+  });
 
   if (nombre === null) {
-    return;
-  }
-
-  nombre = nombre.trim();
-
-  if (nombre.length < 2 || nombre.length > 30) {
-    alert("El nombre debe tener entre 2 y 30 caracteres.");
-
-    return;
-  }
-
-  const repetido = datosApp.perfiles.some(
-    (perfil) => perfil.nombre.toLowerCase() === nombre.toLowerCase()
-  );
-
-  if (repetido) {
-    alert("Ya existe un deportista con ese nombre.");
-
     return;
   }
 
@@ -2675,12 +2175,20 @@ function crearPerfil() {
   });
 }
 
-function eliminarPerfil(id) {
+async function eliminarPerfil(id) {
   if (datosApp.perfiles.length <= 1) {
     return;
   }
 
-  if (!confirm("¿Eliminar este deportista y todo su historial?")) {
+  const confirmado = await confirmarRehab({
+    titulo: "Eliminar deportista",
+    mensaje: "¿Eliminar este deportista y todo su historial?",
+    aceptar: "Eliminar",
+    peligro: true,
+    icono: "🗑️",
+  });
+
+  if (!confirmado) {
     return;
   }
 
@@ -2697,15 +2205,6 @@ function eliminarPerfil(id) {
   mostrarPerfiles();
 
   actualizarResumenInicio();
-}
-
-function escaparHTML(texto) {
-  return String(texto)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
 }
 
 // =====================================================
@@ -2773,6 +2272,11 @@ function calcularResumenPerfil() {
 }
 
 function calcularRacha(historial) {
+  // La lógica vive en js/metas.js (con pruebas); aquí solo se delega.
+  if (window.RehabMetas) {
+    return window.RehabMetas.calcularRacha(historial).racha;
+  }
+
   if (historial.length === 0) {
     return 0;
   }
@@ -2926,33 +2430,42 @@ function obtenerColorPod(indice) {
 // En todos los modos normales los colores cambian entre estímulos.
 // Los colores fijos por Pod se reservan para el Modo entrenador.
 // =====================================================
-const CLAVES_COLORES_REACTIPOD = [
-  "red",
-  "green",
-  "blue",
-  "yellow",
-  "white",
-  "purple",
-  "cyan",
-  "orange",
-  "pink",
-];
+// Las claves salen del catálogo único de arriba: añadir un color allí basta.
+const CLAVES_COLORES_REACTIPOD = Object.keys(catalogoColoresPersonalizados);
 
 let ultimoColorAleatorioPorPod = [null, null, null, null];
+
+// Los 4 Pods necesitan poder mostrar 4 colores distintos entre sí al mismo
+// tiempo, así que nunca dejamos que queden menos de 4 colores activos.
+const MINIMO_COLORES_ACTIVOS = 4;
+
+function obtenerClavesColoresActivos() {
+  const guardadas = Array.isArray(ajustesApp?.coloresActivos)
+    ? ajustesApp.coloresActivos
+    : [];
+
+  const validas = CLAVES_COLORES_REACTIPOD.filter((clave) => guardadas.includes(clave));
+
+  return validas.length >= MINIMO_COLORES_ACTIVOS ? validas : CLAVES_COLORES_REACTIPOD;
+}
 
 function obtenerColorAleatorioParaPod(indice, excluidos = []) {
   const bloqueados = new Set(excluidos.filter(Boolean));
   const ultimo = ultimoColorAleatorioPorPod[indice];
+  const paleta = obtenerClavesColoresActivos();
 
-  let disponibles = CLAVES_COLORES_REACTIPOD.filter(
-    (clave) => !bloqueados.has(clave) && clave !== ultimo
-  );
+  let disponibles = paleta.filter((clave) => !bloqueados.has(clave) && clave !== ultimo);
 
   if (!disponibles.length) {
-    disponibles = CLAVES_COLORES_REACTIPOD.filter((clave) => !bloqueados.has(clave));
+    disponibles = paleta.filter((clave) => !bloqueados.has(clave));
   }
 
-  const clave = disponibles[Math.floor(Math.random() * disponibles.length)] || "red";
+  if (!disponibles.length) {
+    disponibles = paleta;
+  }
+
+  const clave =
+    disponibles[Math.floor(Math.random() * disponibles.length)] || paleta[0] || "red";
 
   ultimoColorAleatorioPorPod[indice] = clave;
   return catalogoColoresPersonalizados[clave];
@@ -3181,123 +2694,6 @@ function crearControlesExperienciaEntrenamiento() {
   } else {
     referencia.parentElement.insertBefore(panel, referencia);
   }
-
-  const estilo = document.createElement("style");
-
-  estilo.textContent = `
-        .btnDificultadReactiPod {
-            padding:10px 6px;
-            border-radius:12px;
-            border:1px solid var(--borde);
-            background:var(--tarjeta3);
-            color:var(--texto2);
-            font-weight:800;
-            font-size:11px;
-        }
- 
-        .btnDificultadReactiPod.activa {
-            background:var(--acento);
-            color:var(--acento-tinta);
-            border-color:var(--acento);
-            box-shadow:0 0 16px rgba(198,255,77,.3);
-        }
- 
-        .filaColorPodReactiPod {
-            display:grid;
-
-            grid-template-columns:80px 1fr 28px;
-            gap:10px;
-            align-items:center;
-        }
- 
-        .selectColorPodReactiPod {
-            width:100%;
-            padding:10px;
-            border-radius:10px;
-            border:1px solid var(--borde);
-            background:var(--tarjeta3);
-            color:var(--texto);
-        }
- 
-        .muestraColorPodReactiPod {
-            width:24px;
-            height:24px;
-            border-radius:50%;
-            box-shadow:0 0 14px rgba(255,255,255,.15);
-        }
- 
-        #panelEntrenadorActivoReactiPod {
-            margin:0 0 14px;
-            padding:19px;
-            border-radius:14px;
-            background:var(--tarjeta);
-            border:1px solid var(--borde);
-        }
- 
-        #gridEntrenadorActivoReactiPod {
-            display:grid;
-            grid-template-columns:repeat(2,minmax(0,1fr));
-            gap:10px;
-        }
- 
-        .btnPodEntrenadorActivo {
-            min-height:62px;
-            border-radius:12px;
-            border:1px solid var(--borde);
-            background:var(--tarjeta2);
-            color:var(--texto);
-            font-size:15px;
-            font-weight:900;
-        }
- 
-        .btnPodEntrenadorActivo:disabled {
-            opacity:.42;
-        }
- 
-        /* El objetivo principal domina visualmente durante el entrenamiento. */
-        #colorObjetivo {
-            width:150px !important;
-            height:150px !important;
-            min-width:150px !important;
-            min-height:150px !important;
-            border-radius:50% !important;
-            box-shadow:0 0 42px rgba(255,255,255,.22) !important;
-            margin:12px auto !important;
-            border:5px solid rgba(255,255,255,.85) !important;
-        }
- 
-        #textoObjetivo {
-            font-size:30px !important;
-            line-height:1.05 !important;
-            font-weight:900 !important;
-            text-align:center !important;
-            letter-spacing:.4px !important;
-        }
- 
-        #nombreColor {
-            font-size:32px !important;
-            line-height:1.05 !important;
-            font-weight:900 !important;
-            text-align:center !important;
-            margin-top:8px !important;
-        }
- 
-        #luzPod1, #luzPod2, #luzPod3, #luzPod4 {
-            width:46px !important;
-            height:46px !important;
-            min-width:46px !important;
-            min-height:46px !important;
-            box-shadow:none;
-        }
- 
-        @media(max-width:560px){
-            #selectorDificultadReactiPod{
-                grid-template-columns:repeat(2,1fr)!important;
-            }
-        }
-    `;
-
-  document.head.appendChild(estilo);
 
   const contenedor = document.getElementById("coloresPodsReactiPod");
 
@@ -3705,12 +3101,8 @@ function crearBotonRepetirEntrenamiento() {
   const boton = document.createElement("button");
   boton.id = "btnRepetirEntrenamientoReactiPod";
   boton.type = "button";
+  boton.className = "boton botonPrincipal";
   boton.textContent = "🔁 REPETIR ESTE ENTRENAMIENTO";
-  boton.style.cssText = `
-        width:100%;padding:15px 14px;margin-bottom:10px;border:none;
-        border-radius:14px;background:#22c55e;color:#07111f;
-        font-size:14px;font-weight:900;box-shadow:0 10px 26px rgba(34,197,94,.22);
-    `;
   boton.onclick = () => iniciarEntrenamiento();
   btnNuevoEntrenamiento.parentElement.insertBefore(boton, btnNuevoEntrenamiento);
 }
@@ -3869,7 +3261,10 @@ function tono(frecuencia, duracion) {
 
 function iniciarEntrenamiento() {
   if (cantidadConectados() < 4) {
-    alert("Debes conectar los 4 Pods antes de iniciar.");
+    avisarRehab(
+      "Conecta los 4 Pods para empezar, o activa «Pods simulados» para entrenar sin ellos.",
+      { tipo: "error" }
+    );
 
     return;
   }
@@ -4191,69 +3586,9 @@ async function activarEstimulo() {
 // SIMPLE
 // =====================================================
 
-async function activarSimple() {
-  fase = "respuesta";
-
-  objetivoCorrecto = Math.floor(Math.random() * 4);
-
-  const color = obtenerColorEstimulo(objetivoCorrecto);
-
-  textoFase.textContent = "¡AHORA!";
-
-  textoObjetivo.textContent = `TOCA POD ${objetivoCorrecto + 1}`;
-
-  nombreColor.textContent = color.nombre;
-
-  colorObjetivo.style.background = color.css;
-
-  encenderVisual(objetivoCorrecto, color.css);
-
-  await enviarComandoPod(objetivoCorrecto, color.comando);
-
-  iniciarMedicion();
-}
-
 // =====================================================
 // COLORES
 // =====================================================
-
-async function activarColores() {
-  fase = "respuesta";
-
-  coloresActuales = obtenerColoresAleatoriosUnicosPods();
-
-  objetivoCorrecto = Math.floor(Math.random() * 4);
-
-  const objetivo = coloresActuales[objetivoCorrecto];
-
-  for (let i = 0; i < 4; i++) {
-    encenderVisual(
-      i,
-
-      coloresActuales[i].css
-    );
-  }
-
-  await Promise.all(
-    coloresActuales.map((color, indice) =>
-      enviarComandoPod(
-        indice,
-
-        color.comando
-      )
-    )
-  );
-
-  textoFase.textContent = "¡AHORA!";
-
-  textoObjetivo.textContent = "TOCA EL COLOR";
-
-  nombreColor.textContent = objetivo.nombre;
-
-  colorObjetivo.style.background = objetivo.css;
-
-  iniciarMedicion();
-}
 
 function mezclar(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -4268,45 +3603,6 @@ function mezclar(array) {
 // =====================================================
 // DOBLE ESTIMULO
 // =====================================================
-
-async function activarDobleEstimulo() {
-  fase = "dobleRespuesta";
-
-  const primero = Math.floor(Math.random() * 4);
-
-  let segundo = Math.floor(Math.random() * 4);
-
-  while (segundo === primero) {
-    segundo = Math.floor(Math.random() * 4);
-  }
-
-  objetivosDobles = [primero, segundo];
-
-  objetivosDoblesPendientes = new Set(objetivosDobles);
-
-  textoFase.textContent = "¡DOBLE!";
-
-  textoObjetivo.textContent = `POD ${primero + 1} + POD ${segundo + 1}`;
-
-  nombreColor.textContent = "TOCA LOS DOS";
-
-  const colorPrimero = obtenerColorEstimulo(primero);
-
-  const colorSegundo = obtenerColorEstimulo(segundo, [colorPrimero.comando]);
-
-  colorObjetivo.style.background = `linear-gradient(135deg, ${colorPrimero.css} 0 48%, ${colorSegundo.css} 52% 100%)`;
-
-  encenderVisual(primero, colorPrimero.css);
-
-  encenderVisual(segundo, colorSegundo.css);
-
-  await Promise.all([
-    enviarComandoPod(primero, colorPrimero.comando),
-    enviarComandoPod(segundo, colorSegundo.comando),
-  ]);
-
-  iniciarMedicion();
-}
 
 async function respuestaDobleEstimulo(indice) {
   if (!esperandoRespuesta) {
@@ -4379,87 +3675,6 @@ async function respuestaDobleEstimulo(indice) {
 // COLOR PROHIBIDO
 // =====================================================
 
-async function activarColorProhibido() {
-  fase = "prohibidoRespuesta";
-
-  coloresActuales = obtenerColoresAleatoriosUnicosPods();
-
-  indiceColorProhibido = Math.floor(Math.random() * 4);
-
-  const prohibido = coloresActuales[indiceColorProhibido];
-
-  for (let i = 0; i < 4; i++) {
-    encenderVisual(i, coloresActuales[i].css);
-  }
-
-  await Promise.all(
-    coloresActuales.map((color, indice) => enviarComandoPod(indice, color.comando))
-  );
-
-  textoFase.textContent = "¡CUIDADO!";
-
-  textoObjetivo.textContent = "NO TOQUES";
-
-  nombreColor.textContent = prohibido.nombre;
-
-  colorObjetivo.style.background = prohibido.css;
-
-  iniciarMedicion();
-}
-
-async function respuestaColorProhibido(indice) {
-  if (!esperandoRespuesta) {
-    return;
-  }
-
-  esperandoRespuesta = false;
-
-  detenerCronometro();
-
-  fase = "resultado";
-
-  const tiempo = (performance.now() - tiempoInicio - tiempoPausado) / 1000;
-
-  const correcto = indice !== indiceColorProhibido;
-
-  ultimoTiempo.textContent = `${tiempo.toFixed(3)} s`;
-
-  if (correcto) {
-    aciertos++;
-
-    contadorAciertos.textContent = aciertos;
-
-    mensajeResultado.textContent = `✅ Evitaste ${coloresActuales[indiceColorProhibido].nombre}`;
-
-    mensajeResultado.className = "mensajeResultado mensajeCorrecto";
-
-    tono(1000, 130);
-  } else {
-    errores++;
-
-    contadorErrores.textContent = errores;
-
-    mensajeResultado.textContent = `❌ Tocaste el color prohibido`;
-
-    mensajeResultado.className = "mensajeResultado mensajeError";
-
-    tono(220, 240);
-  }
-
-  resultados.push({
-    ronda: rondaActual,
-    correcto,
-    tiempo,
-    estado: correcto
-      ? `Evitó ${coloresActuales[indiceColorProhibido].nombre}`
-      : `Tocó ${coloresActuales[indiceColorProhibido].nombre}`,
-  });
-
-  await apagarTodosLosPods();
-
-  continuar();
-}
-
 // =====================================================
 // CIRCUITO 4 PODS
 // Cada ronda obliga a completar los cuatro Pods una vez.
@@ -4467,221 +3682,9 @@ async function respuestaColorProhibido(indice) {
 // siguiente objetivo después de acertar el actual.
 // =====================================================
 
-async function activarCircuito() {
-  if (!entrenamientoActivo || pausado) {
-    return;
-  }
-
-  circuitoOrden = mezclar([0, 1, 2, 3]);
-
-  circuitoPosicion = 0;
-
-  circuitoTiempoInicio = performance.now();
-
-  fase = "circuitoRespuesta";
-
-  esperandoRespuesta = true;
-
-  textoFase.textContent = "¡CIRCUITO!";
-
-  mensajeResultado.textContent = "Completa los 4 Pods";
-
-  await mostrarObjetivoCircuito();
-
-  iniciarMedicion();
-}
-
-async function mostrarObjetivoCircuito() {
-  if (circuitoPosicion >= circuitoOrden.length) {
-    return;
-  }
-
-  const indice = circuitoOrden[circuitoPosicion];
-
-  objetivoCorrecto = indice;
-
-  const color = obtenerColorEstimulo(indice);
-
-  textoObjetivo.textContent = `TOCA POD ${indice + 1}`;
-
-  nombreColor.textContent = `${color.nombre} · ${circuitoPosicion + 1}/4`;
-
-  colorObjetivo.style.background = color.css;
-
-  encenderVisual(indice, color.css);
-
-  await enviarComandoPod(indice, color.comando);
-}
-
-async function respuestaCircuito(indice) {
-  if (!esperandoRespuesta || circuitoPosicion >= circuitoOrden.length) {
-    return;
-  }
-
-  const esperado = circuitoOrden[circuitoPosicion];
-
-  if (indice !== esperado) {
-    errores++;
-
-    contadorErrores.textContent = errores;
-
-    mensajeResultado.textContent = `❌ Pod ${indice + 1} incorrecto · busca Pod ${esperado + 1}`;
-
-    mensajeResultado.className = "mensajeResultado mensajeError";
-
-    tono(220, 120);
-
-    return;
-  }
-
-  await enviarComandoPod(indice, "off");
-
-  apagarVisualPod(indice);
-
-  circuitoPosicion++;
-
-  tono(820, 70);
-
-  if (circuitoPosicion < circuitoOrden.length) {
-    mensajeResultado.textContent = `✅ ${circuitoPosicion}/4 · siguiente`;
-
-    mensajeResultado.className = "mensajeResultado mensajeCorrecto";
-
-    await mostrarObjetivoCircuito();
-
-    return;
-  }
-
-  esperandoRespuesta = false;
-
-  detenerCronometro();
-
-  fase = "resultado";
-
-  const tiempo = (performance.now() - circuitoTiempoInicio - tiempoPausado) / 1000;
-
-  aciertos++;
-
-  contadorAciertos.textContent = aciertos;
-
-  ultimoTiempo.textContent = `${tiempo.toFixed(3)} s`;
-
-  mensajeResultado.textContent = `✅ CIRCUITO COMPLETO · ${tiempo.toFixed(3)} s`;
-
-  mensajeResultado.className = "mensajeResultado mensajeCorrecto";
-
-  tono(1050, 160);
-
-  resultados.push({
-    ronda: rondaActual,
-    correcto: true,
-    tiempo,
-    estado: `Circuito ${circuitoOrden.map((i) => i + 1).join("-")}`,
-  });
-
-  await apagarTodosLosPods();
-
-  continuar();
-}
-
 // =====================================================
 // PERSECUCION
 // =====================================================
-
-async function activarPersecucion() {
-  if (!entrenamientoActivo || pausado) {
-    return;
-  }
-
-  fase = "respuesta";
-
-  let nuevoObjetivo = Math.floor(Math.random() * 4);
-
-  if (objetivoCorrecto >= 0 && nuevoObjetivo === objetivoCorrecto) {
-    nuevoObjetivo = (nuevoObjetivo + 1 + Math.floor(Math.random() * 3)) % 4;
-  }
-
-  objetivoCorrecto = nuevoObjetivo;
-
-  const color = obtenerColorEstimulo(objetivoCorrecto);
-
-  textoFase.textContent = "¡PERSIGUE!";
-
-  textoObjetivo.textContent = `TOCA POD ${objetivoCorrecto + 1}`;
-
-  nombreColor.textContent = color.nombre;
-
-  colorObjetivo.style.background = color.css;
-
-  encenderVisual(objetivoCorrecto, color.css);
-
-  await enviarComandoPod(objetivoCorrecto, color.comando);
-
-  iniciarMedicion();
-}
-
-async function respuestaPersecucion(indice) {
-  if (!esperandoRespuesta) {
-    return;
-  }
-
-  const tiempo = (performance.now() - tiempoInicio - tiempoPausado) / 1000;
-
-  if (indice !== objetivoCorrecto) {
-    errores++;
-
-    contadorErrores.textContent = errores;
-
-    mensajeResultado.textContent = `❌ Pod ${indice + 1} incorrecto`;
-
-    mensajeResultado.className = "mensajeResultado mensajeError";
-
-    tono(220, 120);
-
-    return;
-  }
-
-  esperandoRespuesta = false;
-
-  detenerCronometro();
-
-  aciertos++;
-  rondaActual = Math.max(rondaActual, aciertos);
-
-  contadorAciertos.textContent = aciertos;
-
-  ultimoTiempo.textContent = `${tiempo.toFixed(3)} s`;
-
-  mensajeResultado.textContent = `🔥 ${tiempo.toFixed(3)} s`;
-
-  mensajeResultado.className = "mensajeResultado mensajeCorrecto";
-
-  tono(900, 70);
-
-  resultados.push({
-    ronda: aciertos,
-    correcto: true,
-    tiempo,
-    estado: `Pod ${indice + 1}`,
-  });
-
-  await apagarTodosLosPods();
-
-  if (aciertos >= totalRondasActual) {
-    fase = "resultado";
-
-    temporizador = setTimeout(finalizarEntrenamiento, 350);
-
-    return;
-  }
-
-  textoRonda.textContent = `Objetivo ${aciertos + 1} de ${totalRondasActual}`;
-
-  const pausaPersecucion =
-    dificultadActual === "dificil" ? 120 : dificultadActual === "facil" ? 450 : 250;
-
-  temporizador = setTimeout(activarPersecucion, pausaPersecucion);
-}
 
 // =====================================================
 // CRONOMETRO
@@ -4741,61 +3744,6 @@ function actualizarTiempoContrarreloj() {
   if (!entrenamientoActivo || modoActual !== "contrarreloj") return;
   const restante = Math.max(0, (finContrarrelojMs - performance.now()) / 1000);
   textoRonda.textContent = `Tiempo restante: ${restante.toFixed(1)} s`;
-}
-
-async function activarObjetivoContrarreloj() {
-  if (!entrenamientoActivo || modoActual !== "contrarreloj") return;
-  await apagarTodosLosPods();
-  let siguiente = Math.floor(Math.random() * 4);
-  if (siguiente === objetivoContrarreloj) {
-    siguiente = (siguiente + 1 + Math.floor(Math.random() * 3)) % 4;
-  }
-  objetivoContrarreloj = siguiente;
-  const color = obtenerColorEstimulo(objetivoContrarreloj);
-  fase = "contrarrelojRespuesta";
-  rondaActual++;
-  textoObjetivo.textContent = `POD ${objetivoContrarreloj + 1}`;
-  nombreColor.textContent = color.nombre;
-  colorObjetivo.style.background = color.css;
-  encenderVisual(objetivoContrarreloj, color.css);
-  await enviarComandoPod(objetivoContrarreloj, color.comando);
-  iniciarMedicion();
-}
-
-async function respuestaContrarreloj(indice) {
-  if (!entrenamientoActivo || modoActual !== "contrarreloj" || !esperandoRespuesta)
-    return;
-  esperandoRespuesta = false;
-  detenerCronometro();
-  const tiempo = (performance.now() - tiempoInicio - tiempoPausado) / 1000;
-  const correcto = indice === objetivoContrarreloj;
-  ultimoTiempo.textContent = `${tiempo.toFixed(3)} s`;
-  if (correcto) {
-    aciertos++;
-    contadorAciertos.textContent = aciertos;
-    mensajeResultado.textContent = `✅ ${tiempo.toFixed(3)} s`;
-    mensajeResultado.className = "mensajeResultado mensajeCorrecto";
-    tono(980, 80);
-  } else {
-    errores++;
-    contadorErrores.textContent = errores;
-    mensajeResultado.textContent = `❌ Era el Pod ${objetivoContrarreloj + 1}`;
-    mensajeResultado.className = "mensajeResultado mensajeError";
-    tono(220, 100);
-  }
-  resultados.push({
-    ronda: rondaActual,
-    correcto,
-    tiempo,
-    estado: correcto
-      ? `Pod ${objetivoContrarreloj + 1} correcto`
-      : `Pod ${indice + 1}; objetivo Pod ${objetivoContrarreloj + 1}`,
-  });
-  if (performance.now() >= finContrarrelojMs) {
-    terminarContrarreloj();
-    return;
-  }
-  await activarObjetivoContrarreloj();
 }
 
 async function terminarContrarreloj() {
@@ -4859,14 +3807,6 @@ function mostrarPanelEntrenadorActivo(mostrar) {
     ? crearPanelEntrenadorActivo()
     : document.getElementById("panelEntrenadorActivoReactiPod");
   if (panel) panel.style.display = mostrar ? "block" : "none";
-}
-
-function habilitarBotonesEntrenador(habilitar) {
-  const panel = document.getElementById("panelEntrenadorActivoReactiPod");
-  if (!panel) return;
-  panel.querySelectorAll(".btnPodEntrenadorActivo").forEach((boton) => {
-    boton.disabled = !habilitar;
-  });
 }
 
 async function iniciarEntrenador() {
@@ -5200,26 +4140,6 @@ function continuar() {
 // SECUENCIA
 // =====================================================
 
-function iniciarSecuencia() {
-  fase = "secuenciaMostrar";
-
-  secuencia.push(Math.floor(Math.random() * 4));
-
-  indiceMostrarSecuencia = 0;
-
-  posicionSecuencia = 0;
-
-  textoFase.textContent = "Memoriza";
-
-  textoObjetivo.textContent = "MEMORIZA";
-
-  nombreColor.textContent = `${secuencia.length} pasos`;
-
-  colorObjetivo.style.background = "#374151";
-
-  mostrarElementoSecuencia();
-}
-
 async function mostrarElementoSecuencia() {
   if (!entrenamientoActivo || pausado) {
     return;
@@ -5499,48 +4419,10 @@ async function golpeLibre(indice) {
 // FEEDBACK POD
 // =====================================================
 
-async function iluminarPodPresionado(indice, duracion = 300) {
-  const color = obtenerColorEstimulo(indice);
-
-  encenderVisual(indice, color.css);
-
-  await enviarComandoPod(indice, color.comando);
-
-  setTimeout(
-    async () => {
-      await enviarComandoPod(indice, "off");
-
-      apagarVisualPod(indice);
-    },
-
-    duracion
-  );
-}
-
 // =====================================================
 // FEEDBACK DE TODOS LOS PODS
 // Verde = secuencia correcta / Rojo = secuencia incorrecta
 // =====================================================
-
-async function feedbackTodosPods(comando, colorCSS, duracion = 800) {
-  // Feedback visual dentro de la app.
-  for (let i = 0; i < podsBLE.length; i++) {
-    encenderVisual(i, colorCSS);
-  }
-
-  // Feedback fisico en los Pods conectados.
-  await Promise.all(
-    podsBLE.map((pod, indice) => {
-      if (pod.conectado) {
-        return enviarComandoPod(indice, comando);
-      }
-    })
-  );
-
-  await new Promise((resolver) => setTimeout(resolver, duracion));
-
-  await apagarTodosLosPods();
-}
 
 // =====================================================
 // PAUSA
@@ -5654,7 +4536,7 @@ async function mostrarCelebracionFinal() {
   overlay.style.cssText = `
         position:fixed;
         inset:0;
-        z-index:99998;
+        z-index:calc(var(--z-pantalla) + 2);
         display:flex;
         align-items:center;
         justify-content:center;
@@ -5931,6 +4813,8 @@ function guardarEntrenamiento(promedio, mejor, peor) {
     mejor,
 
     peor,
+
+    dificultad: dificultadActual,
   });
 
   guardarDatos();
@@ -6105,28 +4989,30 @@ function actualizarObjetivo() {
   textoObjetivoProgreso.textContent = `Te faltan ${faltan.toFixed(3)} s para alcanzar tu objetivo.`;
 }
 
-function editarObjetivo() {
+async function editarObjetivo() {
   const perfil = obtenerPerfilActivo();
 
   const actual = perfil.objetivo || 0.5;
 
-  const respuesta = prompt(
-    "Ingresa tu objetivo en segundos.\nEjemplo: 0.450",
-
-    actual.toFixed(3)
-  );
+  const respuesta = await pedirTextoRehab({
+    titulo: "Tu objetivo",
+    mensaje: "Ingresa tu objetivo en segundos. Ejemplo: 0.450",
+    etiqueta: "Objetivo (segundos)",
+    valor: actual.toFixed(3),
+    inputMode: "decimal",
+    validar: (texto) => {
+      const n = Number(texto.replace(",", "."));
+      return !Number.isFinite(n) || n <= 0 || n > 10
+        ? "Ingresa un tiempo válido. Ejemplo: 0.450"
+        : null;
+    },
+  });
 
   if (respuesta === null) {
     return;
   }
 
   const valor = Number(respuesta.replace(",", "."));
-
-  if (!Number.isFinite(valor) || valor <= 0 || valor > 10) {
-    alert("Ingresa un tiempo válido. Ejemplo: 0.450");
-
-    return;
-  }
 
   perfil.objetivo = valor;
 
@@ -6503,10 +5389,18 @@ btnEstadisticasInicio.onclick = () => {
   mostrarPantalla(pantallaInicio);
 };
 
-btnBorrarHistorial.onclick = () => {
+btnBorrarHistorial.onclick = async () => {
   const perfil = obtenerPerfilActivo();
 
-  if (confirm(`¿Borrar todo el historial de ${perfil.nombre}?`)) {
+  const confirmado = await confirmarRehab({
+    titulo: "Borrar historial",
+    mensaje: `¿Borrar todo el historial de ${perfil.nombre}?`,
+    aceptar: "Borrar",
+    peligro: true,
+    icono: "🗑️",
+  });
+
+  if (confirmado) {
     perfil.historial = [];
 
     guardarDatos();
@@ -6520,6 +5414,10 @@ btnBorrarHistorial.onclick = () => {
 btnAjustes.onclick = () => {
   mostrarPantalla(pantallaAjustes);
 };
+
+// Acceso visible a Ajustes desde la barra inferior de Inicio.
+const btnAjustesMenu = document.getElementById("btnAjustesMenu");
+if (btnAjustesMenu) btnAjustesMenu.onclick = () => mostrarPantalla(pantallaAjustes);
 
 btnVolverAjustes.onclick = () => {
   mostrarPantalla(pantallaInicio);
@@ -6644,7 +5542,7 @@ function mostrarModalDatosPerfil(perfil) {
   overlay.style.cssText = `
         position:fixed;
         inset:0;
-        z-index:99997;
+        z-index:calc(var(--z-pantalla) + 1);
         display:flex;
         align-items:center;
         justify-content:center;
@@ -6745,14 +5643,15 @@ function mostrarModalDatosPerfil(perfil) {
       try {
         await navigator.clipboard.writeText(contenido);
 
-        alert("Datos copiados al portapapeles.");
+        avisarRehab("Datos copiados al portapapeles.", { tipo: "exito" });
       } catch (error) {
         console.error(error);
 
         document.getElementById("areaDatosPerfilRehabPod").select();
 
-        alert(
-          "No se pudo copiar automáticamente. El texto quedó seleccionado, cópialo manualmente."
+        avisarRehab(
+          "No se pudo copiar automáticamente. El texto quedó seleccionado, cópialo manualmente.",
+          { tipo: "error" }
         );
       }
     }
@@ -6765,8 +5664,9 @@ function mostrarModalDatosPerfil(perfil) {
       const exito = intentarDescargaArchivo(contenido, nombreArchivo);
 
       if (!exito) {
-        alert(
-          "No se pudo generar el archivo en este dispositivo. Usa el botón Copiar como alternativa."
+        avisarRehab(
+          "No se pudo generar el archivo en este dispositivo. Usa el botón Copiar como alternativa.",
+          { tipo: "error" }
         );
       }
     }
@@ -6783,7 +5683,7 @@ function descargarMisDatos() {
   const perfil = obtenerPerfilActivo();
 
   if (!perfil) {
-    alert("No hay un perfil activo.");
+    avisarRehab("No hay un perfil activo.", { tipo: "error" });
 
     return;
   }
@@ -6791,16 +5691,20 @@ function descargarMisDatos() {
   mostrarModalDatosPerfil(perfil);
 }
 
-function eliminarMiCuentaYDatos() {
+async function eliminarMiCuentaYDatos() {
   const perfil = obtenerPerfilActivo();
 
   if (!perfil) {
     return;
   }
 
-  const confirmacion = confirm(
-    `¿Eliminar el perfil de ${perfil.nombre} y todo su historial de este dispositivo? Esta acción no se puede deshacer.`
-  );
+  const confirmacion = await confirmarRehab({
+    titulo: "Eliminar mis datos",
+    mensaje: `¿Eliminar el perfil de ${perfil.nombre} y todo su historial de este dispositivo? Esta acción no se puede deshacer.`,
+    aceptar: "Eliminar",
+    peligro: true,
+    icono: "⚠️",
+  });
 
   if (!confirmacion) {
     return;
@@ -6844,7 +5748,7 @@ function eliminarMiCuentaYDatos() {
 
   actualizarResumenInicio();
 
-  alert("Tus datos fueron eliminados de este dispositivo.");
+  avisarRehab("Tus datos fueron eliminados de este dispositivo.", { tipo: "exito" });
 
   mostrarPantalla(pantallaInicio);
 }
@@ -6866,586 +5770,15 @@ if (btnEliminarMiCuenta) {
 // =====================================================
 
 function crearPantallaInicioApp() {
-  const splash = document.createElement("div");
-
-  splash.id = "splashReactiPod";
-
-  splash.style.cssText = `
-        position:fixed;
-        inset:0;
-        z-index:99999;
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        justify-content:center;
-        gap:14px;
-        background:
-
-            radial-gradient(circle at center, #123525 0%, #07111f 48%, #030712 100%);
-        color:white;
-        font-family:Arial, sans-serif;
-        transition:opacity .45s ease;
-        `;
-
-  const perfil = obtenerPerfilActivo();
-
-  const nombreBienvenida = perfil?.nombre || "deportista";
-
-  splash.innerHTML = `
-        <img
-            src="logo-full.png"
-            alt="RehabPod"
-            style="
-                width:220px;
-                max-width:70vw;
-                filter:drop-shadow(0 0 30px rgba(198,255,77,.18));
-            "
-        >
- 
-        <div
-            style="
-                margin-top:4px;
-                font-size:20px;
-                font-weight:800;
-                color:#ffffff;
-            "
-        >
-            ¡Bienvenido, ${escaparHTML(nombreBienvenida)}!
-        </div>
- 
-        <div
-            style="
-                color:#9ca3af;
-                font-size:14px;
-            "
-        >
-            Prepárate para reaccionar más rápido.
-        </div>
- 
-        <div
-            style="
-                margin-top:16px;
-                width:38px;
-                height:38px;
-                border:4px solid rgba(255,255,255,.15);
-                border-top-color:#22c55e;
-
-                border-radius:50%;
-                animation:reactiPodSpin .8s linear infinite;
-            "
-        ></div>
- 
-        <style>
-            @keyframes reactiPodSpin {
-                to { transform: rotate(360deg); }
-            }
-        </style>
-        `;
-
-  document.body.appendChild(splash);
-
-  setTimeout(
-    () => {
-      splash.style.opacity = "0";
-
-      setTimeout(() => splash.remove(), 500);
-    },
-
-    2400
-  );
+  // La animación, el saludo y el mensaje personalizado viven en js/bienvenida.js.
+  if (window.RehabBienvenida) {
+    window.RehabBienvenida.mostrar(obtenerPerfilActivo());
+  }
 }
 
 // =====================================================
 // V9 - INTERFAZ MODERNA + NAVEGACION POR CATEGORIAS + FIX FEEDBACK
 // =====================================================
-
-function aplicarMejorasVisualesV8() {
-  if (document.getElementById("estilosReactiPodV8")) return;
-
-  const estilo = document.createElement("style");
-  estilo.id = "estilosReactiPodV8";
-  estilo.textContent = `
-        :root {
-            --rp-verde:#22c55e;
-            --rp-verde-oscuro:#16a34a;
-            --rp-panel:#0d1728;
-            --rp-panel2:#111d31;
-            --rp-borde:rgba(148,163,184,.16);
-            --rp-texto:#f8fafc;
-            --rp-muted:#94a3b8;
-        }
- 
-        .pantalla.activa {
-            animation: rpEntradaPantallaV8 .34s cubic-bezier(.2,.8,.2,1) both !important;
-        }
- 
-        @keyframes rpEntradaPantallaV8 {
-            from { opacity:0; transform:translateY(14px) scale(.992); }
-            to { opacity:1; transform:translateY(0) scale(1); }
-        }
- 
-        /* Encabezado de selección */
-        #encabezadoModosV8 {
-            margin:8px 0 20px;
-            padding:18px;
-            border-radius:22px;
-            background:
-                radial-gradient(circle at 12% 10%,rgba(34,197,94,.16),transparent 34%),
-                linear-gradient(145deg,#101b2d,#09111f);
-            border:1px solid rgba(34,197,94,.22);
-        }
- 
-        #encabezadoModosV8 .rpEyebrow {
-            color:#86efac;
-            font-size:11px;
-            font-weight:900;
-            letter-spacing:1.4px;
-            text-transform:uppercase;
-        }
- 
-        #encabezadoModosV8 h2 {
-            margin:6px 0 5px;
-            font-size:26px;
-            color:#f8fafc;
-        }
- 
-        #encabezadoModosV8 p {
-            margin:0;
-            color:#94a3b8;
-            line-height:1.45;
-            font-size:13px;
-        }
- 
-        .rpCategoriaModosV8 {
-            margin:24px 0 10px;
-        }
- 
-        .rpCategoriaCabeceraV8 {
-            display:flex;
-            align-items:center;
-            gap:10px;
-            margin-bottom:12px;
-        }
- 
-        .rpCategoriaIconoV8 {
-            width:38px;
-            height:38px;
-            border-radius:12px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            background:#122038;
-            border:1px solid rgba(148,163,184,.16);
-
-            font-size:19px;
-        }
- 
-        .rpCategoriaTituloV8 {
-            font-size:18px;
-            font-weight:900;
-            color:#f8fafc;
-        }
- 
-        .rpCategoriaSubtituloV8 {
-            font-size:11px;
-            color:#64748b;
-            margin-top:2px;
-        }
- 
-        .rpGridModosV8 {
-            display:grid;
-            grid-template-columns:repeat(2,minmax(0,1fr));
-            gap:12px;
-        }
- 
-        .rpGridModosV8 .tarjetaEntrenamientoModo {
-            min-height:164px !important;
-            padding:20px !important;
-            border-radius:22px !important;
-            background:
-                radial-gradient(circle at 88% 12%,rgba(34,197,94,.09),transparent 28%),
-                linear-gradient(145deg,#111d31,#0a1322) !important;
-            border:1px solid rgba(148,163,184,.16) !important;
-            box-shadow:0 14px 32px rgba(0,0,0,.20) !important;
-            display:flex !important;
-            flex-direction:column;
-            justify-content:center;
-            align-items:flex-start;
-            text-align:left;
-            position:relative;
-            overflow:hidden;
-        }
- 
-        .rpGridModosV8 .tarjetaEntrenamientoModo::before {
-            width:5px !important;
-            background:linear-gradient(180deg,#4ade80,#16a34a) !important;
-        }
- 
-        .rpGridModosV8 .tarjetaEntrenamientoModo > div:first-child {
-            font-size:42px !important;
-            line-height:1 !important;
-            margin-bottom:14px !important;
-            filter:drop-shadow(0 7px 14px rgba(0,0,0,.25));
-        }
- 
-        .rpGridModosV8 .tarjetaEntrenamientoModo strong {
-            font-size:18px !important;
-            line-height:1.15;
-            color:#f8fafc;
-        }
- 
-        .rpGridModosV8 .tarjetaEntrenamientoModo small {
-            font-size:12px !important;
-            line-height:1.4 !important;
-            color:#94a3b8 !important;
-        }
- 
-        .rpGridModosV8 .tarjetaEntrenamientoModo:active {
-            transform:scale(.975) !important;
-            border-color:rgba(34,197,94,.6) !important;
-        }
- 
-        /* Entrenamiento activo: objetivo enorme y Pods discretos */
-        #pantallaEntrenamiento #colorObjetivo {
-            width:min(58vw,220px) !important;
-            height:min(58vw,220px) !important;
-            min-width:min(58vw,220px) !important;
-            min-height:min(58vw,220px) !important;
-
-            border:7px solid rgba(255,255,255,.92) !important;
-            box-shadow:
-                0 0 0 10px rgba(255,255,255,.035),
-                0 0 74px rgba(255,255,255,.20),
-                0 22px 48px rgba(0,0,0,.30) !important;
-            margin:18px auto !important;
-            animation:rpObjetivoRespiraV8 1.1s ease-in-out infinite alternate !important;
-        }
- 
-        @keyframes rpObjetivoRespiraV8 {
-            from { transform:scale(.985); }
-            to { transform:scale(1.035); }
-        }
- 
-        #pantallaEntrenamiento #textoObjetivo {
-            font-size:36px !important;
-            font-weight:950 !important;
-            line-height:1.02 !important;
-            margin-top:10px !important;
-        }
- 
-        #pantallaEntrenamiento #nombreColor {
-            font-size:38px !important;
-            font-weight:950 !important;
-        }
- 
-        #pantallaEntrenamiento #cronometro {
-            font-weight:900 !important;
-            font-variant-numeric:tabular-nums;
-        }
- 
-        .indicadoresPodsV8 {
-            opacity:.72;
-            transform:scale(.92);
-            transition:opacity .2s ease;
-        }
- 
-        .indicadoresPodsV8::before {
-            content:"PODS";
-            display:block;
-            text-align:center;
-            font-size:9px;
-            font-weight:900;
-            letter-spacing:1.6px;
-            color:#64748b;
-            margin-bottom:6px;
-        }
- 
-        #luzPod1,#luzPod2,#luzPod3,#luzPod4 {
-            width:34px !important;
-            height:34px !important;
-            min-width:34px !important;
-            min-height:34px !important;
-            border-width:2px !important;
-            box-shadow:none;
-        }
- 
-        /* Feedback de acierto/error */
-        #pantallaEntrenamiento.rpFeedbackCorrectoV8 {
-            animation:rpFeedbackCorrectoV8 .42s ease both;
-        }
- 
-        #pantallaEntrenamiento.rpFeedbackErrorV8 {
-            animation:rpFeedbackErrorV8 .46s ease both;
-        }
- 
-        @keyframes rpFeedbackCorrectoV8 {
-            0% { filter:none; }
-            35% { filter:drop-shadow(0 0 18px rgba(34,197,94,.35)); }
-            100% { filter:none; }
-        }
- 
-        @keyframes rpFeedbackErrorV8 {
-            0%,100% { transform:translateX(0); }
-            25% { transform:translateX(-5px); }
-            50% { transform:translateX(5px); }
-            75% { transform:translateX(-3px); }
-        }
- 
-        #mensajeResultado.rpMensajeCorrectoV8 {
-
-            animation:rpMensajePopV8 .34s ease both;
-        }
- 
-        #mensajeResultado.rpMensajeErrorV8 {
-            animation:rpMensajeErrorV8 .38s ease both;
-        }
- 
-        @keyframes rpMensajePopV8 {
-            0% { opacity:.25; transform:scale(.88); }
-            70% { transform:scale(1.06); }
-            100% { opacity:1; transform:scale(1); }
-        }
- 
-        @keyframes rpMensajeErrorV8 {
-            0% { opacity:.25; transform:scale(.92); }
-            45% { transform:scale(1.04); }
-            100% { opacity:1; transform:scale(1); }
-        }
- 
-        /* Resultados */
-        #resumenResultadosV8 {
-            margin:14px 0 20px;
-            padding:20px;
-            border-radius:24px;
-            background:
-                radial-gradient(circle at 84% 0%,rgba(34,197,94,.16),transparent 31%),
-                linear-gradient(150deg,#111d31,#08111f);
-            border:1px solid rgba(34,197,94,.24);
-            box-shadow:0 18px 42px rgba(0,0,0,.26);
-        }
- 
-        .rpResultadoSuperiorV8 {
-            display:flex;
-            justify-content:space-between;
-            align-items:flex-start;
-            gap:14px;
-            margin-bottom:18px;
-        }
- 
-        .rpResultadoSuperiorV8 .rpEyebrow {
-            color:#86efac;
-            font-size:10px;
-            font-weight:900;
-            letter-spacing:1.4px;
-        }
- 
-        .rpResultadoSuperiorV8 h2 {
-            margin:5px 0 0;
-            color:#f8fafc;
-            font-size:24px;
-        }
- 
-        .rpResultadoBadgeV8 {
-            flex:0 0 auto;
-            padding:8px 11px;
-            border-radius:999px;
-            background:rgba(34,197,94,.12);
-            border:1px solid rgba(34,197,94,.25);
-            color:#86efac;
-            font-size:11px;
-            font-weight:900;
-        }
- 
-        .rpMetricasV8 {
-            display:grid;
-            grid-template-columns:repeat(2,minmax(0,1fr));
-            gap:10px;
-        }
- 
-        .rpMetricaV8 {
-            padding:15px;
-            border-radius:17px;
-            background:rgba(15,23,42,.78);
-            border:1px solid rgba(148,163,184,.13);
-        }
- 
-        .rpMetricaV8 span {
-            display:block;
-            font-size:10px;
-            color:#64748b;
-            font-weight:900;
-            letter-spacing:.8px;
-            text-transform:uppercase;
-        }
- 
-        .rpMetricaV8 strong {
-            display:block;
-            margin-top:5px;
-            font-size:22px;
-            color:#f8fafc;
-            font-variant-numeric:tabular-nums;
-        }
- 
-        .rpResultadoMensajeV8 {
-            margin-top:14px;
-            padding:12px 14px;
-            border-radius:14px;
-            background:rgba(34,197,94,.08);
-            color:#bbf7d0;
-            font-size:12px;
-
-            line-height:1.45;
-            border:1px solid rgba(34,197,94,.14);
-        }
- 
-        #btnRepetirEntrenamientoReactiPod,
-        #btnNuevoEntrenamiento {
-            min-height:58px !important;
-            border-radius:17px !important;
-            font-size:15px !important;
-            font-weight:950 !important;
-            letter-spacing:.2px;
-        }
- 
-        #btnNuevoEntrenamiento {
-            background:#172033 !important;
-            color:#f8fafc !important;
-            border:1px solid #334155 !important;
-        }
- 
-        #btnResultadosInicio {
-            min-height:48px !important;
-            opacity:.78;
-        }
- 
-        @media (max-width:520px) {
-            .rpGridModosV8 {
-                grid-template-columns:1fr;
-            }
- 
-            .rpGridModosV8 .tarjetaEntrenamientoModo {
-                min-height:138px !important;
-            }
- 
-            .rpResultadoSuperiorV8 {
-                flex-direction:column;
-            }
-        }
- 
-        /* V9 - navegación de categorías en dos vistas */
-        .rpVistaCategoriasV9 {
-            display:grid;
-            grid-template-columns:repeat(2,minmax(0,1fr));
-            gap:14px;
-            margin-top:18px;
-        }
- 
-        .rpCategoriaTarjetaV9 {
-            width:100%;
-            min-height:142px;
-            border:1px solid rgba(148,163,184,.16);
-            border-radius:24px;
-            background:linear-gradient(145deg,rgba(20,31,48,.98),rgba(10,18,31,.98));
-            color:#f8fafc;
-            padding:20px;
-
-            display:grid;
-            grid-template-columns:auto 1fr auto;
-            align-items:center;
-            gap:16px;
-            text-align:left;
-            box-shadow:0 16px 34px rgba(0,0,0,.18);
-            cursor:pointer;
-            transition:transform .2s ease,border-color .2s ease;
-        }
- 
-        .rpCategoriaTarjetaV9:active { transform:scale(.985); }
- 
-        .rpCategoriaIconoGrandeV9,
-        .rpDetalleIconoV9 {
-            width:62px;
-            height:62px;
-            border-radius:20px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            background:rgba(34,197,94,.1);
-            border:1px solid rgba(34,197,94,.2);
-            font-size:32px;
-        }
- 
-        .rpCategoriaContenidoV9 {
-            min-width:0;
-            display:flex;
-            flex-direction:column;
-            gap:5px;
-        }
- 
-        .rpCategoriaContenidoV9 strong { font-size:20px; line-height:1.05; }
-        .rpCategoriaContenidoV9 span { color:#cbd5e1; font-size:13px; line-height:1.35; }
-        .rpCategoriaContenidoV9 small {
-            color:#22c55e;
-            font-size:11px;
-            font-weight:800;
-            letter-spacing:.5px;
-            text-transform:uppercase;
-        }
-        .rpCategoriaFlechaV9 { color:#64748b; font-size:34px; line-height:1; }
- 
-        .rpVistaDetalleCategoriaV9[hidden],
-        .rpVistaCategoriasV9[hidden] { display:none !important; }
- 
-        .rpVolverCategoriaV9 {
-            min-height:44px;
-            border:1px solid rgba(148,163,184,.18);
-            background:#0b1423;
-            color:#cbd5e1;
-            border-radius:14px;
-            padding:10px 14px;
-            font-weight:800;
-            margin:14px 0;
-        }
- 
-        .rpDetalleCabeceraV9 {
-            display:flex;
-            align-items:center;
-            gap:16px;
-            padding:18px;
-            border-radius:22px;
-            background:linear-gradient(145deg,#111d30,#091321);
-            border:1px solid rgba(148,163,184,.14);
-            margin-bottom:16px;
-        }
- 
-        .rpDetalleTituloV9 { font-size:24px; font-weight:900; color:#f8fafc; margin-bottom:5px; }
-        .rpDetalleDescripcionV9 { color:#94a3b8; font-size:13px; line-height:1.45; }
-        .rpGridDetalleV9 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
- 
-        .rpEntraV9 { animation:rpEntraV9 .3s cubic-bezier(.2,.8,.2,1) both; }
-        @keyframes rpEntraV9 {
-            from { opacity:0; transform:translateY(8px) scale(.99); }
-            to { opacity:1; transform:translateY(0) scale(1); }
-        }
- 
-        @media (max-width:640px) {
-            .rpVistaCategoriasV9, .rpGridDetalleV9 { grid-template-columns:1fr; }
-            .rpCategoriaTarjetaV9 { min-height:126px; padding:17px; }
-        }
- 
-        @media (prefers-reduced-motion:reduce) {
-            .pantalla.activa,
-            #pantallaEntrenamiento #colorObjetivo,
-            #pantallaEntrenamiento.rpFeedbackCorrectoV8,
-            #pantallaEntrenamiento.rpFeedbackErrorV8,
-            #mensajeResultado.rpMensajeCorrectoV8,
-            #mensajeResultado.rpMensajeErrorV8 {
-                animation:none !important;
-            }
-        }
-    `;
-
-  document.head.appendChild(estilo);
-}
 
 function organizarModosPorCategoriaV8() {
   const tarjetas = [...document.querySelectorAll(".tarjetaEntrenamientoModo")];
@@ -7867,7 +6200,6 @@ function ajustarEncabezadosV11() {
 }
 
 function inicializarInterfazV8() {
-  aplicarMejorasVisualesV8();
   organizarModosPorCategoriaV8();
   prepararIndicadoresPodsV8();
   iniciarFeedbackVisualV8();
@@ -7892,8 +6224,6 @@ actualizarEstadoGeneralPods();
 actualizarResumenInicio();
 
 crearControlesExperienciaEntrenamiento();
-
-aplicarMejorasVisualesV7();
 
 inicializarInterfazV8();
 
@@ -7967,39 +6297,6 @@ mostrarPanelEntrenadorActivo = function (mostrar) {
     ordenarEntrenadorActivoV15();
   }
 };
-
-// Refuerzo de estilo del panel manual para replicar la jerarquía solicitada.
-(function aplicarEstiloEntrenadorV15() {
-  if (document.getElementById("estiloEntrenadorV15")) return;
-  const estilo = document.createElement("style");
-  estilo.id = "estiloEntrenadorV15";
-  estilo.textContent = `
-        #panelEntrenadorActivoReactiPod {
-            padding:19px !important;
-            border-radius:14px !important;
-            background:var(--tarjeta) !important;
-            border:1px solid var(--borde) !important;
-        }
-        #panelEntrenadorActivoReactiPod > div:first-child {
-            margin-bottom:8px !important;
-            font-size:11px !important;
-            letter-spacing:.04em !important;
-        }
-        #gridEntrenadorActivoReactiPod {
-            grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-            gap:8px !important;
-        }
-        .btnPodEntrenadorActivo {
-            min-height:48px !important;
-            border-radius:12px !important;
-            font-size:12px !important;
-        }
-        @media(max-width:420px){
-            .btnPodEntrenadorActivo { font-size:11px !important; }
-        }
-    `;
-  document.head.appendChild(estilo);
-})();
 
 // Aplicar de inmediato a la pantalla actualmente cargada.
 ordenarConfiguracionV15();
@@ -8189,7 +6486,7 @@ function rehabActualizarEtiquetasMinimoPods() {
       etiqueta = document.createElement("span");
       etiqueta.className = "rehabMinimoPods";
       etiqueta.style.cssText =
-        "display:inline-block;margin-top:10px;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:900;letter-spacing:.04em;background:rgba(34,197,94,.13);border:1px solid rgba(34,197,94,.35);color:#86efac;";
+        "display:inline-block;margin-top:10px;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:900;letter-spacing:.04em;background:rgba(34,197,94,.13);border:1px solid rgba(34,197,94,.35);color:var(--verde-texto);";
       tarjeta.appendChild(etiqueta);
     }
 
@@ -8288,7 +6585,9 @@ conectarPodNativo = async function (indice) {
     );
 
     if (duplicado >= 0) {
-      alert(`Ese Pod ya está conectado como RehabPod ${duplicado + 1}.`);
+      avisarRehab(`Ese Pod ya está conectado como RehabPod ${duplicado + 1}.`, {
+        tipo: "error",
+      });
       estadosConexion[indice].textContent = "Selecciona otro Pod";
       return;
     }
@@ -8338,13 +6637,16 @@ conectarPodNativo = async function (indice) {
   } catch (error) {
     console.error("Error conectando RehabPod:", error);
     marcarPodNoConectado(indice, "No conectado");
-    alert("No se pudo conectar el Pod seleccionado.");
+    const mensajePod = mensajeErrorPod(error);
+    if (mensajePod) avisarRehab(mensajePod, { tipo: "error" });
   }
 };
 
 conectarPodWeb = async function (indice) {
   if (!navigator.bluetooth) {
-    alert("Web Bluetooth no está disponible. Usa Chrome o Edge.");
+    avisarRehab("Web Bluetooth no está disponible. Usa Chrome o Edge.", {
+      tipo: "error",
+    });
     return;
   }
 
@@ -8368,7 +6670,9 @@ conectarPodWeb = async function (indice) {
     );
 
     if (duplicado >= 0) {
-      alert(`Ese Pod ya está conectado como RehabPod ${duplicado + 1}.`);
+      avisarRehab(`Ese Pod ya está conectado como RehabPod ${duplicado + 1}.`, {
+        tipo: "error",
+      });
       estadosConexion[indice].textContent = "Selecciona otro Pod";
       return;
     }
@@ -8403,6 +6707,8 @@ conectarPodWeb = async function (indice) {
     console.error(error);
     estadosConexion[indice].textContent = "No conectado";
     actualizarEstadoGeneralPods();
+    const mensajePod = mensajeErrorPod(error);
+    if (mensajePod) avisarRehab(mensajePod, { tipo: "error" });
   }
 };
 
@@ -8573,20 +6879,25 @@ iniciarEntrenamiento = function () {
   localStorage.setItem(REHABPOD_CLAVE_CANTIDAD, String(cantidadPodsSeleccionada));
 
   if (cantidadPodsSeleccionada < minimo) {
-    alert(`Este modo necesita mínimo ${minimo} ${minimo === 1 ? "Pod" : "Pods"}.`);
+    avisarRehab(`Este modo necesita mínimo ${minimo} ${minimo === 1 ? "Pod" : "Pods"}.`, {
+      tipo: "error",
+    });
     return;
   }
 
   var conectados = cantidadConectados();
   if (conectados < cantidadPodsSeleccionada) {
-    alert(
-      `Seleccionaste ${cantidadPodsSeleccionada} ${cantidadPodsSeleccionada === 1 ? "Pod" : "Pods"}, pero solo hay ${conectados} conectado${conectados === 1 ? "" : "s"}.\n\nConecta ${cantidadPodsSeleccionada - conectados} más o reduce la cantidad.`
+    avisarRehab(
+      `Seleccionaste ${cantidadPodsSeleccionada} ${cantidadPodsSeleccionada === 1 ? "Pod" : "Pods"}, pero solo hay ${conectados} conectado${conectados === 1 ? "" : "s"}.\n\nConecta ${cantidadPodsSeleccionada - conectados} más o reduce la cantidad.`,
+      { tipo: "error" }
     );
     return;
   }
 
   if (rehabIndicesPodsActivos().length < minimo) {
-    alert(`Este entrenamiento necesita al menos ${minimo} Pods activos.`);
+    avisarRehab(`Este entrenamiento necesita al menos ${minimo} Pods activos.`, {
+      tipo: "error",
+    });
     return;
   }
 
@@ -8708,7 +7019,7 @@ activarDobleEstimulo = async function () {
   var segundo = activos[1];
 
   if (primero === undefined || segundo === undefined) {
-    alert("Doble estímulo necesita al menos 2 Pods activos.");
+    avisarRehab("Doble estímulo necesita al menos 2 Pods activos.", { tipo: "error" });
     return;
   }
 
@@ -8739,55 +7050,9 @@ activarDobleEstimulo = async function () {
 // COLOR PROHIBIDO
 // =====================================================
 
-activarColorProhibido = async function () {
-  fase = "prohibidoRespuesta";
-  var activos = rehabIndicesPodsActivos();
-  var usados = [];
-
-  coloresActuales = new Array(podsBLE.length).fill(null);
-
-  activos.forEach((indice) => {
-    var color = obtenerColorAleatorioParaPod(indice, usados);
-    usados.push(color.comando);
-    coloresActuales[indice] = color;
-    encenderVisual(indice, color.css);
-  });
-
-  indiceColorProhibido = rehabElegirPodActivo();
-  var prohibido = coloresActuales[indiceColorProhibido];
-
-  await Promise.all(
-    activos.map((indice) => enviarComandoPod(indice, coloresActuales[indice].comando))
-  );
-
-  textoFase.textContent = "¡CUIDADO!";
-  textoObjetivo.textContent = "NO TOQUES";
-  nombreColor.textContent = prohibido.nombre;
-  colorObjetivo.style.background = prohibido.css;
-  iniciarMedicion();
-};
-
 // =====================================================
 // SECUENCIA / MEMORIA
 // =====================================================
-
-iniciarSecuencia = function () {
-  fase = "secuenciaMostrar";
-
-  var elegido = rehabElegirPodActivo();
-  if (elegido < 0) {
-    return;
-  }
-
-  secuencia.push(elegido);
-  indiceMostrarSecuencia = 0;
-  posicionSecuencia = 0;
-  textoFase.textContent = "Memoriza";
-  textoObjetivo.textContent = "MEMORIZA";
-  nombreColor.textContent = `${secuencia.length} pasos`;
-  colorObjetivo.style.background = "#374151";
-  mostrarElementoSecuencia();
-};
 
 // =====================================================
 // CIRCUITO VARIABLE
@@ -8946,7 +7211,6 @@ activarObjetivoContrarreloj = async function () {
 // MODO ENTRENADOR: SOLO MUESTRA/HABILITA LOS PODS ELEGIDOS
 // =====================================================
 
-var rehabHabilitarBotonesEntrenadorBase = habilitarBotonesEntrenador;
 habilitarBotonesEntrenador = function (habilitar) {
   var panel = document.getElementById("panelEntrenadorActivoReactiPod");
   if (!panel) {
@@ -9048,15 +7312,9 @@ var rehabColorMemoria = localStorage.getItem(REHABPOD_CLAVE_COLOR_MEMORIA) || "b
 
 // En Memoria NO se permiten rojo ni verde porque quedan reservados para
 // feedback de error/correcto al terminar la secuencia.
-var REHABPOD_COLORES_MEMORIA = [
-  "blue",
-  "yellow",
-  "white",
-  "purple",
-  "cyan",
-  "orange",
-  "pink",
-];
+var REHABPOD_COLORES_MEMORIA = CLAVES_COLORES_REACTIPOD.filter(function (clave) {
+  return clave !== "red" && clave !== "green";
+});
 
 if (!REHABPOD_COLORES_MEMORIA.includes(rehabColorMemoria)) {
   rehabColorMemoria = "blue";
@@ -9187,7 +7445,7 @@ function rehabCrearControlModoVirtual() {
       </div>
 
       <label style="display:flex;align-items:center;gap:8px;font-weight:800;white-space:nowrap;cursor:pointer;">
-        <input id="modoVirtualRehabPod" type="checkbox" style="width:20px;height:20px;">
+        <input id="modoVirtualRehabPod" type="checkbox" style="width:28px;height:28px;">
         ACTIVAR
       </label>
     </div>
@@ -9233,7 +7491,7 @@ function rehabActualizarModoVirtual() {
   if (rehabModoVirtual) {
     estado.textContent =
       "SIMULACIÓN ACTIVADA · toca un Pod en pantalla para simular el golpe";
-    estado.style.color = "#22c55e";
+    estado.style.color = "var(--verde-texto)";
   } else {
     estado.textContent = "SIMULACIÓN DESACTIVADA · se usarán los Pods Bluetooth";
     estado.style.color = "";
@@ -9524,17 +7782,7 @@ var rehabTiempoAutomaticoMs = Number(
   localStorage.getItem(REHABPOD_CLAVE_TIEMPO_AUTOMATICO) || 1000
 );
 
-var REHABPOD_COLORES_CAZA = [
-  "red",
-  "green",
-  "blue",
-  "yellow",
-  "white",
-  "purple",
-  "cyan",
-  "orange",
-  "pink",
-];
+var REHABPOD_COLORES_CAZA = CLAVES_COLORES_REACTIPOD.slice();
 
 if (!REHABPOD_COLORES_CAZA.includes(rehabColorCaza)) {
   rehabColorCaza = "red";
@@ -9920,7 +8168,7 @@ async function rehabV19ActivarCazaColor() {
 
   var activos = rehabIndicesPodsActivos();
   if (activos.length < 2) {
-    alert("Caza de color necesita al menos 2 Pods activos.");
+    avisarRehab("Caza de color necesita al menos 2 Pods activos.", { tipo: "error" });
     return;
   }
 
@@ -10840,8 +9088,8 @@ if (btnCancelar) btnCancelar.onclick = cancelarEntrenamiento;
 // Pegar TODO este bloque al FINAL de app.js, despues de V20.
 // =====================================================
 
-const REHAB_V21_VERDE = "#22c55e";
-const REHAB_V21_ROJO = "#ef4444";
+const REHAB_V21_VERDE = catalogoColoresPersonalizados.green.css;
+const REHAB_V21_ROJO = catalogoColoresPersonalizados.red.css;
 const REHAB_V21_DURACION = 240;
 
 function rehabV21Esperar(ms) {
@@ -11309,160 +9557,8 @@ console.log(
     },
   ];
 
-  function rehabV22AgregarEstilos() {
-    if (document.getElementById("rehabV22Estilos")) return;
-
-    const style = document.createElement("style");
-    style.id = "rehabV22Estilos";
-    style.textContent = `
-      #rehabV22Categorias {
-        display:grid;
-        grid-template-columns:repeat(3,minmax(0,1fr));
-        gap:14px;
-        margin-top:16px;
-      }
-
-      .rehabV22Categoria {
-        appearance:none;
-        width:100%;
-        border:1px solid rgba(148,163,184,.22);
-        border-radius:20px;
-        padding:20px;
-        text-align:left;
-        cursor:pointer;
-        color:inherit;
-        background:rgba(148,163,184,.08);
-        transition:transform .18s ease, border-color .18s ease, background .18s ease;
-      }
-
-      .rehabV22Categoria:hover {
-        transform:translateY(-2px);
-        border-color:rgba(59,130,246,.55);
-        background:rgba(59,130,246,.09);
-      }
-
-      .rehabV22CategoriaIcono {
-        font-size:34px;
-        margin-bottom:10px;
-      }
-
-      .rehabV22CategoriaTitulo {
-        font-size:1.18rem;
-        font-weight:800;
-        margin-bottom:5px;
-      }
-
-      .rehabV22CategoriaSubtitulo {
-        opacity:.78;
-        font-size:.9rem;
-        line-height:1.35;
-      }
-
-      .rehabV22CategoriaCantidad {
-        margin-top:12px;
-
-        font-size:.78rem;
-        font-weight:700;
-        opacity:.72;
-      }
-
-      #rehabV22Detalle {
-        margin-top:16px;
-      }
-
-      .rehabV22Volver {
-        appearance:none;
-        border:0;
-        background:transparent;
-        color:inherit;
-        font-weight:800;
-        cursor:pointer;
-        padding:8px 0 14px;
-      }
-
-      .rehabV22DetalleCabecera {
-        display:flex;
-        gap:14px;
-        align-items:center;
-        margin-bottom:16px;
-      }
-
-      .rehabV22DetalleIcono {
-        font-size:38px;
-      }
-
-      .rehabV22DetalleTitulo {
-        font-size:1.35rem;
-        font-weight:900;
-      }
-
-      .rehabV22DetalleDescripcion {
-        opacity:.78;
-        margin-top:4px;
-        line-height:1.4;
-      }
-
-      .rehabV22GridModos {
-        display:grid;
-        grid-template-columns:repeat(2,minmax(0,1fr));
-        gap:12px;
-      }
-
-      .rehabV22Modo {
-        appearance:none;
-        width:100%;
-        border:1px solid rgba(148,163,184,.20);
-        border-radius:17px;
-        padding:16px;
-        background:rgba(148,163,184,.07);
-        color:inherit;
-        cursor:pointer;
-        text-align:left;
-        display:flex;
-        gap:12px;
-        align-items:flex-start;
-        transition:transform .16s ease, border-color .16s ease, background .16s ease;
-      }
-
-      .rehabV22Modo:hover {
-        transform:translateY(-1px);
-        border-color:rgba(34,197,94,.50);
-        background:rgba(34,197,94,.07);
-      }
-
-      .rehabV22ModoIcono {
-        font-size:26px;
-        min-width:34px;
-      }
-
-      .rehabV22ModoTitulo {
-
-        font-weight:850;
-        margin-bottom:4px;
-      }
-
-      .rehabV22ModoDescripcion {
-        font-size:.85rem;
-        opacity:.75;
-        line-height:1.35;
-      }
-
-      .rehabV22Nota {
-        margin-top:16px;
-        font-size:.78rem;
-        opacity:.66;
-        line-height:1.4;
-      }
-
-      @media (max-width:760px) {
-        #rehabV22Categorias,
-        .rehabV22GridModos {
-          grid-template-columns:1fr;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-  }
+  window.REHAB_V22_MODOS = REHAB_V22_MODOS;
+  window.REHAB_V22_CATEGORIAS = REHAB_V22_CATEGORIAS;
 
   function rehabV22CrearTarjetaCategoria(categoria) {
     const boton = document.createElement("button");
@@ -11572,8 +9668,6 @@ console.log(
   }
 
   function rehabV22AplicarCategorias() {
-    rehabV22AgregarEstilos();
-
     const host = document.getElementById("categoriasEntrenamientoV8");
     if (!host) {
       console.warn("RehabPod V22: no se encontro categoriasEntrenamientoV8.");
@@ -11618,6 +9712,10 @@ console.log(
     }
 
     rehabV22MostrarCategorias();
+
+    // Permite que otros módulos (p. ej. "Dos jugadores") añadan su entrada aquí.
+    document.dispatchEvent(new CustomEvent("rehabpod:categorias"));
+
     console.log(
       "RehabPod V22: categorias Deportista / Fisioterapia / Neurologia activadas."
     );
@@ -11679,28 +9777,11 @@ console.log(
   }
 
   function rehabV23LeerRutinas() {
-    try {
-      const raw = localStorage.getItem(REHAB_V23_CLAVE_RUTINAS);
-      if (!raw) return [];
-      const valor = JSON.parse(raw);
-      return Array.isArray(valor) ? valor : [];
-    } catch (error) {
-      console.warn("RehabPod V23: no se pudieron leer rutinas.", error);
-      return [];
-    }
+    return leerLista(REHAB_V23_CLAVE_RUTINAS, "RehabPod V23");
   }
 
   function rehabV23GuardarRutinas() {
-    localStorage.setItem(REHAB_V23_CLAVE_RUTINAS, JSON.stringify(rehabV23Rutinas));
-  }
-
-  function rehabV23Escapar(texto) {
-    return String(texto ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+    guardarJSON(REHAB_V23_CLAVE_RUTINAS, rehabV23Rutinas, "RehabPod V23");
   }
 
   function rehabV23NombreModo(clave) {
@@ -11731,311 +9812,9 @@ console.log(
     return categoria ? categoria.icono : "📋";
   }
 
-  function rehabV23AgregarEstilos() {
-    if (document.getElementById("rehabV23Estilos")) return;
-
-    const style = document.createElement("style");
-    style.id = "rehabV23Estilos";
-    style.textContent = `
-      .rehabV23Marca {
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        margin:4px auto 18px;
-      }
-
-      .rehabV23Logo {
-        width:min(180px, 48vw);
-        max-height:126px;
-        object-fit:contain;
-        border-radius:18px;
-        display:block;
-        filter:drop-shadow(0 8px 22px rgba(0,0,0,.18));
-      }
-
-      .rehabV23BotonRutinas {
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        gap:8px;
-        width:100%;
-        min-height:48px;
-        margin-top:10px;
-        border:1px solid rgba(59,130,246,.30);
-        border-radius:14px;
-        background:rgba(59,130,246,.10);
-        color:inherit;
-        font-weight:800;
-        cursor:pointer;
-      }
-
-      .rehabV23BotonRutinas:hover {
-        background:rgba(59,130,246,.17);
-      }
-
-      .rehabV23Overlay {
-        position:fixed;
-        inset:0;
-        z-index:99999;
-        background:rgba(2,6,23,.72);
-        backdrop-filter:blur(7px);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:18px;
-      }
-
-      .rehabV23Overlay[hidden] {
-        display:none !important;
-      }
-
-      .rehabV23Modal {
-        width:min(920px, 100%);
-        max-height:92vh;
-        overflow:auto;
-        border-radius:24px;
-        border:1px solid rgba(148,163,184,.22);
-        background:var(--tarjeta);
-        color:inherit;
-        padding:20px;
-
-        box-shadow:0 25px 80px rgba(0,0,0,.40);
-      }
-
-      .tema-claro .rehabV23Modal {
-        background:#ffffff;
-      }
-
-      .rehabV23ModalCabecera {
-        display:flex;
-        gap:14px;
-        align-items:center;
-        justify-content:space-between;
-        margin-bottom:18px;
-      }
-
-      .rehabV23ModalTitulo {
-        display:flex;
-        align-items:center;
-        gap:11px;
-      }
-
-      .rehabV23ModalLogo {
-        width:58px;
-        height:58px;
-        object-fit:contain;
-        border-radius:14px;
-      }
-
-      .rehabV23Modal h2,
-      .rehabV23Modal h3 {
-        margin:0;
-      }
-
-      .rehabV23Cerrar {
-        appearance:none;
-        border:1px solid rgba(148,163,184,.25);
-        color:inherit;
-        background:rgba(148,163,184,.08);
-        border-radius:12px;
-        width:42px;
-        height:42px;
-        cursor:pointer;
-        font-size:20px;
-      }
-
-      .rehabV23Acciones {
-        display:flex;
-        gap:10px;
-        flex-wrap:wrap;
-        margin:12px 0 18px;
-      }
-
-      .rehabV23Btn {
-        appearance:none;
-        border:0;
-        border-radius:13px;
-        padding:11px 15px;
-        cursor:pointer;
-        font-weight:800;
-        background:var(--acento);
-        color:var(--acento-tinta);
-      }
-
-      .rehabV23Btn.secundario {
-        background:rgba(148,163,184,.16);
-        color:inherit;
-        border:1px solid rgba(148,163,184,.25);
-      }
-
-      .rehabV23Btn.peligro {
-        background:#b91c1c;
-      }
-
-      .rehabV23Lista {
-        display:grid;
-        gap:12px;
-      }
-
-      .rehabV23Vacio {
-        padding:28px 18px;
-        border:1px dashed rgba(148,163,184,.30);
-        border-radius:18px;
-        text-align:center;
-        opacity:.78;
-      }
-
-      .rehabV23RutinaCard {
-        border:1px solid rgba(148,163,184,.22);
-        border-radius:18px;
-        padding:16px;
-        background:rgba(148,163,184,.06);
-      }
-
-      .rehabV23RutinaTop {
-        display:flex;
-        align-items:flex-start;
-        justify-content:space-between;
-        gap:12px;
-      }
-
-      .rehabV23RutinaNombre {
-        font-weight:900;
-        font-size:1.05rem;
-      }
-
-      .rehabV23RutinaMeta {
-        margin-top:4px;
-        opacity:.72;
-        font-size:.84rem;
-      }
-
-      .rehabV23RutinaEjercicios {
-        margin:12px 0 0;
-        padding-left:20px;
-        opacity:.90;
-      }
-
-      .rehabV23RutinaEjercicios li {
-        margin:4px 0;
-      }
-
-      .rehabV23Campo {
-        display:grid;
-        gap:6px;
-        margin-bottom:13px;
-      }
-
-      .rehabV23Campo label {
-        font-size:.82rem;
-        font-weight:800;
-        opacity:.80;
-      }
-
-      .rehabV23Campo input,
-      .rehabV23Campo select {
-        width:100%;
-        box-sizing:border-box;
-        padding:11px 12px;
-        border-radius:12px;
-        border:1px solid rgba(148,163,184,.28);
-        background:rgba(148,163,184,.08);
-        color:inherit;
-      }
-
-      .rehabV23DosColumnas {
-        display:grid;
-        grid-template-columns:1fr 1fr;
-        gap:12px;
-      }
-
-      .rehabV23EditorEjercicio {
-        border:1px solid rgba(148,163,184,.22);
-        border-radius:16px;
-        padding:14px;
-        margin:12px 0;
-        background:rgba(148,163,184,.05);
-      }
-
-      .rehabV23FilaEjercicio {
-        display:grid;
-        grid-template-columns:1.5fr 1fr 1fr 110px auto;
-        gap:8px;
-        align-items:end;
-      }
-
-      .rehabV23MiniLabel {
-        display:grid;
-        gap:5px;
-        font-size:.73rem;
-        font-weight:700;
-        opacity:.82;
-      }
-
-      .rehabV23MiniLabel select,
-      .rehabV23MiniLabel input {
-        width:100%;
-        box-sizing:border-box;
-        border-radius:10px;
-        border:1px solid rgba(148,163,184,.25);
-        padding:9px;
-
-        background:rgba(148,163,184,.08);
-        color:inherit;
-
-      }
-
-      .rehabV23Quitar {
-        width:38px;
-        height:38px;
-        border:0;
-        border-radius:10px;
-        background:rgba(239,68,68,.15);
-        color:#ef4444;
-        cursor:pointer;
-        font-weight:900;
-      }
-
-      .rehabV23Aviso {
-        margin-top:14px;
-        padding:12px 14px;
-        border-radius:13px;
-        background:rgba(59,130,246,.09);
-        border:1px solid rgba(59,130,246,.20);
-        font-size:.82rem;
-        line-height:1.45;
-      }
-
-      @media (max-width:720px) {
-        .rehabV23FilaEjercicio {
-          grid-template-columns:1fr 1fr;
-        }
-
-        .rehabV23DosColumnas {
-          grid-template-columns:1fr;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-  }
-
+  // Antes esta función también insertaba un segundo logo grande sobre la cabecera
+  // (que ya lleva el logo y el nombre); se quitó por duplicado. Solo fija el favicon.
   function rehabV23ColocarLogo() {
-    const pantalla = document.getElementById("pantallaInicio");
-    if (!pantalla || document.getElementById("rehabV23MarcaInicio")) return;
-
-    const marca = document.createElement("div");
-    marca.id = "rehabV23MarcaInicio";
-    marca.className = "rehabV23Marca";
-    marca.innerHTML = `
-      <img
-        src="${REHAB_V23_LOGO}"
-        alt="RehabPod"
-        class="rehabV23Logo"
-      >
-    `;
-
-    pantalla.insertBefore(marca, pantalla.firstChild);
-
     let favicon = document.querySelector('link[rel="icon"]');
     if (!favicon) {
       favicon = document.createElement("link");
@@ -12063,39 +9842,14 @@ console.log(
   }
 
   function rehabV23CrearModal() {
-    if (document.getElementById("rehabV23Overlay")) return;
-
-    const overlay = document.createElement("div");
-    overlay.id = "rehabV23Overlay";
-    overlay.className = "rehabV23Overlay";
-    overlay.hidden = true;
-
-    overlay.innerHTML = `
-      <div class="rehabV23Modal" role="dialog" aria-modal="true">
-        <div class="rehabV23ModalCabecera">
-          <div class="rehabV23ModalTitulo">
-            <img src="${REHAB_V23_LOGO}" alt="RehabPod" class="rehabV23ModalLogo">
-            <div>
-              <div style="font-size:.72rem;opacity:.68;font-weight:800;">REHABPOD</div>
-              <h2 id="rehabV23TituloModal">Mis rutinas</h2>
-            </div>
-          </div>
-
-          <button type="button" id="rehabV23Cerrar" class="rehabV23Cerrar">×</button>
-        </div>
-
-        <div id="rehabV23Contenido"></div>
-      </div>
-    `;
-
-    document.body.appendChild(overlay);
-
-    document
-      .getElementById("rehabV23Cerrar")
-      .addEventListener("click", rehabV23CerrarModal);
-
-    overlay.addEventListener("click", function (evento) {
-      if (evento.target === overlay) rehabV23CerrarModal();
+    modalRehab({
+      id: "rehabV23",
+      idTitulo: "rehabV23TituloModal",
+      titulo: "Mis rutinas",
+      logo: REHAB_V23_LOGO,
+      clase: "rehabV23Modal",
+      ancho: 920,
+      z: "var(--z-modal)",
     });
   }
 
@@ -12128,20 +9882,26 @@ console.log(
         <button type="button" id="rehabV23Nueva" class="rehabV23Btn">
           + CREAR NUEVA RUTINA
         </button>
+        <button type="button" id="rehabV23Biblioteca" class="rehabV23Btn secundario" hidden>
+          📚 RUTINAS DE USUARIOS
+        </button>
       </div>
 
       <div id="rehabV23Lista" class="rehabV23Lista"></div>
 
       <div class="rehabV23Aviso">
-        En V23 las rutinas se guardan en este dispositivo.
-        Todavía no se ejecutan automáticamente una detrás de otra;
-        primero estamos creando y guardando la estructura de cada rutina.
+        Estas rutinas se guardan en este dispositivo.
+        Para una rutina armada a tu medida y que se ejecuta sola,
+        usa «Armar mi rutina» en Inicio.
       </div>
     `;
 
     document.getElementById("rehabV23Nueva").addEventListener("click", function () {
       rehabV23AbrirEditor(null);
     });
+
+    // Los profesionales ven aquí la biblioteca de rutinas compartidas (js/profesional.js).
+    document.dispatchEvent(new CustomEvent("rehabpod:v23lista"));
 
     const lista = document.getElementById("rehabV23Lista");
 
@@ -12167,10 +9927,10 @@ console.log(
           <div>
             <div class="rehabV23RutinaNombre">
               ${rehabV23IconoCategoria(rutina.categoria)}
-              ${rehabV23Escapar(rutina.nombre)}
+              ${escaparHTML(rutina.nombre)}
             </div>
             <div class="rehabV23RutinaMeta">
-              ${rehabV23Escapar(rehabV23NombreCategoria(rutina.categoria))}
+              ${escaparHTML(rehabV23NombreCategoria(rutina.categoria))}
               · ${ejercicios.length} ejercicio${ejercicios.length === 1 ? "" : "s"}
               · Descanso: ${Number(rutina.descansoSeg || 0)} s
             </div>
@@ -12188,8 +9948,8 @@ console.log(
               return `
               <li>
                 ${rehabV23IconoModo(ejercicio.modo)}
-                ${rehabV23Escapar(rehabV23NombreModo(ejercicio.modo))}
-                · ${rehabV23Escapar(ejercicio.dificultad)}
+                ${escaparHTML(rehabV23NombreModo(ejercicio.modo))}
+                · ${escaparHTML(ejercicio.dificultad)}
                 · ${tipo}
               </li>
             `;
@@ -12217,14 +9977,20 @@ console.log(
     });
 
     lista.querySelectorAll("[data-borrar]").forEach(function (boton) {
-      boton.addEventListener("click", function () {
+      boton.addEventListener("click", async function () {
         const id = boton.dataset.borrar;
         const rutina = rehabV23Rutinas.find(function (r) {
           return r.id === id;
         });
         if (!rutina) return;
 
-        if (!confirm(`¿Borrar la rutina "${rutina.nombre}"?`)) return;
+        const confirmado = await confirmarRehab({
+          titulo: "Borrar rutina",
+          mensaje: `¿Borrar la rutina "${rutina.nombre}"?`,
+          aceptar: "Borrar",
+          peligro: true,
+        });
+        if (!confirmado) return;
 
         rehabV23Rutinas = rehabV23Rutinas.filter(function (r) {
           return r.id !== id;
@@ -12271,7 +10037,7 @@ console.log(
             type="text"
             maxlength="60"
             placeholder="Ej. Recuperación miembro superior"
-            value="${rutina ? rehabV23Escapar(rutina.nombre) : ""}"
+            value="${rutina ? escaparHTML(rutina.nombre) : ""}"
           >
         </div>
 
@@ -12418,7 +10184,7 @@ console.log(
 
       fila.querySelector(".rehabV23Quitar").addEventListener("click", function () {
         if (rehabV23EjerciciosEditor.length <= 1) {
-          alert("La rutina debe tener al menos un ejercicio.");
+          avisarRehab("La rutina debe tener al menos un ejercicio.", { tipo: "error" });
           return;
         }
 
@@ -12453,12 +10219,12 @@ console.log(
       });
 
     if (!nombre) {
-      alert("Escribe un nombre para la rutina.");
+      avisarRehab("Escribe un nombre para la rutina.", { tipo: "error" });
       return;
     }
 
     if (!rehabV23EjerciciosEditor.length) {
-      alert("Agrega al menos un ejercicio.");
+      avisarRehab("Agrega al menos un ejercicio.", { tipo: "error" });
       return;
     }
 
@@ -12473,7 +10239,7 @@ console.log(
     });
 
     if (invalido) {
-      alert("Revisa la configuración de los ejercicios.");
+      avisarRehab("Revisa la configuración de los ejercicios.", { tipo: "error" });
       return;
     }
 
@@ -12516,9 +10282,10 @@ console.log(
   }
 
   function rehabV23Iniciar() {
-    rehabV23AgregarEstilos();
     rehabV23ColocarLogo();
-    rehabV23CrearBotonRutinas();
+    // El botón "MIS RUTINAS" ya no está en Inicio: las rutinas de cada persona
+    // se guardan desde el asistente (js/misrutinas.js). Este editor sigue
+    // disponible para PROFESIONALES en Cuenta y nube ("Rutinas para asignar").
     rehabV23CrearModal();
 
     console.log("RehabPod V23: logo y rutinas activados.");
@@ -12557,41 +10324,16 @@ console.log(
     return "sesion_rutina_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
   }
 
-  function rehabV24Escapar(texto) {
-    return String(texto ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
   function rehabV24LeerHistorial() {
-    try {
-      const raw = localStorage.getItem(REHAB_V24_CLAVE_HISTORIAL);
-      if (!raw) return [];
-      const valor = JSON.parse(raw);
-      return Array.isArray(valor) ? valor : [];
-    } catch (error) {
-      console.warn("RehabPod V24: error leyendo historial.", error);
-      return [];
-    }
+    return leerLista(REHAB_V24_CLAVE_HISTORIAL, "RehabPod V24");
   }
 
   function rehabV24GuardarHistorial(historial) {
-    localStorage.setItem(REHAB_V24_CLAVE_HISTORIAL, JSON.stringify(historial));
+    guardarJSON(REHAB_V24_CLAVE_HISTORIAL, historial, "RehabPod V24");
   }
 
   function rehabV24LeerRutinas() {
-    try {
-      const raw = localStorage.getItem(REHAB_V24_CLAVE_RUTINAS);
-      if (!raw) return [];
-      const valor = JSON.parse(raw);
-      return Array.isArray(valor) ? valor : [];
-    } catch (error) {
-      console.warn("RehabPod V24: error leyendo rutinas.", error);
-      return [];
-    }
+    return leerLista(REHAB_V24_CLAVE_RUTINAS, "RehabPod V24");
   }
 
   function rehabV24PerfilActivo() {
@@ -12607,321 +10349,15 @@ console.log(
     };
   }
 
-  function rehabV24AgregarEstilos() {
-    if (document.getElementById("rehabV24Estilos")) return;
-
-    const style = document.createElement("style");
-    style.id = "rehabV24Estilos";
-    style.textContent = `
-      .rehabV24BotonHistorial {
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        gap:8px;
-        width:100%;
-        min-height:48px;
-        margin-top:10px;
-        border:1px solid rgba(34,197,94,.28);
-        border-radius:14px;
-        background:rgba(34,197,94,.09);
-        color:inherit;
-        font-weight:800;
-        cursor:pointer;
-      }
-
-      .rehabV24BotonHistorial:hover {
-        background:rgba(34,197,94,.15);
-      }
-
-      .rehabV24Overlay {
-        position:fixed;
-        inset:0;
-        z-index:100000;
-        background:rgba(2,6,23,.74);
-        backdrop-filter:blur(7px);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:18px;
-      }
-
-      .rehabV24Overlay[hidden] {
-        display:none !important;
-      }
-
-      .rehabV24Modal {
-        width:min(950px,100%);
-        max-height:92vh;
-        overflow:auto;
-        border-radius:24px;
-        border:1px solid rgba(148,163,184,.22);
-        background:var(--tarjeta);
-        color:inherit;
-        padding:20px;
-        box-shadow:0 25px 80px rgba(0,0,0,.42);
-      }
-
-      .tema-claro .rehabV24Modal {
-        background:#fff;
-      }
-
-      .rehabV24Cabecera {
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:12px;
-        margin-bottom:16px;
-      }
-
-      .rehabV24Titulo {
-        display:flex;
-        align-items:center;
-        gap:10px;
-      }
-
-      .rehabV24Cerrar {
-        appearance:none;
-        border:1px solid rgba(148,163,184,.25);
-        width:42px;
-        height:42px;
-        border-radius:12px;
-        background:rgba(148,163,184,.08);
-        color:inherit;
-        cursor:pointer;
-        font-size:20px;
-      }
-
-      .rehabV24Resumen {
-        display:grid;
-        grid-template-columns:repeat(4,minmax(0,1fr));
-        gap:10px;
-        margin:14px 0 18px;
-      }
-
-      .rehabV24ResumenCard {
-        padding:14px;
-        border-radius:16px;
-        border:1px solid rgba(148,163,184,.20);
-
-        background:rgba(148,163,184,.06);
-      }
-
-      .rehabV24ResumenValor {
-        font-size:1.25rem;
-        font-weight:900;
-      }
-
-      .rehabV24ResumenLabel {
-        margin-top:3px;
-        font-size:.76rem;
-        opacity:.68;
-      }
-
-      .rehabV24Acciones {
-        display:flex;
-        flex-wrap:wrap;
-        gap:9px;
-        margin:12px 0 17px;
-      }
-
-      .rehabV24Btn {
-        appearance:none;
-        border:0;
-        border-radius:12px;
-        padding:10px 14px;
-        cursor:pointer;
-        background:var(--acento);
-        color:var(--acento-tinta);
-        font-weight:800;
-      }
-
-      .rehabV24Btn.secundario {
-        background:rgba(148,163,184,.15);
-        border:1px solid rgba(148,163,184,.22);
-        color:inherit;
-      }
-
-      .rehabV24Btn.peligro {
-        background:#b91c1c;
-      }
-
-      .rehabV24Lista {
-        display:grid;
-        gap:11px;
-      }
-
-      .rehabV24Sesion {
-        border:1px solid rgba(148,163,184,.21);
-        border-radius:18px;
-        padding:15px;
-        background:rgba(148,163,184,.05);
-      }
-
-      .rehabV24SesionTop {
-        display:flex;
-        justify-content:space-between;
-        gap:12px;
-        align-items:flex-start;
-      }
-
-      .rehabV24SesionNombre {
-        font-weight:900;
-        font-size:1.02rem;
-      }
-
-      .rehabV24Meta {
-        margin-top:4px;
-        font-size:.82rem;
-        opacity:.70;
-      }
-
-      .rehabV24Barra {
-        height:8px;
-        border-radius:99px;
-        overflow:hidden;
-        background:rgba(148,163,184,.18);
-        margin-top:11px;
-      }
-
-      .rehabV24Barra > span {
-        display:block;
-        height:100%;
-        border-radius:99px;
-        background:#22c55e;
-      }
-
-      .rehabV24Datos {
-        display:grid;
-        grid-template-columns:repeat(3,minmax(0,1fr));
-        gap:8px;
-        margin-top:11px;
-      }
-
-      .rehabV24Dato {
-        font-size:.79rem;
-        padding:8px 10px;
-        border-radius:11px;
-        background:rgba(148,163,184,.08);
-      }
-
-      .rehabV24Notas {
-        margin-top:10px;
-        font-size:.82rem;
-        opacity:.84;
-        line-height:1.4;
-      }
-
-      .rehabV24Vacio {
-        padding:28px 18px;
-        border:1px dashed rgba(148,163,184,.30);
-        border-radius:18px;
-        text-align:center;
-        opacity:.77;
-      }
-
-      .rehabV24Campo {
-        display:grid;
-        gap:6px;
-        margin-bottom:13px;
-      }
-
-      .rehabV24Campo label {
-        font-size:.80rem;
-        font-weight:800;
-        opacity:.78;
-      }
-
-      .rehabV24Campo input,
-      .rehabV24Campo select,
-      .rehabV24Campo textarea {
-        width:100%;
-        box-sizing:border-box;
-        border-radius:12px;
-        border:1px solid rgba(148,163,184,.27);
-        padding:10px 11px;
-        background:rgba(148,163,184,.07);
-        color:inherit;
-      }
-
-      .rehabV24DosColumnas {
-        display:grid;
-        grid-template-columns:1fr 1fr;
-        gap:12px;
-      }
-
-      .rehabV24InfoRutina {
-        padding:12px;
-        border-radius:14px;
-        background:rgba(59,130,246,.08);
-        border:1px solid rgba(59,130,246,.18);
-        margin-bottom:14px;
-        font-size:.83rem;
-        line-height:1.45;
-      }
-
-      .rehabV24EjerciciosCheck {
-        display:grid;
-        gap:7px;
-        margin:7px 0 15px;
-      }
-
-      .rehabV24EjercicioCheck {
-        display:flex;
-        align-items:center;
-        gap:8px;
-        padding:9px 10px;
-        border-radius:11px;
-        background:rgba(148,163,184,.07);
-      }
-
-      @media(max-width:760px) {
-        .rehabV24Resumen {
-          grid-template-columns:1fr 1fr;
-        }
-
-        .rehabV24Datos,
-        .rehabV24DosColumnas {
-          grid-template-columns:1fr;
-        }
-
-      }
-    `;
-    document.head.appendChild(style);
-  }
-
   function rehabV24CrearModal() {
-    if (document.getElementById("rehabV24Overlay")) return;
-
-    const overlay = document.createElement("div");
-    overlay.id = "rehabV24Overlay";
-
-    overlay.className = "rehabV24Overlay";
-    overlay.hidden = true;
-
-    overlay.innerHTML = `
-      <div class="rehabV24Modal" role="dialog" aria-modal="true">
-        <div class="rehabV24Cabecera">
-          <div class="rehabV24Titulo">
-            <div style="font-size:30px;">📊</div>
-            <div>
-              <div style="font-size:.72rem;opacity:.65;font-weight:800;">REHABPOD</div>
-              <h2 id="rehabV24TituloModal" style="margin:0;">Historial de rutinas</h2>
-            </div>
-          </div>
-
-          <button id="rehabV24Cerrar" type="button" class="rehabV24Cerrar">×</button>
-        </div>
-
-        <div id="rehabV24Contenido"></div>
-      </div>
-    `;
-
-    document.body.appendChild(overlay);
-
-    document.getElementById("rehabV24Cerrar").addEventListener("click", rehabV24Cerrar);
-
-    overlay.addEventListener("click", function (evento) {
-      if (evento.target === overlay) rehabV24Cerrar();
+    modalRehab({
+      id: "rehabV24",
+      idTitulo: "rehabV24TituloModal",
+      titulo: "Historial de rutinas",
+      icono: "📊",
+      clase: "rehabV24Modal",
+      ancho: 950,
+      z: "calc(var(--z-modal) + 1)",
     });
   }
 
@@ -12944,15 +10380,6 @@ console.log(
       .sort(function (a, b) {
         return Number(b.timestamp || 0) - Number(a.timestamp || 0);
       });
-  }
-
-  function rehabV24FormatoDuracion(segundos) {
-    segundos = Math.max(0, Number(segundos || 0));
-    const min = Math.floor(segundos / 60);
-    const seg = Math.floor(segundos % 60);
-
-    if (min <= 0) return seg + " s";
-    return min + " min " + String(seg).padStart(2, "0") + " s";
   }
 
   function rehabV24CalcularResumen(historial) {
@@ -13005,7 +10432,7 @@ console.log(
 
     contenido.innerHTML = `
       <div style="font-size:.88rem;opacity:.76;margin-bottom:6px;">
-        Perfil: <strong>${rehabV24Escapar(perfil.nombre || "Perfil")}</strong>
+        Perfil: <strong>${escaparHTML(perfil.nombre || "Perfil")}</strong>
       </div>
 
       <div class="rehabV24Resumen">
@@ -13020,7 +10447,7 @@ console.log(
         </div>
 
         <div class="rehabV24ResumenCard">
-          <div class="rehabV24ResumenValor">${rehabV24FormatoDuracion(resumen.tiempo)}</div>
+          <div class="rehabV24ResumenValor">${formatoDuracionLarga(resumen.tiempo)}</div>
           <div class="rehabV24ResumenLabel">Tiempo acumulado</div>
         </div>
 
@@ -13080,10 +10507,10 @@ console.log(
         <div class="rehabV24SesionTop">
           <div>
             <div class="rehabV24SesionNombre">
-              📋 ${rehabV24Escapar(sesion.rutinaNombre || "Rutina")}
+              📋 ${escaparHTML(sesion.rutinaNombre || "Rutina")}
             </div>
             <div class="rehabV24Meta">
-              ${rehabV24Escapar(fecha)}
+              ${escaparHTML(fecha)}
             </div>
           </div>
 
@@ -13100,7 +10527,7 @@ console.log(
           </div>
 
           <div class="rehabV24Dato">
-            ⏱️ ${rehabV24FormatoDuracion(sesion.duracionSeg)}
+            ⏱️ ${formatoDuracionLarga(sesion.duracionSeg)}
           </div>
 
           <div class="rehabV24Dato">
@@ -13110,7 +10537,7 @@ console.log(
 
         ${
           sesion.notas
-            ? `<div class="rehabV24Notas"><strong>Notas:</strong> ${rehabV24Escapar(sesion.notas)}</div>`
+            ? `<div class="rehabV24Notas"><strong>Notas:</strong> ${escaparHTML(sesion.notas)}</div>`
             : ""
         }
 
@@ -13128,9 +10555,15 @@ console.log(
     });
 
     lista.querySelectorAll("[data-borrar-sesion]").forEach(function (boton) {
-      boton.addEventListener("click", function () {
+      boton.addEventListener("click", async function () {
         const id = boton.dataset.borrarSesion;
-        if (!confirm("¿Borrar este registro del historial?")) return;
+        const confirmado = await confirmarRehab({
+          titulo: "Borrar registro",
+          mensaje: "¿Borrar este registro del historial?",
+          aceptar: "Borrar",
+          peligro: true,
+        });
+        if (!confirmado) return;
 
         const nuevo = rehabV24LeerHistorial().filter(function (s) {
           return s.id !== id;
@@ -13155,7 +10588,7 @@ console.log(
         <div class="rehabV24Vacio">
           <strong>No tienes rutinas guardadas.</strong>
           <div style="margin-top:6px;">
-            Primero crea una rutina desde “MIS RUTINAS”.
+            Primero crea una rutina en Cuenta y nube → «Rutinas para asignar».
           </div>
 
           <div class="rehabV24Acciones" style="justify-content:center;">
@@ -13178,7 +10611,7 @@ console.log(
         <select id="rehabV24RutinaSelect">
           ${rutinas
             .map(function (rutina) {
-              return `<option value="${rehabV24Escapar(rutina.id)}">${rehabV24Escapar(rutina.nombre)}</option>`;
+              return `<option value="${escaparHTML(rutina.id)}">${escaparHTML(rutina.nombre)}</option>`;
             })
             .join("")}
         </select>
@@ -13251,8 +10684,8 @@ console.log(
     const ejercicios = Array.isArray(rutina.ejercicios) ? rutina.ejercicios : [];
 
     document.getElementById("rehabV24InfoRutina").innerHTML = `
-      <strong>${rehabV24Escapar(rutina.nombre)}</strong><br>
-      Categoría: ${rehabV24Escapar(rutina.categoria || "--")}<br>
+      <strong>${escaparHTML(rutina.nombre)}</strong><br>
+      Categoría: ${escaparHTML(rutina.categoria || "--")}<br>
       ${ejercicios.length} ejercicio${ejercicios.length === 1 ? "" : "s"}
       · Descanso: ${Number(rutina.descansoSeg || 0)} s
     `;
@@ -13267,17 +10700,17 @@ console.log(
       fila.innerHTML = `
         <input
           type="checkbox"
-          data-ejercicio-rutina="${rehabV24Escapar(ejercicio.id || String(indice))}"
+          data-ejercicio-rutina="${escaparHTML(ejercicio.id || String(indice))}"
           checked
         >
         <span>
           <strong>${indice + 1}.</strong>
-          ${rehabV24Escapar(
+          ${escaparHTML(
             typeof rehabV23NombreModo === "function"
               ? rehabV23NombreModo(ejercicio.modo)
               : ejercicio.modo
           )}
-          · ${rehabV24Escapar(ejercicio.dificultad || "media")}
+          · ${escaparHTML(ejercicio.dificultad || "media")}
         </span>
       `;
 
@@ -13293,7 +10726,7 @@ console.log(
     });
 
     if (!rutina) {
-      alert("No se encontró la rutina seleccionada.");
+      avisarRehab("No se encontró la rutina seleccionada.", { tipo: "error" });
       return;
     }
 
@@ -13323,7 +10756,7 @@ console.log(
     const precision = precisionInput === "" ? null : Number(precisionInput);
 
     if (duracionMin < 0 || !Number.isFinite(duracionMin)) {
-      alert("Revisa la duración.");
+      avisarRehab("Revisa la duración.", { tipo: "error" });
       return;
     }
 
@@ -13331,7 +10764,7 @@ console.log(
       precision !== null &&
       (!Number.isFinite(precision) || precision < 0 || precision > 100)
     ) {
-      alert("La precisión debe estar entre 0 y 100.");
+      avisarRehab("La precisión debe estar entre 0 y 100.", { tipo: "error" });
       return;
     }
 
@@ -13370,7 +10803,6 @@ console.log(
   }
 
   function rehabV24Iniciar() {
-    rehabV24AgregarEstilos();
     rehabV24CrearModal();
     // Nav final: ya no creamos el botón "HISTORIAL DE RUTINAS" en Inicio;
     // esa información ya vive en Progreso, para no repetirla al usuario
@@ -13403,28 +10835,11 @@ console.log(
   const CLAVE_RUTINAS = "rehabpodRutinas";
 
   function leerRutinas() {
-    try {
-      const raw = localStorage.getItem(CLAVE_RUTINAS);
-      if (!raw) return [];
-      const r = JSON.parse(raw);
-      return Array.isArray(r) ? r : [];
-    } catch (e) {
-      console.warn("V25: no se pudieron leer rutinas", e);
-      return [];
-    }
+    return leerLista(CLAVE_RUTINAS, "V25");
   }
 
   function guardarRutinas(rutinas) {
-    localStorage.setItem(CLAVE_RUTINAS, JSON.stringify(rutinas));
-  }
-
-  function escapar(texto) {
-    return String(texto ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+    guardarJSON(CLAVE_RUTINAS, rutinas, "V25");
   }
 
   function nombreModo(clave) {
@@ -13446,69 +10861,13 @@ console.log(
     return mapa[clave] || clave;
   }
 
-  function agregarEstilos() {
-    if (document.getElementById("rehabV25Estilos")) return;
-
-    const st = document.createElement("style");
-    st.id = "rehabV25Estilos";
-    st.textContent = `
-      .rehabV25Overlay{
-        position:fixed;inset:0;z-index:100100;background:rgba(2,6,23,.76);
-        backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:18px
-      }
-      .rehabV25Overlay[hidden]{display:none!important}
-      .rehabV25Modal{
-        width:min(850px,100%);max-height:92vh;overflow:auto;border-radius:24px;
-        border:1px solid rgba(148,163,184,.22);background:var(--tarjeta);
-        color:inherit;padding:20px;box-shadow:0 25px 80px rgba(0,0,0,.42)
-      }
-      .tema-claro .rehabV25Modal{background:#fff}
-      .rehabV25Cabecera{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:16px}
-      .rehabV25Cerrar{width:42px;height:42px;border-radius:12px;border:1px solid rgba(148,163,184,.25);
-        background:rgba(148,163,184,.08);color:inherit;font-size:20px;cursor:pointer}
-      .rehabV25Ejercicio{border:1px solid rgba(148,163,184,.22);border-radius:16px;padding:14px;margin:10px 0;
-        background:rgba(148,163,184,.05)}
-      .rehabV25EjercicioTitulo{font-weight:900;margin-bottom:8px}
-      .rehabV25Campo{display:grid;gap:6px}
-      .rehabV25Campo label{font-size:.79rem;font-weight:800;opacity:.76}
-      .rehabV25Campo input{width:100%;box-sizing:border-box;padding:10px 11px;border-radius:11px;
-        border:1px solid rgba(148,163,184,.27);background:rgba(148,163,184,.07);color:inherit}
-      .rehabV25Acciones{display:flex;gap:9px;flex-wrap:wrap;margin-top:10px}
-      .rehabV25Btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;
-        background:var(--acento);color:var(--acento-tinta)}
-      .rehabV25Btn.sec{background:rgba(148,163,184,.15);color:inherit;border:1px solid rgba(148,163,184,.22)}
-      .rehabV25VideoBtn{display:inline-flex;gap:6px;align-items:center;margin-top:8px;padding:8px 11px;border-radius:10px;
-        background:rgba(59,130,246,.11);border:1px solid rgba(59,130,246,.23);color:inherit;text-decoration:none;font-weight:800}
-    `;
-    document.head.appendChild(st);
-  }
-
   function crearModal() {
-    if (document.getElementById("rehabV25Overlay")) return;
-
-    const ov = document.createElement("div");
-    ov.id = "rehabV25Overlay";
-    ov.className = "rehabV25Overlay";
-    ov.hidden = true;
-    ov.innerHTML = `
-      <div class="rehabV25Modal">
-        <div class="rehabV25Cabecera">
-          <div>
-            <div style="font-size:.72rem;opacity:.65;font-weight:800">REHABPOD</div>
-            <h2 style="margin:0">Videos de la rutina</h2>
-          </div>
-          <button id="rehabV25Cerrar" class="rehabV25Cerrar" type="button">×</button>
-        </div>
-        <div id="rehabV25Contenido"></div>
-      </div>
-    `;
-    document.body.appendChild(ov);
-
-    document.getElementById("rehabV25Cerrar").onclick = function () {
-      ov.hidden = true;
-    };
-    ov.addEventListener("click", function (e) {
-      if (e.target === ov) ov.hidden = true;
+    modalRehab({
+      id: "rehabV25",
+      titulo: "Videos de la rutina",
+      clase: "rehabV25Modal",
+      ancho: 850,
+      z: "calc(var(--z-modal) + 2)",
     });
   }
 
@@ -13522,7 +10881,7 @@ console.log(
 
     contenido.innerHTML = `
       <div style="opacity:.78;margin-bottom:12px">
-        Rutina: <strong>${escapar(rutina.nombre)}</strong><br>
+        Rutina: <strong>${escaparHTML(rutina.nombre)}</strong><br>
         Agrega un video por ejercicio para mostrar exactamente cómo debe realizarse.
       </div>
       <div id="rehabV25ListaVideos"></div>
@@ -13538,16 +10897,16 @@ console.log(
       const box = document.createElement("div");
       box.className = "rehabV25Ejercicio";
       box.innerHTML = `
-        <div class="rehabV25EjercicioTitulo">${i + 1}. ${escapar(nombreModo(ej.modo))}</div>
+        <div class="rehabV25EjercicioTitulo">${i + 1}. ${escaparHTML(nombreModo(ej.modo))}</div>
         <div class="rehabV25Campo">
           <label>Enlace del video</label>
           <input
             type="url"
-            data-video-ejercicio="${escapar(ej.id || String(i))}"
+            data-video-ejercicio="${escaparHTML(ej.id || String(i))}"
             placeholder="https://..."
-            value="${escapar(ej.videoUrl || "")}">
+            value="${escaparHTML(ej.videoUrl || "")}">
         </div>
-        ${ej.videoUrl ? `<a class="rehabV25VideoBtn" target="_blank" rel="noopener noreferrer" href="${escapar(ej.videoUrl)}">▶ VER VIDEO ACTUAL</a>` : ""}
+        ${ej.videoUrl ? `<a class="rehabV25VideoBtn" target="_blank" rel="noopener noreferrer" href="${escaparHTML(ej.videoUrl)}">▶ VER VIDEO ACTUAL</a>` : ""}
       `;
       host.appendChild(box);
     });
@@ -13563,7 +10922,7 @@ console.log(
       rutina.ejercicios = ejercicios;
       guardarRutinas(rutinas);
 
-      alert("Videos guardados.");
+      avisarRehab("Videos guardados.", { tipo: "exito" });
       document.getElementById("rehabV25Overlay").hidden = true;
 
       // Refresca la lista de V23 si esta disponible.
@@ -13632,7 +10991,6 @@ console.log(
   }
 
   function iniciar() {
-    agregarEstilos();
     crearModal();
     setInterval(decorarRutinas, 700);
     console.log("RehabPod V25: videos por ejercicio activados.");
@@ -13649,6 +11007,18 @@ console.log(
 window.rehabSupabaseClient = window.rehabSupabaseClient || null;
 window.rehabSupabasePromise = window.rehabSupabasePromise || null;
 
+// Sin esto, en un dispositivo sin internet el navegador puede tardar
+// muchísimo (a veces 30-60 segundos, según la red) antes de darse por
+// vencido intentando cargar un script externo. Con este límite de 6
+// segundos, la app se da por vencida rápido y muestra el contenido local
+// en vez de dejar la pantalla de Cuenta/Progreso "cargando" para siempre.
+function rehabConTiempoLimite(promesa, ms, mensaje) {
+  return Promise.race([
+    promesa,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(mensaje)), ms)),
+  ]);
+}
+
 window.rehabGetSupabaseClient = async function () {
   if (window.rehabSupabaseClient) {
     return window.rehabSupabaseClient;
@@ -13664,34 +11034,39 @@ window.rehabGetSupabaseClient = async function () {
       !window.REHAB_SUPABASE_CONFIG?.url ||
       !window.REHAB_SUPABASE_CONFIG?.publishableKey
     ) {
-      await new Promise((resolve, reject) => {
-        const existente = document.getElementById("rehabSupabaseConfigPublica");
+      await rehabConTiempoLimite(
+        new Promise((resolve, reject) => {
+          const existente = document.getElementById("rehabSupabaseConfigPublica");
 
-        if (existente) {
-          if (
-            window.REHAB_SUPABASE_CONFIG?.url &&
-            window.REHAB_SUPABASE_CONFIG?.publishableKey
-          ) {
-            resolve();
+          if (existente) {
+            if (
+              window.REHAB_SUPABASE_CONFIG?.url &&
+              window.REHAB_SUPABASE_CONFIG?.publishableKey
+            ) {
+              resolve();
+              return;
+            }
+
+            existente.addEventListener("load", resolve, { once: true });
+            existente.addEventListener(
+              "error",
+              () => reject(new Error("No se pudo cargar supabase-config.js.")),
+              { once: true }
+            );
             return;
           }
 
-          existente.addEventListener("load", resolve, { once: true });
-          existente.addEventListener(
-            "error",
-            () => reject(new Error("No se pudo cargar supabase-config.js.")),
-            { once: true }
-          );
-          return;
-        }
-
-        const script = document.createElement("script");
-        script.id = "rehabSupabaseConfigPublica";
-        script.src = "supabase-config.js";
-        script.onload = resolve;
-        script.onerror = () => reject(new Error("No se pudo cargar supabase-config.js."));
-        document.head.appendChild(script);
-      });
+          const script = document.createElement("script");
+          script.id = "rehabSupabaseConfigPublica";
+          script.src = "supabase-config.js";
+          script.onload = resolve;
+          script.onerror = () =>
+            reject(new Error("No se pudo cargar supabase-config.js."));
+          document.head.appendChild(script);
+        }),
+        6000,
+        "Sin conexión a internet."
+      );
     }
 
     if (
@@ -13703,31 +11078,37 @@ window.rehabGetSupabaseClient = async function () {
 
     // Cargar supabase-js una sola vez.
     if (!window.supabase?.createClient) {
-      await new Promise((resolve, reject) => {
-        const existente = document.getElementById("rehabSupabaseSDK");
+      await rehabConTiempoLimite(
+        new Promise((resolve, reject) => {
+          const existente = document.getElementById("rehabSupabaseSDK");
 
-        if (existente) {
-          if (window.supabase?.createClient) {
-            resolve();
+          if (existente) {
+            if (window.supabase?.createClient) {
+              resolve();
+              return;
+            }
+
+            existente.addEventListener("load", resolve, { once: true });
+            existente.addEventListener(
+              "error",
+              () => reject(new Error("No se pudo cargar Supabase JS.")),
+              { once: true }
+            );
             return;
           }
 
-          existente.addEventListener("load", resolve, { once: true });
-          existente.addEventListener(
-            "error",
-            () => reject(new Error("No se pudo cargar Supabase JS.")),
-            { once: true }
-          );
-          return;
-        }
-
-        const script = document.createElement("script");
-        script.id = "rehabSupabaseSDK";
-        script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-        script.onload = resolve;
-        script.onerror = () => reject(new Error("No se pudo cargar Supabase JS."));
-        document.head.appendChild(script);
-      });
+          const script = document.createElement("script");
+          script.id = "rehabSupabaseSDK";
+          // SDK incluido con la aplicación: evita depender de un CDN y de
+          // cambios inesperados en una versión remota.
+          script.src = "vendor/supabase-2.57.4.js";
+          script.onload = resolve;
+          script.onerror = () => reject(new Error("No se pudo cargar Supabase JS."));
+          document.head.appendChild(script);
+        }),
+        6000,
+        "Sin conexión a internet."
+      );
     }
 
     if (!window.supabase?.createClient) {
@@ -13794,15 +11175,6 @@ window.rehabGetSupabaseClient = async function () {
     ],
   };
 
-  function escapar(texto) {
-    return String(texto ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
   function etiquetaRol(role) {
     return role === "professional" ? "Profesional" : "Usuario";
   }
@@ -13819,7 +11191,7 @@ window.rehabGetSupabaseClient = async function () {
     return (ESPECIALIDADES[role] || [])
       .map(
         ([value, label]) =>
-          `<option value="${escapar(value)}" ${value === seleccionada ? "selected" : ""}>${escapar(label)}</option>`
+          `<option value="${escaparHTML(value)}" ${value === seleccionada ? "selected" : ""}>${escaparHTML(label)}</option>`
       )
       .join("");
   }
@@ -13881,53 +11253,6 @@ window.rehabGetSupabaseClient = async function () {
     return data;
   }
 
-  // -----------------------------------------------------
-  // ESTILOS / BOTON
-  // -----------------------------------------------------
-  function agregarEstilos() {
-    if (document.getElementById("rehabV27Estilos")) return;
-
-    const st = document.createElement("style");
-    st.id = "rehabV27Estilos";
-    st.textContent = `
-      .rehabV27Boton{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;
-        margin-top:10px;border:1px solid rgba(168,85,247,.28);border-radius:14px;
-        background:rgba(168,85,247,.09);color:inherit;font-weight:800;cursor:pointer}
-      .rehabV27Boton:hover{background:rgba(168,85,247,.15)}
-      .rehabV27Overlay{position:fixed;inset:0;z-index:100200;background:rgba(2,6,23,.76);backdrop-filter:blur(7px);
-        display:flex;align-items:center;justify-content:center;padding:18px}
-      .rehabV27Overlay[hidden]{display:none!important}
-      .rehabV27Modal{width:min(900px,100%);max-height:92vh;overflow:auto;border-radius:24px;
-        border:1px solid rgba(148,163,184,.22);background:var(--tarjeta);color:inherit;
-        padding:20px;box-shadow:0 25px 80px rgba(0,0,0,.42)}
-      .tema-claro .rehabV27Modal{background:#fff}
-      .rehabV27Cabecera{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
-
-      .rehabV27Cerrar{width:42px;height:42px;border-radius:12px;border:1px solid rgba(148,163,184,.25);
-        background:rgba(148,163,184,.08);color:inherit;font-size:20px;cursor:pointer}
-      .rehabV27Campo{display:grid;gap:6px;margin-bottom:12px}
-      .rehabV27Campo label{font-size:.8rem;font-weight:800;opacity:.78}
-      .rehabV27Campo input,.rehabV27Campo select{width:100%;box-sizing:border-box;padding:10px 11px;border-radius:11px;
-        border:1px solid rgba(148,163,184,.27);background:rgba(148,163,184,.07);color:inherit}
-      .rehabV27Dos{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-      .rehabV27Acciones{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0}
-      .rehabV27Btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;
-        background:#7c3aed;color:#fff}
-      .rehabV27Btn.sec{background:rgba(148,163,184,.15);color:inherit;border:1px solid rgba(148,163,184,.22)}
-      .rehabV27Link{appearance:none;border:0;background:none;color:var(--acento,#7c3aed);
-        font-size:.82rem;font-weight:700;cursor:pointer;padding:8px 2px;text-align:left;width:100%}
-      .rehabV27Card{border:1px solid rgba(148,163,184,.21);border-radius:17px;padding:14px;
-        background:rgba(148,163,184,.05);margin:10px 0}
-      .rehabV27Estado{padding:11px 12px;border-radius:13px;background:rgba(59,130,246,.09);
-        border:1px solid rgba(59,130,246,.18);font-size:.84rem;line-height:1.45;margin-bottom:12px}
-      .rehabV27Codigo{font-size:1.5rem;font-weight:950;letter-spacing:3px;text-align:center;padding:16px;
-        border-radius:15px;background:rgba(34,197,94,.09);border:1px dashed rgba(34,197,94,.35);margin:12px 0}
-      .rehabV27Ayuda{font-size:.8rem;opacity:.72;line-height:1.45;margin-top:-4px;margin-bottom:12px}
-      @media(max-width:700px){.rehabV27Dos{grid-template-columns:1fr}}
-    `;
-    document.head.appendChild(st);
-  }
-
   function crearBoton() {
     // Limpieza defensiva si la app venia de V26.
     document.getElementById("rehabV26BtnCloud")?.remove();
@@ -13952,29 +11277,13 @@ window.rehabGetSupabaseClient = async function () {
 
   function crearModal() {
     document.getElementById("rehabV26Overlay")?.remove();
-    if (document.getElementById("rehabV27Overlay")) return;
-
-    const ov = document.createElement("div");
-    ov.id = "rehabV27Overlay";
-    ov.className = "rehabV27Overlay";
-    ov.hidden = true;
-    ov.innerHTML = `
-      <div class="rehabV27Modal">
-        <div class="rehabV27Cabecera">
-          <div>
-            <div style="font-size:.72rem;opacity:.65;font-weight:800">REHABPOD CLOUD</div>
-            <h2 id="rehabV27Titulo" style="margin:0">Cuenta y nube</h2>
-          </div>
-          <button id="rehabV27Cerrar" class="rehabV27Cerrar" type="button">×</button>
-        </div>
-        <div id="rehabV27Contenido"></div>
-      </div>
-    `;
-    document.body.appendChild(ov);
-
-    document.getElementById("rehabV27Cerrar").onclick = () => (ov.hidden = true);
-    ov.addEventListener("click", (e) => {
-      if (e.target === ov) ov.hidden = true;
+    modalRehab({
+      id: "rehabV27",
+      titulo: "Cuenta y nube",
+      eyebrow: "REHABPOD CLOUD",
+      clase: "rehabV27Modal",
+      ancho: 900,
+      z: "calc(var(--z-modal) + 3)",
     });
   }
 
@@ -14018,20 +11327,16 @@ window.rehabGetSupabaseClient = async function () {
         <div class="rehabV27Card">
           <h3>Crear cuenta</h3>
           <div class="rehabV27Campo"><label>Nombre</label><input id="rehabV27RegNombre" type="text" maxlength="80" autocomplete="name"></div>
-          <div class="rehabV27Campo">
-            <label>Tipo de cuenta</label>
-            <select id="rehabV27RegRol">
-              <option value="user">Usuario</option>
-              <option value="professional">Profesional</option>
-            </select>
+          <div class="rehabV27Ayuda">
+            Las cuentas nuevas se crean como usuario. La activación de una cuenta profesional
+            requiere verificación administrativa.
           </div>
-          <div id="rehabV27DescripcionRol" class="rehabV27Ayuda"></div>
           <div class="rehabV27Campo">
             <label id="rehabV27LabelEspecialidad">Tipo de uso</label>
             <select id="rehabV27RegEspecialidad"></select>
           </div>
           <div class="rehabV27Campo"><label>Correo</label><input id="rehabV27RegEmail" type="email" autocomplete="email"></div>
-          <div class="rehabV27Campo"><label>Contraseña</label><input id="rehabV27RegPass" type="password" minlength="6" autocomplete="new-password"></div>
+          <div class="rehabV27Campo"><label>Contraseña</label><input id="rehabV27RegPass" type="password" minlength="10" autocomplete="new-password"></div>
           <button id="rehabV27RegBtn" class="rehabV27Btn" type="button">CREAR CUENTA</button>
         </div>
       </div>
@@ -14041,28 +11346,18 @@ window.rehabGetSupabaseClient = async function () {
     document.getElementById("rehabV27LoginBtn").onclick = login;
     document.getElementById("rehabV27OlvideBtn").onclick = recuperarContrasena;
     document.getElementById("rehabV27RegBtn").onclick = registrar;
-    document.getElementById("rehabV27RegRol").onchange = actualizarRegistroRol;
     actualizarRegistroRol();
   }
 
   function actualizarRegistroRol() {
-    const role = document.getElementById("rehabV27RegRol")?.value || "user";
+    const role = "user";
     const sel = document.getElementById("rehabV27RegEspecialidad");
     const label = document.getElementById("rehabV27LabelEspecialidad");
-    const desc = document.getElementById("rehabV27DescripcionRol");
-    if (!sel || !label || !desc) return;
+    if (!sel || !label) return;
 
     sel.innerHTML = opcionesEspecialidad(role);
 
-    if (role === "professional") {
-      label.textContent = "Área profesional";
-      desc.textContent =
-        "Profesional: crea, sincroniza y posteriormente podrá asignar rutinas a otras personas.";
-    } else {
-      label.textContent = "Tipo de uso";
-      desc.textContent =
-        "Usuario: entrena con RehabPod por cuenta propia o puede vincularse con un profesional.";
-    }
+    label.textContent = "Tipo de uso";
   }
 
   function mensaje(texto) {
@@ -14164,7 +11459,8 @@ window.rehabGetSupabaseClient = async function () {
   async function registrar() {
     const btn = document.getElementById("rehabV27RegBtn");
     const full_name = document.getElementById("rehabV27RegNombre").value.trim();
-    const role = document.getElementById("rehabV27RegRol").value;
+    // El cliente nunca puede autoconcederse privilegios profesionales.
+    const role = "user";
     const specialty = document.getElementById("rehabV27RegEspecialidad").value;
     const email = document.getElementById("rehabV27RegEmail").value.trim();
     const password = document.getElementById("rehabV27RegPass").value;
@@ -14186,7 +11482,7 @@ window.rehabGetSupabaseClient = async function () {
     }
 
     if (!rehabValidarPassword(password)) {
-      mensaje("La contraseña debe tener al menos 6 caracteres.");
+      mensaje("Usa al menos 10 caracteres, con mayúscula, minúscula y número.");
       return;
     }
 
@@ -14244,9 +11540,9 @@ window.rehabGetSupabaseClient = async function () {
 
     c.innerHTML = `
       <div class="rehabV27Estado">
-        <strong>${escapar(rehabCloudProfile.full_name)}</strong><br>
-        ${escapar(etiquetaRol(rehabCloudProfile.role))} · ${escapar(etiquetaEspecialidad(rehabCloudProfile.role, rehabCloudProfile.specialty))}<br>
-        ${escapar(rehabCloudUser.email || "")}
+        <strong>${escaparHTML(rehabCloudProfile.full_name)}</strong><br>
+        ${escaparHTML(etiquetaRol(rehabCloudProfile.role))} · ${escaparHTML(etiquetaEspecialidad(rehabCloudProfile.role, rehabCloudProfile.specialty))}<br>
+        ${escaparHTML(rehabCloudUser.email || "")}
       </div>
 
       <div class="rehabV27Card">
@@ -14303,7 +11599,7 @@ window.rehabGetSupabaseClient = async function () {
       <div class="rehabV27Card">
         <h3>Mi código de usuario</h3>
         <p style="opacity:.76">Si quieres trabajar con un entrenador, fisioterapeuta u otro profesional, comparte este código únicamente con esa persona.</p>
-        <div class="rehabV27Codigo">${escapar(rehabCloudProfile.user_code || "--------")}</div>
+        <div class="rehabV27Codigo">${escaparHTML(rehabCloudProfile.user_code || "--------")}</div>
       </div>
 
       <div class="rehabV27Card">
@@ -14335,8 +11631,8 @@ window.rehabGetSupabaseClient = async function () {
       .map(
         (a) => `
       <div style="padding:9px 0;border-bottom:1px solid rgba(148,163,184,.16)">
-        📅 ${escapar(a.scheduled_date)} ${a.scheduled_time ? "· " + escapar(a.scheduled_time) : ""}
-        <br><small>${escapar(a.status)}</small>
+        📅 ${escaparHTML(a.scheduled_date)} ${a.scheduled_time ? "· " + escaparHTML(a.scheduled_time) : ""}
+        <br><small>${escaparHTML(a.status)}</small>
       </div>
     `
       )
@@ -14347,6 +11643,12 @@ window.rehabGetSupabaseClient = async function () {
     const host = document.getElementById("rehabV27PanelRol");
 
     host.innerHTML = `
+      <div class="rehabV27Card">
+        <h3>Rutinas para asignar</h3>
+        <p style="opacity:.76">Crea aquí las rutinas (ejercicios, tiempos y videos) que luego asignas a tus usuarios.</p>
+        <button id="rehabV27AbrirRutinas" class="rehabV27Btn" type="button">📋 CREAR Y EDITAR RUTINAS</button>
+      </div>
+
       <div class="rehabV27Card">
         <h3>Vincular usuario</h3>
         <p style="opacity:.76">El usuario te comparte su código. Puede ser un deportista, paciente, cliente de gimnasio u otra persona que utilice RehabPod.</p>
@@ -14364,6 +11666,13 @@ window.rehabGetSupabaseClient = async function () {
     `;
 
     document.getElementById("rehabV27Vincular").onclick = vincularUsuario;
+    document.getElementById("rehabV27AbrirRutinas").onclick = () => {
+      // El editor de rutinas se abre encima: se cierra antes esta ventana.
+      const cuenta = document.getElementById("rehabV27Overlay");
+      if (cuenta) cuenta.hidden = true;
+      if (typeof window.rehabV23AbrirRutinas === "function")
+        window.rehabV23AbrirRutinas();
+    };
     await cargarUsuariosVinculados();
   }
 
@@ -14424,8 +11733,8 @@ window.rehabGetSupabaseClient = async function () {
         const p = mapa.get(l.user_id) || {};
         return `
         <div style="padding:10px 0;border-bottom:1px solid rgba(148,163,184,.16)">
-          👤 <strong>${escapar(p.full_name || "Usuario")}</strong><br>
-          <small>${escapar(etiquetaEspecialidad("user", p.specialty))}</small>
+          👤 <strong>${escaparHTML(p.full_name || "Usuario")}</strong><br>
+          <small>${escaparHTML(etiquetaEspecialidad("user", p.specialty))}</small>
         </div>`;
       })
       .join("");
@@ -14450,13 +11759,7 @@ window.rehabGetSupabaseClient = async function () {
   // Tanto Profesional como Usuario pueden tener rutinas propias.
   // -----------------------------------------------------
   function leerRutinasLocales() {
-    try {
-      const raw = localStorage.getItem("rehabpodRutinas");
-      const data = raw ? JSON.parse(raw) : [];
-      return Array.isArray(data) ? data : [];
-    } catch (e) {
-      return [];
-    }
+    return leerLista("rehabpodRutinas", "RehabPod nube");
   }
 
   async function sincronizarRutinas() {
@@ -14529,8 +11832,6 @@ window.rehabGetSupabaseClient = async function () {
   // INICIO
   // -----------------------------------------------------
   async function iniciar() {
-    agregarEstilos();
-    crearBoton();
     crearModal();
     await inicializarCloud();
     console.log("RehabPod V27: cuentas Profesional/Usuario + nube preparadas.");
@@ -14572,29 +11873,8 @@ window.rehabGetSupabaseClient = async function () {
     stroop: "Palabra vs color",
   };
 
-  function esc(v) {
-    return String(v ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
   function modoNombre(modo) {
     return MAPA_MODOS[modo] || modo || "Ejercicio";
-  }
-
-  function fechaBonita(fecha) {
-    if (!fecha) return "Sin fecha";
-    const d = new Date(fecha + "T12:00:00");
-    if (Number.isNaN(d.getTime())) return fecha;
-    return d.toLocaleDateString();
-  }
-
-  function horaBonita(hora) {
-    if (!hora) return "";
-    return String(hora).slice(0, 5);
   }
 
   function estadoAsignacionBonito(status, scheduledDate = null) {
@@ -14711,7 +11991,7 @@ window.rehabGetSupabaseClient = async function () {
       return `
         <div class="rehabV28VideoWrap">
           <iframe
-            src="${esc(v.src)}"
+            src="${escaparHTML(v.src)}"
             title="Video del ejercicio"
             loading="lazy"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -14725,7 +12005,7 @@ window.rehabGetSupabaseClient = async function () {
       return `
         <div class="rehabV28VideoWrap">
           <video controls playsinline preload="metadata">
-            <source src="${esc(v.src)}">
+            <source src="${escaparHTML(v.src)}">
           </video>
         </div>
       `;
@@ -14736,7 +12016,7 @@ window.rehabGetSupabaseClient = async function () {
         <div class="rehabV28Aviso">
           Este proveedor no permite garantizar video embebido dentro de la app.
           <br><br>
-          <a class="rehabV28Btn secundario" href="${esc(v.src)}" target="_blank" rel="noopener noreferrer">
+          <a class="rehabV28Btn secundario" href="${escaparHTML(v.src)}" target="_blank" rel="noopener noreferrer">
             ▶ ABRIR VIDEO
           </a>
         </div>
@@ -14744,82 +12024,6 @@ window.rehabGetSupabaseClient = async function () {
     }
 
     return `<div class="rehabV28Aviso">Este ejercicio todavía no tiene video.</div>`;
-  }
-
-  // -----------------------------------------------------
-  // UI GENERAL
-  // -----------------------------------------------------
-  function estilos() {
-    if (document.getElementById("rehabV28Estilos")) return;
-
-    const st = document.createElement("style");
-    st.id = "rehabV28Estilos";
-    st.textContent = `
-      .rehabV28HomeBtn{
-        display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
-        min-height:48px;margin-top:10px;border-radius:14px;cursor:pointer;
-        border:1px solid rgba(14,165,233,.30);background:rgba(14,165,233,.09);
-        color:inherit;font-weight:900
-
-      }
-      .rehabV28Overlay{
-        position:fixed;inset:0;z-index:100300;background:rgba(2,6,23,.80);
-        backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:16px
-      }
-      .rehabV28Overlay[hidden]{display:none!important}
-      .rehabV28Modal{
-        width:min(960px,100%);max-height:94vh;overflow:auto;border-radius:24px;padding:20px;
-        background:var(--tarjeta);color:inherit;
-        border:1px solid rgba(148,163,184,.22);box-shadow:0 25px 80px rgba(0,0,0,.44)
-      }
-      .tema-claro .rehabV28Modal{background:#fff}
-      .rehabV28Head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:15px}
-      .rehabV28Cerrar{width:42px;height:42px;border-radius:12px;border:1px solid rgba(148,163,184,.25);
-        background:rgba(148,163,184,.08);color:inherit;font-size:20px;cursor:pointer}
-      .rehabV28Card{border:1px solid rgba(148,163,184,.20);border-radius:17px;padding:14px;
-        margin:10px 0;background:rgba(148,163,184,.045)}
-      .rehabV28Grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-      .rehabV28Campo{display:grid;gap:6px;margin-bottom:11px}
-      .rehabV28Campo label{font-size:.79rem;font-weight:900;opacity:.76}
-      .rehabV28Campo input,.rehabV28Campo select,.rehabV28Campo textarea{
-        width:100%;box-sizing:border-box;padding:10px 11px;border-radius:11px;
-        border:1px solid rgba(148,163,184,.28);background:rgba(148,163,184,.07);
-        color:inherit;font:inherit
-      }
-      .rehabV28Campo textarea{min-height:85px;resize:vertical}
-      .rehabV28Btn{
-        appearance:none;border:0;border-radius:12px;padding:10px 14px;font-weight:900;
-        cursor:pointer;background:#0284c7;color:white;display:inline-flex;align-items:center;
-        justify-content:center;gap:7px;text-decoration:none
-      }
-      .rehabV28Btn.secundario{
-        background:rgba(148,163,184,.14);color:inherit;border:1px solid rgba(148,163,184,.22)
-      }
-      .rehabV28Btn.peligro{background:#b91c1c}
-      .rehabV28Acciones{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-      .rehabV28Aviso{padding:12px;border-radius:13px;background:rgba(14,165,233,.08);
-        border:1px solid rgba(14,165,233,.18);line-height:1.5}
-      .rehabV28Asignacion{display:grid;gap:7px}
-      .rehabV28Asignacion small{opacity:.70}
-      .rehabV28VideoWrap{
-        width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000;
-        margin:12px 0
-      }
-      .rehabV28VideoWrap iframe,.rehabV28VideoWrap video{
-        width:100%;height:100%;border:0;display:block
-      }
-      .rehabV28Dato{
-        padding:10px 12px;border-radius:12px;background:rgba(148,163,184,.06);
-        border:1px solid rgba(148,163,184,.16);margin:8px 0;line-height:1.5
-      }
-      .rehabV28EjercicioTitulo{font-weight:950;font-size:1.05rem}
-      .rehabV28Badge{
-        display:inline-flex;padding:5px 8px;border-radius:999px;background:rgba(14,165,233,.10);
-        border:1px solid rgba(14,165,233,.20);font-size:.75rem;font-weight:900;margin:4px 4px 4px 0
-      }
-      @media(max-width:700px){.rehabV28Grid{grid-template-columns:1fr}.rehabV28Modal{padding:15px}}
-    `;
-    document.head.appendChild(st);
   }
 
   function crearBotonHome() {
@@ -14843,31 +12047,13 @@ window.rehabGetSupabaseClient = async function () {
   }
 
   function crearModal() {
-    if (document.getElementById("rehabV28Overlay")) return;
-
-    const ov = document.createElement("div");
-    ov.id = "rehabV28Overlay";
-    ov.className = "rehabV28Overlay";
-    ov.hidden = true;
-
-    ov.innerHTML = `
-      <div class="rehabV28Modal">
-        <div class="rehabV28Head">
-          <div>
-            <div style="font-size:.72rem;opacity:.65;font-weight:900">REHABPOD CLOUD</div>
-            <h2 id="rehabV28Titulo" style="margin:0">Rutinas asignadas</h2>
-          </div>
-          <button id="rehabV28Cerrar" class="rehabV28Cerrar" type="button">×</button>
-        </div>
-        <div id="rehabV28Contenido"></div>
-      </div>
-    `;
-
-    document.body.appendChild(ov);
-
-    document.getElementById("rehabV28Cerrar").onclick = cerrar;
-    ov.addEventListener("click", (e) => {
-      if (e.target === ov) cerrar();
+    modalRehab({
+      id: "rehabV28",
+      titulo: "Rutinas asignadas",
+      eyebrow: "REHABPOD CLOUD",
+      clase: "rehabV28Modal",
+      ancho: 960,
+      z: "calc(var(--z-modal) + 4)",
     });
   }
 
@@ -14913,7 +12099,7 @@ window.rehabGetSupabaseClient = async function () {
       }
     } catch (error) {
       console.error(error);
-      c.innerHTML = `<div class="rehabV28Aviso">Error: ${esc(error.message)}</div>`;
+      c.innerHTML = `<div class="rehabV28Aviso">Error: ${escaparHTML(error.message)}</div>`;
     }
   }
 
@@ -14993,14 +12179,14 @@ window.rehabGetSupabaseClient = async function () {
           <div class="rehabV28Campo">
             <label>Usuario</label>
             <select id="rehabV28Usuario" ${!usuarios.length ? "disabled" : ""}>
-              ${usuarios.map((u) => `<option value="${esc(u.user_id)}">${esc(u.full_name || "Usuario")}</option>`).join("")}
+              ${usuarios.map((u) => `<option value="${escaparHTML(u.user_id)}">${escaparHTML(u.full_name || "Usuario")}</option>`).join("")}
             </select>
           </div>
 
           <div class="rehabV28Campo">
             <label>Rutina</label>
             <select id="rehabV28Rutina" ${!rutinas.length ? "disabled" : ""}>
-              ${rutinas.map((r) => `<option value="${esc(r.id)}">${esc(r.name)}</option>`).join("")}
+              ${rutinas.map((r) => `<option value="${escaparHTML(r.id)}">${escaparHTML(r.name)}</option>`).join("")}
             </select>
           </div>
 
@@ -15040,9 +12226,9 @@ window.rehabGetSupabaseClient = async function () {
                   .map(
                     (r) => `
             <div class="rehabV28Dato">
-              <strong>${esc(r.name)}</strong>
+              <strong>${escaparHTML(r.name)}</strong>
               <div class="rehabV28Acciones">
-                <button class="rehabV28Btn secundario" data-guia-rutina="${esc(r.id)}" type="button">
+                <button class="rehabV28Btn secundario" data-guia-rutina="${escaparHTML(r.id)}" type="button">
                   ✏️ EDITAR GUÍA
                 </button>
               </div>
@@ -15152,18 +12338,18 @@ window.rehabGetSupabaseClient = async function () {
       .map(
         (a) => `
       <div class="rehabV28Dato rehabV28Asignacion">
-        <strong>${esc(rutinas.get(a.routine_id) || "Rutina")}</strong>
-        <span>👤 ${esc(usuarios.get(a.user_id) || "Usuario")}</span>
-        <span>📅 ${esc(fechaBonita(a.scheduled_date))}${a.scheduled_time ? " · " + esc(horaBonita(a.scheduled_time)) : ""}</span>
-        <small>Estado: ${esc(estadoAsignacionBonito(a.status, a.scheduled_date))}</small>
-        ${a.professional_notes ? `<small>📝 ${esc(a.professional_notes)}</small>` : ""}
+        <strong>${escaparHTML(rutinas.get(a.routine_id) || "Rutina")}</strong>
+        <span>👤 ${escaparHTML(usuarios.get(a.user_id) || "Usuario")}</span>
+        <span>📅 ${escaparHTML(formatoFechaDia(a.scheduled_date))}${a.scheduled_time ? " · " + escaparHTML(formatoHora(a.scheduled_time)) : ""}</span>
+        <small>Estado: ${escaparHTML(estadoAsignacionBonito(a.status, a.scheduled_date))}</small>
+        ${a.professional_notes ? `<small>📝 ${escaparHTML(a.professional_notes)}</small>` : ""}
         ${
           ["pending", "in_progress"].includes(String(a.status || "pending"))
             ? `
           <div class="rehabV28Acciones">
             <button
               class="rehabV28Btn peligro"
-              data-v41-cancel-assignment="${esc(a.id)}"
+              data-v41-cancel-assignment="${escaparHTML(a.id)}"
               data-v41-cancel-role="professional"
               type="button"
             >
@@ -15209,7 +12395,7 @@ window.rehabGetSupabaseClient = async function () {
 
     c.innerHTML = `
       <div class="rehabV28Aviso">
-        <strong>${esc(rutina.name)}</strong><br>
+        <strong>${escaparHTML(rutina.name)}</strong><br>
         Estos datos se mostrarán al Usuario debajo del video.
       </div>
 
@@ -15217,34 +12403,34 @@ window.rehabGetSupabaseClient = async function () {
         ${(ejercicios || [])
           .map(
             (e, i) => `
-          <div class="rehabV28Card" data-editor-ejercicio="${esc(e.id)}">
-            <div class="rehabV28EjercicioTitulo">${i + 1}. ${esc(modoNombre(e.mode))}</div>
-            <span class="rehabV28Badge">${esc(e.difficulty || "media")}</span>
-            <span class="rehabV28Badge">${esc(e.finish_type || "rondas")}: ${esc(e.finish_value ?? "")}</span>
+          <div class="rehabV28Card" data-editor-ejercicio="${escaparHTML(e.id)}">
+            <div class="rehabV28EjercicioTitulo">${i + 1}. ${escaparHTML(modoNombre(e.mode))}</div>
+            <span class="rehabV28Badge">${escaparHTML(e.difficulty || "media")}</span>
+            <span class="rehabV28Badge">${escaparHTML(e.finish_type || "rondas")}: ${escaparHTML(e.finish_value ?? "")}</span>
 
             <div class="rehabV28Campo">
               <label>Enlace del video</label>
-              <input data-campo="video_url" type="url" value="${esc(e.video_url || "")}"
+              <input data-campo="video_url" type="url" value="${escaparHTML(e.video_url || "")}"
                 placeholder="https://youtube.com/...">
 
             </div>
 
             <div class="rehabV28Campo">
               <label>Distancia recomendada entre Pods</label>
-              <input data-campo="pod_distance" type="text" value="${esc(e.pod_distance || "")}"
+              <input data-campo="pod_distance" type="text" value="${escaparHTML(e.pod_distance || "")}"
                 placeholder="Ej. 1,5 m entre cada Pod">
             </div>
 
             <div class="rehabV28Campo">
               <label>Cómo colocar los Pods</label>
               <textarea data-campo="pod_setup"
-                placeholder="Ej. 4 Pods formando un cuadrado; el usuario se coloca en el centro.">${esc(e.pod_setup || "")}</textarea>
+                placeholder="Ej. 4 Pods formando un cuadrado; el usuario se coloca en el centro.">${escaparHTML(e.pod_setup || "")}</textarea>
             </div>
 
             <div class="rehabV28Campo">
               <label>Indicaciones del ejercicio</label>
               <textarea data-campo="instructions"
-                placeholder="Ej. Mantener semiflexión de rodillas, tocar el Pod iluminado y volver al centro.">${esc(e.instructions || "")}</textarea>
+                placeholder="Ej. Mantener semiflexión de rodillas, tocar el Pod iluminado y volver al centro.">${escaparHTML(e.instructions || "")}</textarea>
             </div>
 
             ${e.video_url ? htmlVideo(e.video_url) : ""}
@@ -15354,13 +12540,13 @@ window.rehabGetSupabaseClient = async function () {
         const r = rutinas.get(a.routine_id);
         return `
         <div class="rehabV28Card">
-          <h3 style="margin:0 0 8px">${esc(r?.name || "Rutina")}</h3>
-          <div>👤 ${esc(pros.get(a.professional_id) || "Profesional")}</div>
-          <div>📅 ${esc(fechaBonita(a.scheduled_date))}${a.scheduled_time ? " · " + esc(horaBonita(a.scheduled_time)) : ""}</div>
-          <div>📌 ${esc(estadoAsignacionBonito(a.status, a.scheduled_date))}</div>
-          ${a.professional_notes ? `<div class="rehabV28Dato">📝 ${esc(a.professional_notes)}</div>` : ""}
+          <h3 style="margin:0 0 8px">${escaparHTML(r?.name || "Rutina")}</h3>
+          <div>👤 ${escaparHTML(pros.get(a.professional_id) || "Profesional")}</div>
+          <div>📅 ${escaparHTML(formatoFechaDia(a.scheduled_date))}${a.scheduled_time ? " · " + escaparHTML(formatoHora(a.scheduled_time)) : ""}</div>
+          <div>📌 ${escaparHTML(estadoAsignacionBonito(a.status, a.scheduled_date))}</div>
+          ${a.professional_notes ? `<div class="rehabV28Dato">📝 ${escaparHTML(a.professional_notes)}</div>` : ""}
           <div class="rehabV28Acciones">
-            <button class="rehabV28Btn" data-ver-asignacion="${esc(a.id)}" type="button">
+            <button class="rehabV28Btn" data-ver-asignacion="${escaparHTML(a.id)}" type="button">
               ▶ VER RUTINA
             </button>
             ${
@@ -15368,7 +12554,7 @@ window.rehabGetSupabaseClient = async function () {
                 ? `
               <button
                 class="rehabV28Btn peligro"
-                data-v41-cancel-assignment="${esc(a.id)}"
+                data-v41-cancel-assignment="${escaparHTML(a.id)}"
                 data-v41-cancel-role="user"
                 type="button"
               >
@@ -15399,7 +12585,7 @@ window.rehabGetSupabaseClient = async function () {
       .single();
 
     if (ea) {
-      alert("No se pudo abrir la asignación.");
+      avisarRehab("No se pudo abrir la asignación.", { tipo: "error" });
       return;
     }
 
@@ -15424,7 +12610,7 @@ window.rehabGetSupabaseClient = async function () {
     ]);
 
     if (rutinaResp.error || ejerciciosResp.error) {
-      alert("No se pudo cargar la rutina.");
+      avisarRehab("No se pudo cargar la rutina.", { tipo: "error" });
       return;
     }
 
@@ -15437,11 +12623,11 @@ window.rehabGetSupabaseClient = async function () {
 
     c.innerHTML = `
       <div class="rehabV28Aviso">
-        <strong>${esc(rutina.name)}</strong><br>
-        Profesional: ${esc(profesional?.full_name || "Profesional")}<br>
-        Fecha: ${esc(fechaBonita(a.scheduled_date))}
-        ${a.scheduled_time ? " · " + esc(horaBonita(a.scheduled_time)) : ""}
-        ${rutina.rest_seconds ? `<br>Descanso entre ejercicios: ${esc(rutina.rest_seconds)} s` : ""}
+        <strong>${escaparHTML(rutina.name)}</strong><br>
+        Profesional: ${escaparHTML(profesional?.full_name || "Profesional")}<br>
+        Fecha: ${escaparHTML(formatoFechaDia(a.scheduled_date))}
+        ${a.scheduled_time ? " · " + escaparHTML(formatoHora(a.scheduled_time)) : ""}
+        ${rutina.rest_seconds ? `<br>Descanso entre ejercicios: ${escaparHTML(rutina.rest_seconds)} s` : ""}
       </div>
 
       ${
@@ -15450,7 +12636,7 @@ window.rehabGetSupabaseClient = async function () {
         <div class="rehabV28Dato">
 
           <strong>Indicaciones generales</strong><br>
-          ${esc(a.professional_notes)}
+          ${escaparHTML(a.professional_notes)}
         </div>
       `
           : ""
@@ -15461,9 +12647,9 @@ window.rehabGetSupabaseClient = async function () {
           .map(
             (e, i) => `
           <div class="rehabV28Card">
-            <div class="rehabV28EjercicioTitulo">${i + 1}. ${esc(modoNombre(e.mode))}</div>
-            <span class="rehabV28Badge">Dificultad: ${esc(e.difficulty || "media")}</span>
-            <span class="rehabV28Badge">${esc(e.finish_type || "rondas")}: ${esc(e.finish_value ?? "")}</span>
+            <div class="rehabV28EjercicioTitulo">${i + 1}. ${escaparHTML(modoNombre(e.mode))}</div>
+            <span class="rehabV28Badge">Dificultad: ${escaparHTML(e.difficulty || "media")}</span>
+            <span class="rehabV28Badge">${escaparHTML(e.finish_type || "rondas")}: ${escaparHTML(e.finish_value ?? "")}</span>
 
             ${htmlVideo(e.video_url)}
 
@@ -15472,7 +12658,7 @@ window.rehabGetSupabaseClient = async function () {
                 ? `
               <div class="rehabV28Dato">
                 <strong>📏 Distancia entre Pods</strong><br>
-                ${esc(e.pod_distance)}
+                ${escaparHTML(e.pod_distance)}
               </div>
             `
                 : ""
@@ -15483,7 +12669,7 @@ window.rehabGetSupabaseClient = async function () {
                 ? `
               <div class="rehabV28Dato">
                 <strong>🔵 Colocación de los Pods</strong><br>
-                ${esc(e.pod_setup).replaceAll("\n", "<br>")}
+                ${escaparHTML(e.pod_setup).replaceAll("\n", "<br>")}
               </div>
             `
                 : ""
@@ -15494,7 +12680,7 @@ window.rehabGetSupabaseClient = async function () {
                 ? `
               <div class="rehabV28Dato">
                 <strong>📋 Cómo realizar el ejercicio</strong><br>
-                ${esc(e.instructions).replaceAll("\n", "<br>")}
+                ${escaparHTML(e.instructions).replaceAll("\n", "<br>")}
               </div>
             `
                 : ""
@@ -15517,7 +12703,6 @@ window.rehabGetSupabaseClient = async function () {
   // ARRANQUE
   // -----------------------------------------------------
   function iniciar() {
-    estilos();
     crearModal();
     crearBotonHome();
     console.log("RehabPod V28: asignaciones + guías con video activadas.");
@@ -15583,15 +12768,6 @@ window.rehabGetSupabaseClient = async function () {
     stroop: "Palabra vs color",
   };
 
-  function v29Esc(texto) {
-    return String(texto ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
   function v29NombreModo(modo) {
     return V29_NOMBRES[modo] || modo || "Ejercicio";
   }
@@ -15610,81 +12786,6 @@ window.rehabGetSupabaseClient = async function () {
     }
   }
 
-  // -----------------------------------------------------
-  // ESTILOS
-  // -----------------------------------------------------
-  function v29AgregarEstilos() {
-    if (document.getElementById("rehabV29Estilos")) return;
-
-    const st = document.createElement("style");
-    st.id = "rehabV29Estilos";
-
-    st.textContent = `
-      .rehabV29BtnInicio{
-        appearance:none;border:0;border-radius:13px;padding:12px 16px;font-weight:950;
-        cursor:pointer;background:#16a34a;color:#fff;display:inline-flex;align-items:center;
-        justify-content:center;gap:8px;text-decoration:none
-      }
-
-      .rehabV29Overlay{
-        position:fixed;inset:0;z-index:100500;background:rgba(2,6,23,.88);
-        backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;
-        padding:18px;color:#fff
-      }
-
-      .rehabV29Overlay[hidden]{display:none!important}
-
-      .rehabV29Card{
-        width:min(520px,100%);border-radius:26px;padding:24px 20px;text-align:center;
-
-        background:linear-gradient(160deg,#111c30,#07101f);
-        border:1px solid rgba(148,163,184,.20);
-        box-shadow:0 28px 90px rgba(0,0,0,.50)
-      }
-
-      .rehabV29Progreso{
-        height:8px;background:#1e293b;border-radius:999px;overflow:hidden;margin:17px 0
-      }
-
-      .rehabV29Progreso span{
-        display:block;height:100%;background:#22c55e;border-radius:999px
-      }
-
-      .rehabV29Cuenta{
-        width:112px;height:112px;border-radius:50%;display:flex;align-items:center;
-        justify-content:center;margin:18px auto;font-size:46px;font-weight:950;
-        border:5px solid rgba(34,197,94,.50);background:rgba(34,197,94,.10)
-      }
-
-      .rehabV29Acciones{
-        display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:16px
-      }
-
-      .rehabV29Btn{
-        appearance:none;border:0;border-radius:12px;padding:10px 14px;font-weight:900;
-        cursor:pointer;background:var(--acento);color:var(--acento-tinta)
-      }
-
-      .rehabV29Btn.sec{
-        background:#1e293b;color:#e2e8f0;border:1px solid #334155
-      }
-
-      .rehabV29Resumen{
-        text-align:left;margin:14px 0;padding:12px;border-radius:14px;
-        background:rgba(148,163,184,.07);border:1px solid rgba(148,163,184,.15)
-      }
-
-      .rehabV29Fila{
-        display:flex;justify-content:space-between;gap:12px;padding:7px 0;
-        border-bottom:1px solid rgba(148,163,184,.12)
-      }
-
-      .rehabV29Fila:last-child{border-bottom:0}
-    `;
-
-    document.head.appendChild(st);
-  }
-
   function v29CrearOverlay() {
     if (document.getElementById("rehabV29Overlay")) return;
 
@@ -15692,9 +12793,10 @@ window.rehabGetSupabaseClient = async function () {
     ov.id = "rehabV29Overlay";
     ov.className = "rehabV29Overlay";
     ov.hidden = true;
-    ov.innerHTML = `<div id="rehabV29Card" class="rehabV29Card"></div>`;
+    ov.innerHTML = `<div id="rehabV29Card" class="rehabV29Card" role="dialog" aria-modal="true" aria-label="Rutina asignada"></div>`;
 
     document.body.appendChild(ov);
+    vigilarOverlay(ov, { cerrarConEsc: false });
   }
 
   function v29AbrirOverlay(html) {
@@ -15911,7 +13013,7 @@ window.rehabGetSupabaseClient = async function () {
       v29AbrirOverlay(`
         <div style="font-size:46px">⚠️</div>
         <h2>No se pudo iniciar</h2>
-        <p style="color:#cbd5e1">${v29Esc(error.message)}</p>
+        <p style="color:#cbd5e1">${escaparHTML(error.message)}</p>
         <div class="rehabV29Acciones">
           <button class="rehabV29Btn sec" id="rehabV29CerrarError">VOLVER</button>
         </div>
@@ -15926,7 +13028,7 @@ window.rehabGetSupabaseClient = async function () {
 
     v29AbrirOverlay(`
       <div style="font-size:52px">🏁</div>
-      <h2 style="margin-bottom:6px">${v29Esc(v29Rutina.name)}</h2>
+      <h2 style="margin-bottom:6px">${escaparHTML(v29Rutina.name)}</h2>
       <p style="color:#cbd5e1;margin-top:0">
         ${v29Ejercicios.length} ejercicio${v29Ejercicios.length === 1 ? "" : "s"}
         · ${descanso} s de descanso entre ejercicios
@@ -15938,8 +13040,8 @@ window.rehabGetSupabaseClient = async function () {
             (e, i) => `
 
           <div class="rehabV29Fila">
-            <span>${i + 1}. ${v29Esc(v29NombreModo(e.mode))}</span>
-            <strong>${v29Esc(e.difficulty || "media")}</strong>
+            <span>${i + 1}. ${escaparHTML(v29NombreModo(e.mode))}</span>
+            <strong>${escaparHTML(e.difficulty || "media")}</strong>
           </div>
         `
           )
@@ -16088,10 +13190,10 @@ window.rehabGetSupabaseClient = async function () {
       </div>
 
       <div style="font-size:48px;margin-top:10px">⚡</div>
-      <h2 style="margin-bottom:6px">${v29Esc(v29NombreModo(ejercicio.mode))}</h2>
+      <h2 style="margin-bottom:6px">${escaparHTML(v29NombreModo(ejercicio.mode))}</h2>
 
       <p style="color:#cbd5e1;margin-top:0">
-        Dificultad: <strong>${v29Esc(ejercicio.difficulty || "media")}</strong><br>
+        Dificultad: <strong>${escaparHTML(ejercicio.difficulty || "media")}</strong><br>
         ${
           ejercicio.mode === "contrarreloj"
             ? `Tiempo: <strong>${Number(ejercicio.finish_value || 30)} s</strong>`
@@ -16247,7 +13349,7 @@ window.rehabGetSupabaseClient = async function () {
         SIGUIENTE EJERCICIO
       </div>
 
-      <h3>${v29Esc(v29NombreModo(siguiente.mode))}</h3>
+      <h3>${escaparHTML(v29NombreModo(siguiente.mode))}</h3>
 
       <div id="rehabV29DescansoCuenta" class="rehabV29Cuenta">${restante}</div>
 
@@ -16363,7 +13465,7 @@ window.rehabGetSupabaseClient = async function () {
     v29AbrirOverlay(`
       <div style="font-size:48px">⚠️</div>
       <h2>No se pudo continuar</h2>
-      <p style="color:#cbd5e1">${v29Esc(error?.message || "Error inesperado")}</p>
+      <p style="color:#cbd5e1">${escaparHTML(error?.message || "Error inesperado")}</p>
       <div class="rehabV29Acciones">
         <button id="rehabV29CerrarErrorRutina" class="rehabV29Btn sec">CERRAR</button>
       </div>
@@ -16405,9 +13507,7 @@ window.rehabGetSupabaseClient = async function () {
 
     // Historial local V24
     try {
-      const raw = localStorage.getItem(V29_CLAVE_HISTORIAL);
-      const historialLeido = raw ? JSON.parse(raw) : [];
-      const historial = Array.isArray(historialLeido) ? historialLeido : [];
+      const historial = leerLista(V29_CLAVE_HISTORIAL, "V29");
 
       let perfil = { id: "perfil_local", nombre: "Perfil local" };
 
@@ -16440,7 +13540,7 @@ window.rehabGetSupabaseClient = async function () {
         resultadosEjercicios: v29ResultadosEjercicios,
       });
 
-      localStorage.setItem(V29_CLAVE_HISTORIAL, JSON.stringify(historial));
+      guardarJSON(V29_CLAVE_HISTORIAL, historial, "V29");
     } catch (error) {
       console.warn("V29 historial local:", error);
     }
@@ -16509,7 +13609,7 @@ window.rehabGetSupabaseClient = async function () {
     v29AbrirOverlay(`
       <div style="font-size:58px">🏆</div>
       <h2>¡Rutina completada!</h2>
-      <p style="color:#cbd5e1">${v29Esc(v29Rutina.name)}</p>
+      <p style="color:#cbd5e1">${escaparHTML(v29Rutina.name)}</p>
 
       <div class="rehabV29Progreso">
         <span style="width:100%"></span>
@@ -16585,7 +13685,6 @@ window.rehabGetSupabaseClient = async function () {
   // INICIO V29
   // -----------------------------------------------------
   function v29Iniciar() {
-    v29AgregarEstilos();
     v29CrearOverlay();
     v29PrepararIntegracionV28();
 
@@ -16622,38 +13721,6 @@ window.rehabGetSupabaseClient = async function () {
   let v31Perfil = null;
   let v31UsuarioSeleccionado = null;
 
-  function v31Esc(valor) {
-    return String(valor ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function v31Numero(valor, defecto = 0) {
-    const n = Number(valor);
-    return Number.isFinite(n) ? n : defecto;
-  }
-
-  function v31Fecha(valor) {
-    if (!valor) return "Sin fecha";
-    const d = new Date(valor);
-    if (Number.isNaN(d.getTime())) return String(valor);
-    return d.toLocaleString();
-  }
-
-  function v31Duracion(segundos) {
-    const s = Math.max(0, Math.round(v31Numero(segundos)));
-    const min = Math.floor(s / 60);
-    const seg = s % 60;
-    return `${min}:${String(seg).padStart(2, "0")}`;
-  }
-
-  function v31Precision(valor) {
-    return `${v31Numero(valor).toFixed(1)}%`;
-  }
-
   async function v31IniciarCloud() {
     if (typeof window.rehabGetSupabaseClient !== "function") {
       throw new Error("RehabPod V30 no está disponible.");
@@ -16681,107 +13748,14 @@ window.rehabGetSupabaseClient = async function () {
     return true;
   }
 
-  function v31AgregarEstilos() {
-    if (document.getElementById("rehabV31Estilos")) return;
-
-    const st = document.createElement("style");
-    st.id = "rehabV31Estilos";
-    st.textContent = `
-      .rehabV31HomeBtn{
-        display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
-        min-height:48px;margin-top:10px;border-radius:14px;cursor:pointer;
-        border:1px solid rgba(34,197,94,.30);background:rgba(34,197,94,.08);
-        color:inherit;font-weight:900
-      }
-      .rehabV31Overlay{
-        position:fixed;inset:0;z-index:100650;background:rgba(2,6,23,.82);
-        backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:16px
-      }
-      .rehabV31Overlay[hidden]{display:none!important}
-      .rehabV31Modal{
-        width:min(980px,100%);max-height:94vh;overflow:auto;border-radius:24px;padding:20px;
-        background:var(--tarjeta);color:inherit;
-        border:1px solid rgba(148,163,184,.22);box-shadow:0 25px 80px rgba(0,0,0,.44)
-      }
-      .tema-claro .rehabV31Modal{background:#fff}
-      .rehabV31Head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:15px}
-      .rehabV31Cerrar{width:42px;height:42px;border-radius:12px;border:1px solid rgba(148,163,184,.25);
-        background:rgba(148,163,184,.08);color:inherit;font-size:20px;cursor:pointer}
-      .rehabV31Grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
-      .rehabV31Kpi{
-        padding:14px;border-radius:16px;background:rgba(148,163,184,.06);
-        border:1px solid rgba(148,163,184,.16)
-      }
-      .rehabV31Kpi small{display:block;opacity:.68;font-weight:850;margin-bottom:7px}
-      .rehabV31Kpi strong{font-size:1.35rem}
-      .rehabV31Card{
-        border:1px solid rgba(148,163,184,.18);border-radius:16px;padding:14px;
-        margin:10px 0;background:rgba(148,163,184,.045)
-      }
-      .rehabV31Fila{display:flex;justify-content:space-between;gap:12px;align-items:center}
-      .rehabV31Mutado{opacity:.68;font-size:.86rem}
-      .rehabV31Btn{
-        appearance:none;border:0;border-radius:11px;padding:9px 12px;font-weight:900;
-        cursor:pointer;background:#16a34a;color:white
-
-      }
-      .rehabV31Btn.sec{background:rgba(148,163,184,.14);color:inherit;border:1px solid rgba(148,163,184,.24)}
-      .rehabV31Select{
-        width:100%;padding:10px;border-radius:11px;border:1px solid rgba(148,163,184,.24);
-        background:rgba(148,163,184,.07);color:inherit;font:inherit
-      }
-      .rehabV31Barra{height:9px;border-radius:999px;background:rgba(148,163,184,.14);overflow:hidden;margin-top:8px}
-      .rehabV31Barra span{display:block;height:100%;border-radius:999px;background:#22c55e}
-      .rehabV31Detalle{margin-top:12px;padding-top:12px;border-top:1px solid rgba(148,163,184,.14)}
-      .rehabV31Ejercicio{
-        padding:9px 10px;border-radius:11px;background:rgba(148,163,184,.05);margin:7px 0
-      }
-      .rehabV31Aviso{
-        padding:13px;border-radius:14px;background:rgba(14,165,233,.08);
-        border:1px solid rgba(14,165,233,.18);line-height:1.5
-      }
-      .rehabV31Evolucion{display:grid;gap:8px;margin-top:10px}
-      .rehabV31EvoFila{display:grid;grid-template-columns:130px 1fr 65px;gap:8px;align-items:center;font-size:.85rem}
-      .rehabV39Filtros{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
-      .rehabV39Campo{display:grid;gap:6px}
-      .rehabV39Campo label{font-size:.75rem;font-weight:900;opacity:.68}
-      .rehabV39Tendencia{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:.82rem;opacity:.78}
-      .rehabV39Punto{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block}
-      .rehabV39Vacio{text-align:center;padding:24px 12px;opacity:.72}
-      @media(max-width:760px){
-        .rehabV31Grid{grid-template-columns:1fr 1fr}
-        .rehabV31EvoFila{grid-template-columns:90px 1fr 55px}
-        .rehabV39Filtros{grid-template-columns:1fr}
-      }
-    `;
-    document.head.appendChild(st);
-  }
-
   function v31CrearModal() {
-    if (document.getElementById("rehabV31Overlay")) return;
-
-    const ov = document.createElement("div");
-    ov.id = "rehabV31Overlay";
-    ov.className = "rehabV31Overlay";
-    ov.hidden = true;
-    ov.innerHTML = `
-      <div class="rehabV31Modal">
-        <div class="rehabV31Head">
-          <div>
-            <div style="font-size:.72rem;opacity:.65;font-weight:900">REHABPOD CLOUD</div>
-            <h2 id="rehabV31Titulo" style="margin:0">Progreso cloud</h2>
-          </div>
-          <button id="rehabV31Cerrar" class="rehabV31Cerrar" type="button">×</button>
-        </div>
-        <div id="rehabV31Contenido"></div>
-      </div>
-    `;
-
-    document.body.appendChild(ov);
-
-    document.getElementById("rehabV31Cerrar").onclick = v31Cerrar;
-    ov.addEventListener("click", (e) => {
-      if (e.target === ov) v31Cerrar();
+    modalRehab({
+      id: "rehabV31",
+      titulo: "Progreso cloud",
+      eyebrow: "REHABPOD CLOUD",
+      clase: "rehabV31Modal",
+      ancho: 980,
+      z: "calc(var(--z-modal) + 7)",
     });
   }
 
@@ -16831,15 +13805,15 @@ window.rehabGetSupabaseClient = async function () {
     const total = sesiones.length;
 
     const precision =
-      total > 0 ? sesiones.reduce((s, x) => s + v31Numero(x.precision), 0) / total : 0;
+      total > 0 ? sesiones.reduce((s, x) => s + numeroSeguro(x.precision), 0) / total : 0;
 
     const duracion =
       total > 0
-        ? sesiones.reduce((s, x) => s + v31Numero(x.duration_seconds), 0) / total
+        ? sesiones.reduce((s, x) => s + numeroSeguro(x.duration_seconds), 0) / total
         : 0;
 
-    const aciertos = sesiones.reduce((s, x) => s + v31Numero(x.hits), 0);
-    const errores = sesiones.reduce((s, x) => s + v31Numero(x.errors), 0);
+    const aciertos = sesiones.reduce((s, x) => s + numeroSeguro(x.hits), 0);
+    const errores = sesiones.reduce((s, x) => s + numeroSeguro(x.errors), 0);
 
     return { total, precision, duracion, aciertos, errores };
   }
@@ -16855,11 +13829,11 @@ window.rehabGetSupabaseClient = async function () {
         </div>
         <div class="rehabV31Kpi">
           <small>PRECISIÓN PROMEDIO</small>
-          <strong>${v31Precision(r.precision)}</strong>
+          <strong>${formatoPrecision(r.precision)}</strong>
         </div>
         <div class="rehabV31Kpi">
           <small>TIEMPO PROMEDIO</small>
-          <strong>${v31Duracion(r.duracion)}</strong>
+          <strong>${formatoDuracionReloj(r.duracion)}</strong>
         </div>
         <div class="rehabV31Kpi">
           <small>ACIERTOS / ERRORES</small>
@@ -16881,11 +13855,11 @@ window.rehabGetSupabaseClient = async function () {
         <div class="rehabV31Evolucion">
           ${ultimas
             .map((s) => {
-              const p = Math.max(0, Math.min(100, v31Numero(s.precision)));
+              const p = Math.max(0, Math.min(100, numeroSeguro(s.precision)));
               return `
                 <div class="rehabV31EvoFila">
-                  <span title="${v31Esc(v31Fecha(s.performed_at))}">
-                    ${v31Esc(String(s.routine_name || "Rutina").slice(0, 18))}
+                  <span title="${escaparHTML(formatoFecha(s.performed_at))}">
+                    ${escaparHTML(String(s.routine_name || "Rutina").slice(0, 18))}
                   </span>
                   <div class="rehabV31Barra"><span style="width:${p}%"></span></div>
                   <strong>${p.toFixed(0)}%</strong>
@@ -16918,23 +13892,23 @@ window.rehabGetSupabaseClient = async function () {
         <strong>Detalle por ejercicio</strong>
         ${ejercicios
           .map((e, i) => {
-            const intentos = v31Numero(e.aciertos) + v31Numero(e.errores);
+            const intentos = numeroSeguro(e.aciertos) + numeroSeguro(e.errores);
             const precision =
-              intentos > 0 ? (v31Numero(e.aciertos) / intentos) * 100 : 100;
+              intentos > 0 ? (numeroSeguro(e.aciertos) / intentos) * 100 : 100;
 
             return `
               <div class="rehabV31Ejercicio">
                 <div class="rehabV31Fila">
-                  <strong>${i + 1}. ${v31Esc(e.nombre || e.modo || "Ejercicio")}</strong>
+                  <strong>${i + 1}. ${escaparHTML(e.nombre || e.modo || "Ejercicio")}</strong>
                   <span>${precision.toFixed(1)}%</span>
                 </div>
                 <div class="rehabV31Mutado">
-                  Dificultad: ${v31Esc(e.dificultad || "-")} ·
-                  Aciertos: ${v31Numero(e.aciertos)} ·
-                  Errores: ${v31Numero(e.errores)}
+                  Dificultad: ${escaparHTML(e.dificultad || "-")} ·
+                  Aciertos: ${numeroSeguro(e.aciertos)} ·
+                  Errores: ${numeroSeguro(e.errores)}
                   ${
                     e.promedio != null
-                      ? ` · Promedio: ${v31Numero(e.promedio).toFixed(3)} s`
+                      ? ` · Promedio: ${numeroSeguro(e.promedio).toFixed(3)} s`
                       : ""
                   }
                 </div>
@@ -16962,23 +13936,23 @@ window.rehabGetSupabaseClient = async function () {
         <div class="rehabV31Card">
           <div class="rehabV31Fila">
             <div>
-              <strong>${v31Esc(s.routine_name || "Rutina")}</strong>
-              <div class="rehabV31Mutado">${v31Esc(v31Fecha(s.performed_at))}</div>
+              <strong>${escaparHTML(s.routine_name || "Rutina")}</strong>
+              <div class="rehabV31Mutado">${escaparHTML(formatoFecha(s.performed_at))}</div>
             </div>
-            <button class="rehabV31Btn sec" data-v31-detalle="${v31Esc(s.id)}">
+            <button class="rehabV31Btn sec" data-v31-detalle="${escaparHTML(s.id)}">
               VER DETALLE
             </button>
           </div>
 
           <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px">
-            <span>🎯 ${v31Precision(s.precision)}</span>
-            <span>⏱️ ${v31Duracion(s.duration_seconds)}</span>
-            <span>✅ ${v31Numero(s.hits)}</span>
-            <span>❌ ${v31Numero(s.errors)}</span>
-            <span>📋 ${v31Numero(s.completed_percent).toFixed(0)}%</span>
+            <span>🎯 ${formatoPrecision(s.precision)}</span>
+            <span>⏱️ ${formatoDuracionReloj(s.duration_seconds)}</span>
+            <span>✅ ${numeroSeguro(s.hits)}</span>
+            <span>❌ ${numeroSeguro(s.errors)}</span>
+            <span>📋 ${numeroSeguro(s.completed_percent).toFixed(0)}%</span>
           </div>
 
-          <div id="rehabV31Detalle-${v31Esc(s.id)}" hidden>
+          <div id="rehabV31Detalle-${escaparHTML(s.id)}" hidden>
             ${v31EjerciciosSesion(s)}
           </div>
         </div>
@@ -17026,7 +14000,7 @@ window.rehabGetSupabaseClient = async function () {
     ].sort((a, b) => a.localeCompare(b));
 
     return nombres
-      .map((n) => `<option value="${v31Esc(n)}">${v31Esc(n)}</option>`)
+      .map((n) => `<option value="${escaparHTML(n)}">${escaparHTML(n)}</option>`)
       .join("");
   }
 
@@ -17066,7 +14040,9 @@ window.rehabGetSupabaseClient = async function () {
     const anterior = orden.slice(0, mitad);
     const reciente = orden.slice(mitad);
     const prom = (arr) =>
-      arr.length ? arr.reduce((s, x) => s + v31Numero(x.precision), 0) / arr.length : 0;
+      arr.length
+        ? arr.reduce((s, x) => s + numeroSeguro(x.precision), 0) / arr.length
+        : 0;
     const dif = prom(reciente) - prom(anterior);
     const texto =
       Math.abs(dif) < 0.5
@@ -17195,9 +14171,9 @@ window.rehabGetSupabaseClient = async function () {
           ${usuarios
             .map(
               (u) =>
-                `<option value="${v31Esc(u.user_id)}" ${
+                `<option value="${escaparHTML(u.user_id)}" ${
                   u.user_id === seleccionado.user_id ? "selected" : ""
-                }>${v31Esc(u.full_name || "Usuario")} · ${v31Esc(
+                }>${escaparHTML(u.full_name || "Usuario")} · ${escaparHTML(
                   u.specialty || "sin especialidad"
                 )}</option>`
             )
@@ -17221,7 +14197,7 @@ window.rehabGetSupabaseClient = async function () {
         const sesiones = await v31SesionesDeUsuario(select.value);
 
         panel.innerHTML = `
-          <h3>${v31Esc(usuario?.full_name || "Usuario")}</h3>
+          <h3>${escaparHTML(usuario?.full_name || "Usuario")}</h3>
           ${v39HtmlFiltros(sesiones, "rehabV39Prof")}
           <div id="rehabV39ProfPanel"></div>
         `;
@@ -17229,7 +14205,7 @@ window.rehabGetSupabaseClient = async function () {
         v39ActivarFiltros(sesiones, "rehabV39Prof", "rehabV39ProfPanel");
       } catch (error) {
         console.error("V31 progreso profesional:", error);
-        panel.innerHTML = `<div class="rehabV31Aviso">${v31Esc(rehabMensajeError(error))}</div>`;
+        panel.innerHTML = `<div class="rehabV31Aviso">${escaparHTML(rehabMensajeError(error))}</div>`;
       }
     }
 
@@ -17275,13 +14251,12 @@ window.rehabGetSupabaseClient = async function () {
       return true;
     } catch (error) {
       console.error("RehabPod V31:", error);
-      c.innerHTML = `<div class="rehabV31Aviso">${v31Esc(rehabMensajeError(error))}</div>`;
+      c.innerHTML = `<div class="rehabV31Aviso">${escaparHTML(rehabMensajeError(error))}</div>`;
       return false;
     }
   }
 
   function v31Iniciar() {
-    v31AgregarEstilos();
     v31CrearModal();
     v31CrearBotonHome();
     console.log("RehabPod V31: historial cloud + panel de progreso activados.");
@@ -17497,75 +14472,15 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
 // =====================================================
 
 (function () {
-  function v36AgregarEstilos() {
-    if (document.getElementById("rehabV36Estilos")) return;
-
-    const st = document.createElement("style");
-    st.id = "rehabV36Estilos";
-    st.textContent = `
-      .rehabV36Oculto{display:none!important}
-
-      .rehabV36ConfirmOverlay{
-        position:fixed;inset:0;z-index:101000;background:rgba(2,6,23,.88);
-        backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;
-        padding:18px
-      }
-      .rehabV36ConfirmOverlay[hidden]{display:none!important}
-
-      .rehabV36ConfirmCard{
-        width:min(440px,100%);border-radius:24px;padding:22px 18px;
-        background:var(--tarjeta);color:inherit;
-        border:1px solid rgba(239,68,68,.28);
-        box-shadow:0 28px 90px rgba(0,0,0,.50);text-align:center
-      }
-      .tema-claro .rehabV36ConfirmCard{background:#fff}
-
-      .rehabV36Icono{
-        width:66px;height:66px;border-radius:50%;display:flex;align-items:center;
-        justify-content:center;margin:0 auto 12px;background:rgba(239,68,68,.12);
-        border:1px solid rgba(239,68,68,.28);font-size:31px
-      }
-
-      .rehabV36Lista{
-        text-align:left;margin:15px 0;padding:12px 14px;border-radius:14px;
-        background:rgba(148,163,184,.06);border:1px solid rgba(148,163,184,.15);
-        font-size:.87rem;line-height:1.55
-      }
-
-      .rehabV36Acciones{
-        display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px
-      }
-
-      .rehabV36Btn{
-        border:0;border-radius:12px;padding:11px 12px;font-weight:900;cursor:pointer
-      }
-      .rehabV36BtnCancelar{
-        background:rgba(148,163,184,.14);color:inherit;
-        border:1px solid rgba(148,163,184,.22)
-      }
-      .rehabV36BtnEliminar{background:#b91c1c;color:#fff}
-
-      @media(max-width:480px){
-        .rehabV36Acciones{grid-template-columns:1fr}
-      }
-    `;
-    document.head.appendChild(st);
-  }
-
-  function v36CrearConfirmacion() {
-    if (document.getElementById("rehabV36ConfirmOverlay")) return;
-
-    const ov = document.createElement("div");
-    ov.id = "rehabV36ConfirmOverlay";
-    ov.className = "rehabV36ConfirmOverlay";
-    ov.hidden = true;
-
-    ov.innerHTML = `
-      <div class="rehabV36ConfirmCard" role="dialog" aria-modal="true">
-        <div class="rehabV36Icono">⚠️</div>
-        <h2 style="margin:0 0 8px">Desvincular cuenta</h2>
-        <p id="rehabV36ConfirmTexto" style="margin:0;opacity:.78;line-height:1.5"></p>
-
+  window.v36ConfirmarDesvinculacion = function (nombre) {
+    return confirmarRehab({
+      titulo: "Desvincular cuenta",
+      icono: "⚠️",
+      peligro: true,
+      aceptar: "SÍ, DESVINCULAR",
+      cancelar: "CANCELAR",
+      mensaje: `¿Deseas desvincular a ${nombre || "esta cuenta"}?`,
+      detalleHTML: `
         <div class="rehabV36Lista">
           <strong>Al desvincular:</strong><br>
           • El Usuario dejará de recibir nuevas rutinas de este Profesional.<br>
@@ -17573,59 +14488,7 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
           • Las asignaciones pendientes pueden dejar de estar disponibles para esa relación.<br><br>
           <strong>Importante:</strong> los resultados e historial que ya fueron guardados
           no se eliminan automáticamente de Supabase.
-        </div>
-
-        <div class="rehabV36Acciones">
-          <button id="rehabV36Cancelar" class="rehabV36Btn rehabV36BtnCancelar" type="button">
-            CANCELAR
-          </button>
-          <button id="rehabV36Confirmar" class="rehabV36Btn rehabV36BtnEliminar" type="button">
-            SÍ, DESVINCULAR
-          </button>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(ov);
-  }
-
-  window.v36ConfirmarDesvinculacion = function (nombre) {
-    return new Promise((resolve) => {
-      const ov = document.getElementById("rehabV36ConfirmOverlay");
-      const texto = document.getElementById("rehabV36ConfirmTexto");
-      const cancelar = document.getElementById("rehabV36Cancelar");
-      const confirmar = document.getElementById("rehabV36Confirmar");
-
-      if (!ov || !texto || !cancelar || !confirmar) {
-        resolve(
-          confirm(
-            `¿Desvincular a ${nombre}?\\n\\n` +
-              "Se perderá la relación profesional-usuario y el acceso compartido futuro."
-          )
-        );
-        return;
-      }
-
-      texto.innerHTML = `¿Deseas desvincular a <strong>${String(nombre || "esta cuenta")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")}</strong>?`;
-
-      ov.hidden = false;
-
-      const cerrar = (valor) => {
-        ov.hidden = true;
-        cancelar.onclick = null;
-        confirmar.onclick = null;
-        resolve(valor);
-      };
-
-      cancelar.onclick = () => cerrar(false);
-      confirmar.onclick = () => cerrar(true);
-
-      ov.onclick = (e) => {
-        if (e.target === ov) cerrar(false);
-      };
+        </div>`,
     });
   };
 
@@ -17670,8 +14533,6 @@ console.log("RehabPod V32: estados de asignaciones + ocultar completadas activad
   }
 
   function v36Iniciar() {
-    v36AgregarEstilos();
-    v36CrearConfirmacion();
     v36OcultarResumenDuplicado();
     v36LimpiarTextoInicio();
     // V36.2: limpieza aplicada una sola vez. Sin observer global.
@@ -17759,16 +14620,29 @@ function rehabConfigurarDesplegable(idBoton, idFlecha, idContenido, abiertoPorDe
 }
 
 async function abrirProgresoNav() {
-  const cloudActiva = await navHaySesionCloud();
-
-  mostrarProgreso();
+  // La pantalla cambia YA, de inmediato. Todo lo que depende de la nube
+  // (más abajo) se resuelve después, sin bloquear esto.
   mostrarPantalla(pantallaProgreso);
+
+  try {
+    mostrarProgreso();
+  } catch (error) {
+    console.error("Error mostrando el progreso local:", error);
+  }
 
   // Los entrenamientos individuales (modos libres, no asignados por un
   // profesional) solo existen en este dispositivo. Se muestran siempre,
   // como sección desplegable para no saturar la pantalla.
   const btnLocal = document.getElementById("rehabToggleProgresoLocal");
   if (btnLocal) btnLocal.style.display = "";
+
+  let cloudActiva = false;
+  try {
+    cloudActiva = await navHaySesionCloud();
+  } catch (error) {
+    console.warn("No se pudo verificar la sesión Cloud:", error);
+  }
+
   rehabConfigurarDesplegable(
     "rehabToggleProgresoLocal",
     "rehabToggleProgresoLocalFlecha",
@@ -17851,7 +14725,7 @@ function rehabMostrarModalNuevaContrasena() {
   const overlay = document.createElement("div");
   overlay.id = "rehabModalNuevaContrasena";
   overlay.style.cssText = `
-    position:fixed;inset:0;z-index:999998;display:flex;align-items:center;
+    position:fixed;inset:0;z-index:var(--z-bloqueo);display:flex;align-items:center;
     justify-content:center;padding:20px;background:rgba(0,0,0,.65);
   `;
 
@@ -17863,14 +14737,14 @@ function rehabMostrarModalNuevaContrasena() {
         Escribe la nueva contraseña para tu cuenta de RehabPod.
       </p>
       <label style="display:block;font-size:12px;color:var(--texto2);margin-bottom:4px;">Nueva contraseña</label>
-      <input id="rehabNuevaPass1" type="password" minlength="6" autocomplete="new-password"
+      <input id="rehabNuevaPass1" type="password" minlength="10" autocomplete="new-password"
         style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--borde);
         background:var(--tarjeta2);color:var(--texto);margin-bottom:10px;">
       <label style="display:block;font-size:12px;color:var(--texto2);margin-bottom:4px;">Confirmar contraseña</label>
-      <input id="rehabNuevaPass2" type="password" minlength="6" autocomplete="new-password"
+      <input id="rehabNuevaPass2" type="password" minlength="10" autocomplete="new-password"
         style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--borde);
         background:var(--tarjeta2);color:var(--texto);margin-bottom:6px;">
-      <div id="rehabNuevaPassAviso" style="font-size:12px;color:var(--rojo);min-height:16px;margin-bottom:10px;"></div>
+      <div id="rehabNuevaPassAviso" style="font-size:12px;color:var(--rojo-texto);min-height:16px;margin-bottom:10px;"></div>
       <button id="rehabNuevaPassGuardar" class="boton botonPrincipal" style="margin:0;">
         Guardar contraseña
       </button>
@@ -17907,8 +14781,9 @@ function rehabMostrarModalNuevaContrasena() {
       }
 
       overlay.remove();
-      alert(
-        "Tu contraseña se actualizó correctamente. Ya puedes usarla para iniciar sesión."
+      avisarRehab(
+        "Tu contraseña se actualizó correctamente. Ya puedes usarla para iniciar sesión.",
+        { tipo: "exito" }
       );
     } finally {
       btn.disabled = false;
@@ -17936,6 +14811,12 @@ rehabConfigurarRecuperacionContrasena();
 console.log("RehabPod: navegación inferior (Inicio/Progreso/Historial/Cuenta) lista.");
 
 // =====================================================
+// ASISTENTE DE RUTINAS
+// Vive en js/asistente.js (se carga después de este archivo) y el generador
+// de rutinas en js/plan.js. Aquí solo queda la nota de dónde encontrarlo.
+// =====================================================
+
+// =====================================================
 // REHABPOD V39
 // PROGRESO MEJORADO: filtros, tendencia, KPIs y sesiones
 // =====================================================
@@ -17961,15 +14842,6 @@ setTimeout(() => {
   let v40User = null;
   let v40Perfil = null;
   let v40Relaciones = [];
-
-  function v40Esc(v) {
-    return String(v ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
 
   function v40Rol(role) {
     return role === "professional" ? "Profesional" : "Usuario";
@@ -18021,9 +14893,9 @@ setTimeout(() => {
     return lista
       .map(
         ([valor, etiqueta]) =>
-          `<option value="${v40Esc(valor)}" ${
+          `<option value="${escaparHTML(valor)}" ${
             valor === actual ? "selected" : ""
-          }>${v40Esc(etiqueta)}</option>`
+          }>${escaparHTML(etiqueta)}</option>`
       )
       .join("");
   }
@@ -18032,90 +14904,6 @@ setTimeout(() => {
     if (typeof window.rehabGetSupabaseClient !== "function") return null;
     v40Cloud = await window.rehabGetSupabaseClient();
     return v40Cloud;
-  }
-
-  function v40AgregarEstilos() {
-    if (document.getElementById("rehabV40Estilos")) return;
-
-    const st = document.createElement("style");
-    st.id = "rehabV40Estilos";
-    st.textContent = `
-      .rehabV40Wrap{display:grid;gap:12px}
-      .rehabV40Hero{
-        display:flex;align-items:center;gap:14px;padding:16px;border-radius:20px;
-        border:1px solid rgba(148,163,184,.18);
-        background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(34,197,94,.06))
-      }
-      .rehabV40Avatar{
-        width:62px;height:62px;border-radius:50%;display:flex;align-items:center;
-        justify-content:center;flex:0 0 auto;font-size:25px;font-weight:950;
-        background:rgba(34,197,94,.13);border:2px solid rgba(34,197,94,.38)
-      }
-      .rehabV40Hero h3{margin:0;font-size:1.18rem}
-      .rehabV40Hero small{display:block;opacity:.65;margin-top:4px}
-      .rehabV40Badge{
-        display:inline-flex;padding:4px 8px;border-radius:999px;margin-top:7px;
-        font-size:.72rem;font-weight:900;background:rgba(59,130,246,.10);
-        border:1px solid rgba(59,130,246,.20)
-      }
-      .rehabV40Card{
-        border:1px solid rgba(148,163,184,.18);border-radius:18px;padding:15px;
-        background:rgba(148,163,184,.04)
-      }
-      .rehabV40SecTitulo{
-        font-size:.78rem;font-weight:950;letter-spacing:.7px;opacity:.66;margin-bottom:11px
-      }
-      .rehabV40Dato{
-        display:flex;justify-content:space-between;gap:16px;padding:8px 0;
-        border-bottom:1px solid rgba(148,163,184,.12)
-      }
-      .rehabV40Dato:last-child{border-bottom:0}
-      .rehabV40Dato span:first-child{opacity:.65}
-      .rehabV40Campo{display:grid;gap:6px;margin:10px 0}
-      .rehabV40Campo label{font-size:.76rem;font-weight:900;opacity:.70}
-      .rehabV40Campo input,.rehabV40Campo select{
-        width:100%;box-sizing:border-box;padding:10px 11px;border-radius:11px;
-        border:1px solid rgba(148,163,184,.24);
-        background:rgba(148,163,184,.07);color:inherit;font:inherit
-      }
-      .rehabV40Acciones{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
-      .rehabV40Btn{
-
-        appearance:none;border:0;border-radius:11px;padding:10px 13px;font-weight:900;
-        cursor:pointer;background:var(--acento);color:var(--acento-tinta)
-      }
-      .rehabV40Btn.sec{
-        background:rgba(148,163,184,.14);color:inherit;border:1px solid rgba(148,163,184,.24)
-      }
-      .rehabV40Btn.ok{background:#16a34a}
-      .rehabV40Btn.peligro{background:#b91c1c}
-      .rehabV40Switch{
-        display:flex;align-items:center;justify-content:space-between;gap:14px;padding:9px 0
-      }
-      .rehabV40Switch input{width:22px;height:22px;accent-color:#22c55e}
-      .rehabV40Relacion{
-        display:flex;justify-content:space-between;align-items:center;gap:10px;
-        padding:10px;border-radius:12px;background:rgba(148,163,184,.055);margin:7px 0
-      }
-      .rehabV40Relacion small{display:block;opacity:.64;margin-top:3px}
-      .rehabV40Aviso{
-        padding:12px;border-radius:13px;background:rgba(14,165,233,.08);
-        border:1px solid rgba(14,165,233,.18);line-height:1.48
-      }
-      .rehabV40Mensaje{margin-top:9px;font-size:.84rem;line-height:1.45}
-      .rehabV40Mensaje.ok{color:#22c55e}
-      .rehabV40Mensaje.error{color:#ef4444}
-      .rehabV40Local{
-        display:flex;align-items:center;justify-content:space-between;gap:12px
-      }
-      @media(max-width:560px){
-        .rehabV40Hero{align-items:flex-start}
-        .rehabV40Dato{display:grid;gap:4px}
-        .rehabV40Relacion{align-items:flex-start;flex-direction:column}
-        .rehabV40Relacion .rehabV40Btn{width:100%}
-      }
-    `;
-    document.head.appendChild(st);
   }
 
   function v40Mensaje(id, texto, tipo = "") {
@@ -18226,7 +15014,7 @@ setTimeout(() => {
         <div class="rehabV40SecTitulo">PERFIL EN ESTE DISPOSITIVO</div>
         <div class="rehabV40Local">
           <div>
-            <strong>${v40Esc(p.nombre || "Perfil")}</strong>
+            <strong>${escaparHTML(p.nombre || "Perfil")}</strong>
             <div style="opacity:.63;font-size:.82rem;margin-top:3px">
               ${Array.isArray(p.historial) ? p.historial.length : 0} entrenamientos locales
             </div>
@@ -18263,11 +15051,11 @@ setTimeout(() => {
 
     return `
       <div class="rehabV40Hero">
-        <div class="rehabV40Avatar">${v40Esc(inicial)}</div>
+        <div class="rehabV40Avatar">${escaparHTML(inicial)}</div>
         <div style="min-width:0">
-          <h3>${v40Esc(p.full_name || "Cuenta RehabPod")}</h3>
-          <small style="overflow-wrap:anywhere">${v40Esc(v40User.email || "")}</small>
-          <span class="rehabV40Badge">${v40Esc(v40Rol(p.role))}</span>
+          <h3>${escaparHTML(p.full_name || "Cuenta RehabPod")}</h3>
+          <small style="overflow-wrap:anywhere">${escaparHTML(v40User.email || "")}</small>
+          <span class="rehabV40Badge">${escaparHTML(v40Rol(p.role))}</span>
         </div>
       </div>
 
@@ -18276,22 +15064,22 @@ setTimeout(() => {
 
         <div class="rehabV40Dato">
           <span>Nombre</span>
-          <strong>${v40Esc(p.full_name || "Sin nombre")}</strong>
+          <strong>${escaparHTML(p.full_name || "Sin nombre")}</strong>
         </div>
         <div class="rehabV40Dato">
           <span>Tipo de cuenta</span>
-          <strong>${v40Esc(v40Rol(p.role))}</strong>
+          <strong>${escaparHTML(v40Rol(p.role))}</strong>
         </div>
         <div class="rehabV40Dato">
           <span>Especialidad / uso</span>
-          <strong>${v40Esc(v40EspecialidadLabel(p.specialty))}</strong>
+          <strong>${escaparHTML(v40EspecialidadLabel(p.specialty))}</strong>
         </div>
         ${
           p.user_code
             ? `
           <div class="rehabV40Dato">
             <span>Código de vinculación</span>
-            <strong>${v40Esc(p.user_code)}</strong>
+            <strong>${escaparHTML(p.user_code)}</strong>
           </div>
         `
             : ""
@@ -18306,20 +15094,14 @@ setTimeout(() => {
         <div id="rehabV40EditorPerfil" hidden>
           <div class="rehabV40Campo">
             <label>NOMBRE</label>
-            <input id="rehabV40Nombre" type="text" maxlength="80" value="${v40Esc(
+            <input id="rehabV40Nombre" type="text" maxlength="80" value="${escaparHTML(
               p.full_name || ""
             )}">
           </div>
 
-          <div class="rehabV40Campo">
-            <label>TIPO DE CUENTA</label>
-            <select id="rehabV40Rol">
-              <option value="user" ${p.role === "user" ? "selected" : ""}>Usuario</option>
-              <option value="professional" ${p.role === "professional" ? "selected" : ""}>Profesional</option>
-            </select>
-            <div style="font-size:.76rem;opacity:.65;line-height:1.4;margin-top:2px">
-              Si cambias el tipo de cuenta, revisa también la especialidad/uso debajo.
-            </div>
+          <div class="rehabV40Dato">
+            <span>Tipo de cuenta</span>
+            <strong>${escaparHTML(v40Rol(p.role))}</strong>
           </div>
 
           <div class="rehabV40Campo">
@@ -18362,14 +15144,14 @@ setTimeout(() => {
                   (r) => `
             <div class="rehabV40Relacion">
               <div>
-                <strong>${v40Esc(r.nombre)}</strong>
-                <small>${v40Esc(r.detalle)}</small>
+                <strong>${escaparHTML(r.nombre)}</strong>
+                <small>${escaparHTML(r.detalle)}</small>
               </div>
               <button
                 class="rehabV40Btn peligro"
                 type="button"
-                data-v40-desvincular="${v40Esc(r.id)}"
-                data-v40-nombre="${v40Esc(r.nombre)}"
+                data-v40-desvincular="${escaparHTML(r.id)}"
+                data-v40-nombre="${escaparHTML(r.nombre)}"
               >
                 DESVINCULAR
               </button>
@@ -18400,14 +15182,14 @@ setTimeout(() => {
 
         <div class="rehabV40Campo">
           <label>NUEVA CONTRASEÑA</label>
-          <input id="rehabV40Password1" type="password" minlength="8" autocomplete="new-password"
-            placeholder="Mínimo 8 caracteres">
+          <input id="rehabV40Password1" type="password" minlength="10" autocomplete="new-password"
+            placeholder="10+ caracteres, mayúscula, minúscula y número">
         </div>
 
 
         <div class="rehabV40Campo">
           <label>REPETIR CONTRASEÑA</label>
-          <input id="rehabV40Password2" type="password" minlength="8" autocomplete="new-password"
+          <input id="rehabV40Password2" type="password" minlength="10" autocomplete="new-password"
             placeholder="Repite la contraseña">
         </div>
 
@@ -18417,35 +15199,6 @@ setTimeout(() => {
           </button>
         </div>
         <div id="rehabV40MensajePassword"></div>
-      </div>
-    `;
-  }
-
-  function v40HtmlPreferencias() {
-    const sonidos = !!ajustesApp?.sonidos;
-    const tema = ajustesApp?.tema || "oscuro";
-
-    return `
-      <div class="rehabV40Card">
-        <div class="rehabV40SecTitulo">PREFERENCIAS</div>
-
-        <div class="rehabV40Switch">
-          <div>
-            <strong>Sonidos</strong>
-            <div style="font-size:.8rem;opacity:.63;margin-top:3px">
-              Aciertos, errores y cuenta regresiva.
-            </div>
-          </div>
-          <input id="rehabV40Sonidos" type="checkbox" ${sonidos ? "checked" : ""}>
-        </div>
-
-        <div class="rehabV40Campo">
-          <label>TEMA</label>
-          <select id="rehabV40Tema">
-            <option value="oscuro" ${tema === "oscuro" ? "selected" : ""}>Oscuro</option>
-            <option value="claro" ${tema === "claro" ? "selected" : ""}>Claro</option>
-          </select>
-        </div>
       </div>
     `;
   }
@@ -18469,36 +15222,16 @@ setTimeout(() => {
     `;
   }
 
-  function v40HtmlPrivacidad() {
+  function v40HtmlAjustes() {
     return `
       <div class="rehabV40Card">
-        <div class="rehabV40SecTitulo">PRIVACIDAD Y DATOS</div>
+        <div class="rehabV40SecTitulo">AJUSTES DE LA APP</div>
         <div style="font-size:.82rem;opacity:.75;line-height:1.5;margin-bottom:10px">
-          Puedes descargar todo lo que RehabPod guarda del perfil activo,
-          o eliminarlo por completo de este dispositivo.
+          Sonidos, voz, tema, colores, recordatorios y privacidad de tus datos están en Ajustes.
         </div>
-        <button id="rehabV40Descargar" class="rehabV40Btn sec" type="button" style="width:100%;margin-bottom:8px">
-          ⬇️ Descargar mis datos
+        <button id="rehabV40AbrirAjustes" class="rehabV40Btn sec" type="button" style="width:100%">
+          Abrir Ajustes
         </button>
-        <button id="rehabV40EliminarDatos" class="rehabV40Btn peligro" type="button" style="width:100%">
-          🗑️ Eliminar mi cuenta y mis datos
-        </button>
-      </div>
-    `;
-  }
-
-  function v40HtmlAcerca() {
-    return `
-      <div class="rehabV40Card">
-        <div class="rehabV40SecTitulo">ACERCA DE REHABPOD</div>
-        <div class="rehabV40Dato">
-          <span>Versión</span>
-          <strong>RehabPod v0.3</strong>
-        </div>
-        <div style="font-size:.8rem;opacity:.62;line-height:1.45;margin-top:9px">
-          Aplicación experimental para entrenamiento de reacción,
-          velocidad, coordinación y rehabilitación.
-        </div>
       </div>
     `;
   }
@@ -18518,10 +15251,8 @@ setTimeout(() => {
           ${tieneCloud ? v40HtmlCloud() : v40HtmlSinCloud()}
           ${tieneCloud ? v40HtmlRelaciones() : ""}
           ${tieneCloud ? v40HtmlSeguridad() : ""}
-          ${v40HtmlPreferencias()}
           ${tieneCloud ? v40HtmlSesion() : ""}
-          ${v40HtmlPrivacidad()}
-          ${v40HtmlAcerca()}
+          ${v40HtmlAjustes()}
         </div>
       `;
 
@@ -18531,10 +15262,8 @@ setTimeout(() => {
       c.innerHTML = `
         <div class="rehabV40Wrap">
           ${v40HtmlLocal()}
-          <div class="rehabV40Aviso">${v40Esc(rehabMensajeError(error))}</div>
-          ${v40HtmlPreferencias()}
-          ${v40HtmlPrivacidad()}
-          ${v40HtmlAcerca()}
+          <div class="rehabV40Aviso">${escaparHTML(rehabMensajeError(error))}</div>
+          ${v40HtmlAjustes()}
         </div>
       `;
       v40ActivarEventos(contentId);
@@ -18542,17 +15271,10 @@ setTimeout(() => {
   }
 
   function v40ActivarEventos(contentId) {
-    const descargar = document.getElementById("rehabV40Descargar");
-    if (descargar) {
-      descargar.onclick = function () {
-        if (typeof descargarMisDatos === "function") descargarMisDatos();
-      };
-    }
-
-    const eliminarDatos = document.getElementById("rehabV40EliminarDatos");
-    if (eliminarDatos) {
-      eliminarDatos.onclick = function () {
-        if (typeof eliminarMiCuentaYDatos === "function") eliminarMiCuentaYDatos();
+    const abrirAjustes = document.getElementById("rehabV40AbrirAjustes");
+    if (abrirAjustes) {
+      abrirAjustes.onclick = function () {
+        if (typeof mostrarPantalla === "function") mostrarPantalla(pantallaAjustes);
       };
     }
 
@@ -18601,22 +15323,13 @@ setTimeout(() => {
       };
     }
 
-    const rolSelect = document.getElementById("rehabV40Rol");
     const especialidadSelect = document.getElementById("rehabV40Especialidad");
-    if (rolSelect && especialidadSelect) {
-      rolSelect.onchange = () => {
-        especialidadSelect.innerHTML = v40OpcionesEspecialidad(rolSelect.value, null);
-      };
-    }
 
     const guardarPerfil = document.getElementById("rehabV40GuardarPerfil");
     if (guardarPerfil) {
       guardarPerfil.onclick = async function () {
         const nombre = String(
           document.getElementById("rehabV40Nombre")?.value || ""
-        ).trim();
-        const rol = String(
-          document.getElementById("rehabV40Rol")?.value || v40Perfil.role
         ).trim();
         const specialty = String(
           document.getElementById("rehabV40Especialidad")?.value || ""
@@ -18638,7 +15351,6 @@ setTimeout(() => {
             .from("rehab_profiles")
             .update({
               full_name: nombre,
-              role: rol,
               specialty: specialty || "other",
             })
             .eq("user_id", v40User.id);
@@ -18684,10 +15396,10 @@ setTimeout(() => {
         const p1 = String(document.getElementById("rehabV40Password1")?.value || "");
         const p2 = String(document.getElementById("rehabV40Password2")?.value || "");
 
-        if (p1.length < 8) {
+        if (!rehabValidarPassword(p1)) {
           v40Mensaje(
             "rehabV40MensajePassword",
-            "La contraseña debe tener al menos 8 caracteres.",
+            "Usa al menos 10 caracteres, con mayúscula, minúscula y número.",
             "error"
           );
           return;
@@ -18723,54 +15435,12 @@ setTimeout(() => {
       };
     }
 
-    const sonidos = document.getElementById("rehabV40Sonidos");
-    if (sonidos) {
-      sonidos.onchange = function () {
-        ajustesApp.sonidos = sonidos.checked;
-
-        try {
-          if (typeof ajusteSonidos !== "undefined" && ajusteSonidos) {
-            ajusteSonidos.checked = sonidos.checked;
-          }
-          if (typeof sonidosActivados !== "undefined" && sonidosActivados) {
-            sonidosActivados.checked = sonidos.checked;
-          }
-          guardarAjustes();
-        } catch (error) {
-          console.warn("V40 sonidos:", error);
-        }
-      };
-    }
-
-    const tema = document.getElementById("rehabV40Tema");
-    if (tema) {
-      tema.onchange = function () {
-        ajustesApp.tema = tema.value;
-
-        try {
-          if (typeof ajusteTema !== "undefined" && ajusteTema) {
-            ajusteTema.value = tema.value;
-          }
-          aplicarTema(tema.value);
-          guardarAjustes();
-        } catch (error) {
-          console.warn("V40 tema:", error);
-        }
-      };
-    }
-
     document.querySelectorAll("[data-v40-desvincular]").forEach((btn) => {
       btn.onclick = async function () {
         const otroId = btn.dataset.v40Desvincular;
         const nombre = btn.dataset.v40Nombre || "esta cuenta";
 
-        let confirmar = false;
-
-        if (typeof window.v36ConfirmarDesvinculacion === "function") {
-          confirmar = await window.v36ConfirmarDesvinculacion(nombre);
-        } else {
-          confirmar = confirm(`¿Desvincular a ${nombre}?`);
-        }
+        const confirmar = await window.v36ConfirmarDesvinculacion(nombre);
 
         if (!confirmar) return;
 
@@ -18788,7 +15458,7 @@ setTimeout(() => {
 
           await v40Render(contentId);
         } catch (error) {
-          alert(rehabMensajeError(error));
+          avisarRehab(rehabMensajeError(error), { tipo: "error" });
         }
       };
     });
@@ -18796,9 +15466,12 @@ setTimeout(() => {
     const cerrar = document.getElementById("rehabV40CerrarSesion");
     if (cerrar) {
       cerrar.onclick = async function () {
-        const confirmar = confirm(
-          "¿Cerrar sesión en RehabPod?\n\nTus datos Cloud permanecerán guardados."
-        );
+        const confirmar = await confirmarRehab({
+          titulo: "Cerrar sesión",
+          mensaje:
+            "¿Cerrar sesión en RehabPod?\n\nTus datos Cloud permanecerán guardados.",
+          aceptar: "Cerrar sesión",
+        });
 
         if (!confirmar) return;
 
@@ -18814,7 +15487,7 @@ setTimeout(() => {
 
           await v40Render(contentId);
         } catch (error) {
-          alert(rehabMensajeError(error));
+          avisarRehab(rehabMensajeError(error), { tipo: "error" });
         } finally {
           cerrar.disabled = false;
         }
@@ -18837,7 +15510,6 @@ setTimeout(() => {
   }
 
   function v40Iniciar() {
-    v40AgregarEstilos();
     window.rehabV40RenderCuenta = v40Render;
 
     console.log(
@@ -18880,16 +15552,6 @@ setTimeout(() => {
   let v41Intervalo = null;
   let v41UltimosIds = new Set();
 
-  function v41Esc(v) {
-    return String(v ?? "")
-      .replaceAll("&", "&amp;")
-
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
   async function v41Cliente() {
     if (typeof window.rehabGetSupabaseClient !== "function") return null;
 
@@ -18904,66 +15566,6 @@ setTimeout(() => {
     }
   }
 
-  function v41AgregarEstilos() {
-    if (document.getElementById("rehabV41Estilos")) return;
-
-    const st = document.createElement("style");
-    st.id = "rehabV41Estilos";
-    st.textContent = `
-      #rehabV41Bell{
-        position:fixed;top:14px;right:14px;z-index:100650;
-        width:46px;height:46px;border-radius:50%;border:1px solid var(--borde);
-        background:var(--tarjeta);color:var(--texto);cursor:pointer;
-        display:none;align-items:center;justify-content:center;font-size:20px;
-        box-shadow:0 9px 25px rgba(0,0,0,.24);backdrop-filter:blur(10px)
-      }
-      .tema-claro #rehabV41Bell{background:var(--tarjeta);color:var(--texto)}
-      #rehabV41Badge{
-        position:absolute;right:-2px;top:-3px;min-width:19px;height:19px;
-        padding:0 4px;border-radius:999px;background:#ef4444;color:#fff;
-        display:none;align-items:center;justify-content:center;
-        font-size:10px;font-weight:950;border:2px solid rgba(15,23,42,.9)
-      }
-      .rehabV41Overlay{
-        position:fixed;inset:0;z-index:100900;background:rgba(2,6,23,.84);
-        backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:16px
-      }
-      .rehabV41Overlay[hidden]{display:none!important}
-      .rehabV41Modal{
-        width:min(620px,100%);max-height:88vh;overflow:auto;border-radius:24px;padding:18px;
-        background:var(--tarjeta);color:inherit;
-        border:1px solid rgba(148,163,184,.22);box-shadow:0 26px 80px rgba(0,0,0,.45)
-      }
-      .tema-claro .rehabV41Modal{background:#fff}
-      .rehabV41Head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
-      .rehabV41Cerrar{
-        width:40px;height:40px;border-radius:11px;border:1px solid rgba(148,163,184,.24);
-        background:rgba(148,163,184,.08);color:inherit;font-size:20px;cursor:pointer
-      }
-      .rehabV41Acciones{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
-      .rehabV41Btn{
-        border:0;border-radius:11px;padding:9px 12px;font-weight:900;cursor:pointer;
-        background:var(--acento);color:var(--acento-tinta)
-      }
-      .rehabV41Btn.sec{
-        background:rgba(148,163,184,.14);color:inherit;border:1px solid rgba(148,163,184,.24)
-      }
-      .rehabV41Item{
-        padding:12px;border-radius:14px;margin:8px 0;
-        border:1px solid rgba(148,163,184,.16);background:rgba(148,163,184,.045)
-      }
-      .rehabV41Item.nueva{
-        border-color:rgba(59,130,246,.30);background:rgba(59,130,246,.08)
-      }
-      .rehabV41Item small{display:block;opacity:.62;margin-top:5px}
-      .rehabV41Vacio{
-        padding:18px;text-align:center;border-radius:14px;
-        border:1px dashed rgba(148,163,184,.22);opacity:.72
-      }
-    `;
-    document.head.appendChild(st);
-  }
-
   function v41CrearUI() {
     if (!document.getElementById("rehabV41Bell")) {
       const bell = document.createElement("button");
@@ -18976,19 +15578,13 @@ setTimeout(() => {
     }
 
     if (!document.getElementById("rehabV41Overlay")) {
-      const ov = document.createElement("div");
-      ov.id = "rehabV41Overlay";
-      ov.className = "rehabV41Overlay";
-      ov.hidden = true;
-      ov.innerHTML = `
-        <div class="rehabV41Modal">
-          <div class="rehabV41Head">
-            <div>
-              <div style="font-size:.72rem;opacity:.62;font-weight:900">REHABPOD</div>
-              <h2 style="margin:0">Notificaciones</h2>
-            </div>
-            <button id="rehabV41Cerrar" class="rehabV41Cerrar" type="button">×</button>
-          </div>
+      modalRehab({
+        id: "rehabV41",
+        titulo: "Notificaciones",
+        clase: "rehabV41Modal",
+        ancho: 620,
+        z: "calc(var(--z-modal) + 8)",
+        contenidoHTML: `
           <div class="rehabV41Acciones">
             <button id="rehabV41LeerTodas" class="rehabV41Btn sec" type="button">
               MARCAR TODO COMO LEÍDO
@@ -18998,28 +15594,12 @@ setTimeout(() => {
             </button>
           </div>
           <div id="rehabV41Lista">Cargando...</div>
-        </div>
-      `;
-      document.body.appendChild(ov);
-
-      document.getElementById("rehabV41Cerrar").onclick = () => {
-        ov.hidden = true;
-      };
-
-      ov.addEventListener("click", (e) => {
-        if (e.target === ov) ov.hidden = true;
+        `,
       });
 
       document.getElementById("rehabV41LeerTodas").onclick = v41MarcarTodasLeidas;
       document.getElementById("rehabV41Permiso").onclick = v41PedirPermiso;
     }
-  }
-
-  function v41Fecha(valor) {
-    if (!valor) return "";
-    const d = new Date(valor);
-    if (Number.isNaN(d.getTime())) return "";
-    return d.toLocaleString();
   }
 
   async function v41ObtenerNotificaciones(limite = 40) {
@@ -19037,6 +15617,37 @@ setTimeout(() => {
     return data || [];
   }
 
+  // Refleja el estado en Ajustes. `total` es el número de notificaciones sin
+  // leer, o null si no hay sesión de la nube. (La campana flotante lleva su
+  // propio contador.)
+  function v41PintarEstado(total) {
+    const estado = document.getElementById("ajusteNotificacionesEstado");
+
+    if (estado) {
+      estado.textContent =
+        total === null
+          ? "Inicia sesión en Cuenta para recibirlas"
+          : total > 0
+            ? `${total} sin leer`
+            : "Todo al día";
+    }
+  }
+
+  // Acceso desde Ajustes: siempre visible; sin sesión
+  // explica qué hacer en lugar de no mostrar nada.
+  async function v41AbrirDesdeMenu() {
+    const cloud = await v41Cliente();
+
+    if (!cloud || !v41User) {
+      avisarRehab("Inicia sesión en Cuenta para ver y recibir notificaciones.", {
+        tipo: "info",
+      });
+      return;
+    }
+
+    v41AbrirCentro();
+  }
+
   async function v41ActualizarBadge(mostrarAvisos = false) {
     const bell = document.getElementById("rehabV41Bell");
     const badge = document.getElementById("rehabV41Badge");
@@ -19048,16 +15659,20 @@ setTimeout(() => {
       if (!cloud || !v41User) {
         bell.style.display = "none";
         badge.style.display = "none";
+        document.body.classList.remove("hay-campana");
+        v41PintarEstado(null);
         return;
       }
 
       bell.style.display = "flex";
+      document.body.classList.add("hay-campana");
 
       const notificaciones = await v41ObtenerNotificaciones(30);
       const nuevas = notificaciones.filter((n) => !n.read_at);
 
       badge.textContent = nuevas.length > 99 ? "99+" : String(nuevas.length);
       badge.style.display = nuevas.length ? "flex" : "none";
+      v41PintarEstado(nuevas.length);
 
       if (mostrarAvisos && typeof Notification !== "undefined") {
         if (Notification.permission === "granted") {
@@ -19108,9 +15723,9 @@ setTimeout(() => {
         .map(
           (n) => `
           <div class="rehabV41Item ${n.read_at ? "" : "nueva"}">
-            <strong>${v41Esc(n.title || "RehabPod")}</strong>
-            <div style="margin-top:4px;line-height:1.45">${v41Esc(n.message || "")}</div>
-            <small>${v41Esc(v41Fecha(n.created_at))}</small>
+            <strong>${escaparHTML(n.title || "RehabPod")}</strong>
+            <div style="margin-top:4px;line-height:1.45">${escaparHTML(n.message || "")}</div>
+            <small>${escaparHTML(formatoFecha(n.created_at, "", ""))}</small>
           </div>
         `
         )
@@ -19118,7 +15733,7 @@ setTimeout(() => {
     } catch (error) {
       host.innerHTML = `
         <div class="rehabV41Vacio">
-          ${v41Esc(rehabMensajeError(error))}
+          ${escaparHTML(rehabMensajeError(error))}
         </div>
       `;
     }
@@ -19140,13 +15755,13 @@ setTimeout(() => {
       await v41AbrirCentro();
       await v41ActualizarBadge(false);
     } catch (error) {
-      alert(rehabMensajeError(error));
+      avisarRehab(rehabMensajeError(error), { tipo: "error" });
     }
   }
 
   async function v41PedirPermiso() {
     if (typeof Notification === "undefined") {
-      alert("Este navegador no admite avisos del sistema.");
+      avisarRehab("Este navegador no admite avisos del sistema.", { tipo: "error" });
       return;
     }
 
@@ -19154,27 +15769,37 @@ setTimeout(() => {
       const permiso = await Notification.requestPermission();
 
       if (permiso === "granted") {
-        alert(
-          "Avisos activados. RehabPod podrá mostrar notificaciones mientras la app esté abierta."
+        avisarRehab(
+          "Avisos activados. RehabPod podrá mostrar notificaciones mientras la app esté abierta.",
+          { tipo: "exito" }
         );
       } else {
-        alert("Los avisos no fueron autorizados.");
+        avisarRehab("Los avisos no fueron autorizados.", { tipo: "error" });
       }
     } catch (error) {
-      alert(rehabMensajeError(error));
+      avisarRehab(rehabMensajeError(error), { tipo: "error" });
     }
   }
 
   async function v41CancelarAsignacion(assignmentId) {
-    const razon = prompt("Motivo de cancelación (opcional):", "");
+    const razon = await pedirTextoRehab({
+      titulo: "Cancelar rutina asignada",
+      etiqueta: "Motivo de cancelación (opcional)",
+      aceptar: "Continuar",
+    });
 
     // Si se pulsa Cancelar en prompt, no hacemos nada.
     if (razon === null) return;
 
-    const confirmar = confirm(
-      "¿Confirmas que deseas cancelar esta rutina asignada?\n\n" +
-        "La rutina dejará de aparecer como pendiente y la otra persona recibirá una notificación."
-    );
+    const confirmar = await confirmarRehab({
+      titulo: "Cancelar rutina asignada",
+      mensaje:
+        "¿Confirmas que deseas cancelar esta rutina asignada?\n\n" +
+        "La rutina dejará de aparecer como pendiente y la otra persona recibirá una notificación.",
+      aceptar: "Sí, cancelar rutina",
+      cancelar: "Volver",
+      peligro: true,
+    });
 
     if (!confirmar) return;
 
@@ -19198,7 +15823,7 @@ setTimeout(() => {
 
       await v41ActualizarBadge(false);
     } catch (error) {
-      alert(rehabMensajeError(error));
+      avisarRehab(rehabMensajeError(error), { tipo: "error" });
     }
   }
 
@@ -19240,8 +15865,12 @@ setTimeout(() => {
   }
 
   async function v41Iniciar() {
-    v41AgregarEstilos();
     v41CrearUI();
+
+    const btnAjuste = document.getElementById("btnAjusteNotificaciones");
+    if (btnAjuste) btnAjuste.onclick = v41AbrirDesdeMenu;
+    v41PintarEstado(null);
+
     v41ActivarCancelaciones();
     await v41PrepararAuth();
     await v41ActualizarBadge(false);
@@ -19278,17 +15907,11 @@ setTimeout(() => {
   let v42Sincronizando = false;
 
   function v42LeerCola() {
-    try {
-      const raw = localStorage.getItem(V42_QUEUE_KEY);
-      const data = raw ? JSON.parse(raw) : [];
-      return Array.isArray(data) ? data : [];
-    } catch (_) {
-      return [];
-    }
+    return leerLista(V42_QUEUE_KEY, "RehabPod V42");
   }
 
   function v42GuardarCola(cola) {
-    localStorage.setItem(V42_QUEUE_KEY, JSON.stringify(cola || []));
+    guardarJSON(V42_QUEUE_KEY, cola || [], "RehabPod V42");
     v42ActualizarIndicador();
   }
 
@@ -19427,21 +16050,6 @@ setTimeout(() => {
   function v42CrearIndicador() {
     if (document.getElementById("rehabV42Estado")) return;
 
-    const st = document.createElement("style");
-    st.id = "rehabV42Estilos";
-    st.textContent = `
-      #rehabV42Estado{
-        position:fixed;left:14px;top:14px;z-index:100640;
-        padding:7px 10px;border-radius:999px;font-size:11px;font-weight:900;
-        border:1px solid var(--borde);
-        background:var(--tarjeta);color:var(--texto);
-        box-shadow:0 7px 22px rgba(0,0,0,.18);
-        backdrop-filter:blur(8px);cursor:pointer
-      }
-      .tema-claro #rehabV42Estado{background:var(--tarjeta);color:var(--texto)}
-    `;
-    document.head.appendChild(st);
-
     const el = document.createElement("button");
     el.id = "rehabV42Estado";
     el.type = "button";
@@ -19449,18 +16057,22 @@ setTimeout(() => {
     el.onclick = function () {
       const n = v42LeerCola().length;
       if (!navigator.onLine) {
-        alert(
+        avisarRehab(
           `RehabPod está sin conexión.\n\nResultados pendientes: ${n}\n\n` +
-            "Puedes seguir con funciones locales. Al recuperar Internet se intentará sincronizar automáticamente."
+            "Puedes seguir con funciones locales. Al recuperar Internet se intentará sincronizar automáticamente.",
+          { tipo: "info" }
         );
       } else if (n > 0) {
-        alert(
+        avisarRehab(
           `Hay ${n} resultado(s) pendiente(s) de sincronizar.\n\n` +
-            "RehabPod volverá a intentarlo automáticamente."
+            "RehabPod volverá a intentarlo automáticamente.",
+          { tipo: "info" }
         );
         v42Sincronizar();
       } else {
-        alert("RehabPod está en línea y no hay resultados pendientes.");
+        avisarRehab("RehabPod está en línea y no hay resultados pendientes.", {
+          tipo: "exito",
+        });
       }
     };
     document.body.appendChild(el);
@@ -19472,18 +16084,25 @@ setTimeout(() => {
 
     const pendientes = v42LeerCola().length;
 
+    // data-estado permite mostrar el indicador solo cuando hay algo que decir
+    // (ver style.css): "ok" solo se ve en Inicio.
+    el.setAttribute("aria-live", "polite");
+
     if (forzado === "sync" || v42Sincronizando) {
+      el.dataset.estado = "sync";
       el.textContent = "↻ Sincronizando";
       return;
     }
 
     if (!navigator.onLine) {
+      el.dataset.estado = "offline";
       el.textContent = pendientes
         ? `● Sin conexión · ${pendientes} pendiente${pendientes === 1 ? "" : "s"}`
         : "● Sin conexión";
       return;
     }
 
+    el.dataset.estado = pendientes ? "pendiente" : "ok";
     el.textContent = pendientes
       ? `● En línea · ${pendientes} pendiente${pendientes === 1 ? "" : "s"}`
       : "● En línea";

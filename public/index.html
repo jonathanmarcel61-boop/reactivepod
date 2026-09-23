@@ -9,7 +9,23 @@
         content="width=device-width, initial-scale=1.0"
     >
 
+    <meta name="color-scheme" content="dark light">
+
+    <!-- Defensa adicional para la version web y el WebView de Android. -->
+    <meta
+        http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com; media-src 'self' blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self';"
+    >
+
     <title>RehabPod</title>
+
+    <link
+        rel="preload"
+        href="fonts/inter-latin-wght-normal.woff2"
+        as="font"
+        type="font/woff2"
+        crossorigin
+    >
 
     <link
         rel="stylesheet"
@@ -18,6 +34,20 @@
 </head>
 
 <body>
+
+<!-- Iconos (línea, heredan el color del texto). Uso: <svg class="ic" aria-hidden="true"><use href="#ic-NOMBRE"/></svg> -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="ic-inicio" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="ic-progreso" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-9"/><path d="M15 6h6v6"/></symbol>
+    <symbol id="ic-cuenta" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></symbol>
+    <symbol id="ic-ajustes" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+    <symbol id="ic-campana" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
+    <symbol id="ic-rayo" viewBox="0 0 24 24"><path d="M13 3 5 14h6l-1 7 8-11h-6z"/></symbol>
+    <symbol id="ic-llama" viewBox="0 0 24 24"><path d="M12 3c1 3.5 5 5.5 5 10.5a5 5 0 0 1-10 0c0-2 .8-3.3 2-4.5.2 1.6 1 2.5 2 2.7C11 9.5 10.5 6 12 3z"/></symbol>
+    <symbol id="ic-volver" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m11 6-6 6 6 6"/></symbol>
+</svg>
+
+<main id="contenidoApp">
 
 
 <!-- ================================================= -->
@@ -106,6 +136,89 @@
         </div>
 
 
+        <!-- BOTÓN PRINCIPAL (justo bajo el perfil: es la acción más importante de Inicio) -->
+
+        <button
+            id="btnEntrenamiento"
+            class="boton botonPrincipal"
+        >
+            <svg class="ic" aria-hidden="true"><use href="#ic-rayo"/></svg>
+            INICIAR ENTRENAMIENTO
+        </button>
+
+
+        <!-- ASISTENTE DE RUTINAS -->
+
+        <div class="tarjeta" id="rehabAsistenteTarjeta">
+
+            <div class="tituloFila">
+
+                <div>
+
+                    <small class="etiquetaTitulo">
+                        SIN PROFESIONAL VINCULADO
+                    </small>
+
+                    <h3>
+                        🎯 ¿Qué entrenamiento me conviene hoy?
+                    </h3>
+
+                </div>
+
+            </div>
+
+            <p class="textoSecundario">
+                Dinos qué quieres mejorar y cuánto tiempo tienes: te armamos una rutina a tu medida.
+            </p>
+
+            <button
+                id="btnAbrirAsistenteRutinas"
+                class="boton botonOscuro"
+                style="margin-top: 8px; border: 1px solid var(--acento); color: var(--acento-texto)"
+            >
+                Armar mi rutina
+            </button>
+
+        </div>
+
+
+        <!-- MIS RUTINAS (guardadas y favoritas, js/misrutinas.js) -->
+
+        <div class="tarjeta" id="tarjetaMisRutinas">
+
+            <div class="tituloFila">
+
+                <div>
+
+                    <small class="etiquetaTitulo">
+                        GUARDADAS Y FAVORITAS
+                    </small>
+
+                    <h3>
+                        ⭐ Mis rutinas
+                    </h3>
+
+                </div>
+
+                <button type="button" id="btnVerMisRutinas" class="botonSecundarioPequeno" hidden>
+                    Ver y editar
+                </button>
+
+            </div>
+
+            <ul class="rut-lista" id="listaMisRutinasInicio" aria-label="Tus rutinas guardadas"></ul>
+
+            <p class="textoSecundario" id="misRutinasVacio">
+                Aún no tienes rutinas guardadas. Guarda la que te arme el asistente o crea una a tu manera.
+            </p>
+
+            <button type="button" id="btnCrearRutina" class="boton botonOscuro" style="margin-top: 8px">
+                Crear rutina a mi manera
+            </button>
+
+        </div>
+
+
         <!-- CONEXIÓN -->
 
         <div class="tarjeta">
@@ -132,7 +245,7 @@
                         class="indicador desconectado"
                     ></span>
 
-                    <span id="textoEstadoPods">
+                    <span id="textoEstadoPods" aria-live="polite">
                         0 de 4
                     </span>
 
@@ -170,16 +283,6 @@
             </button>
 
         </div>
-
-
-        <!-- BOTÓN PRINCIPAL -->
-
-        <button
-            id="btnEntrenamiento"
-            class="boton botonPrincipal"
-        >
-            ⚡ INICIAR ENTRENAMIENTO
-        </button>
 
 
         <!-- RESUMEN -->
@@ -257,18 +360,44 @@
         </div>
 
 
+        <!-- META SEMANAL -->
+
+        <div class="tarjeta metaSemanal" id="tarjetaMetaSemanal">
+
+            <div class="metaSemanal__cab">
+
+                <svg class="ic metaSemanal__llama" aria-hidden="true"><use href="#ic-llama"/></svg>
+
+                <div>
+
+                    <strong id="metaSemanalTitulo">
+                        0 de 3 días esta semana
+                    </strong>
+
+                    <small id="metaSemanalSub">
+                        Entrena hoy para empezar tu semana.
+                    </small>
+
+                </div>
+
+            </div>
+
+            <ol class="metaSemanal__dias" id="metaSemanalDias" aria-label="Días entrenados esta semana"></ol>
+
+        </div>
+
+
         <!-- NAVEGACIÓN INFERIOR -->
 
-        <div class="menuPrincipal">
+        <nav class="menuPrincipal" aria-label="Navegación principal">
 
             <button
                 id="btnInicioMenu"
                 class="menuItem activo"
+                aria-current="page"
             >
 
-                <span>
-                    🏠
-                </span>
+                <svg class="ic" aria-hidden="true"><use href="#ic-inicio"/></svg>
 
                 Inicio
 
@@ -280,9 +409,7 @@
                 class="menuItem"
             >
 
-                <span>
-                    📈
-                </span>
+                <svg class="ic" aria-hidden="true"><use href="#ic-progreso"/></svg>
 
                 Progreso
 
@@ -296,7 +423,7 @@
                 aria-hidden="true"
             >
 
-                <span>
+                <span aria-hidden="true">
                     📊
                 </span>
 
@@ -310,15 +437,25 @@
                 class="menuItem"
             >
 
-                <span>
-                    👤
-                </span>
+                <svg class="ic" aria-hidden="true"><use href="#ic-cuenta"/></svg>
 
                 Cuenta
 
             </button>
 
-        </div>
+
+            <button
+                id="btnAjustesMenu"
+                class="menuItem"
+            >
+
+                <svg class="ic" aria-hidden="true"><use href="#ic-ajustes"/></svg>
+
+                Ajustes
+
+            </button>
+
+        </nav>
 
     </div>
 
@@ -341,8 +478,9 @@
             <button
                 id="btnVolverDesdePods"
                 class="botonVolver"
+                aria-label="Volver"
             >
-                ←
+                <svg class="ic" aria-hidden="true"><use href="#ic-volver"/></svg>
             </button>
 
             <div>
@@ -522,8 +660,9 @@
             <button
                 id="btnVolverPerfiles"
                 class="botonVolver"
+                aria-label="Volver"
             >
-                ←
+                <svg class="ic" aria-hidden="true"><use href="#ic-volver"/></svg>
             </button>
 
             <div>
@@ -576,8 +715,9 @@
             <button
                 id="btnVolverTipos"
                 class="botonVolver"
+                aria-label="Volver"
             >
-                ←
+                <svg class="ic" aria-hidden="true"><use href="#ic-volver"/></svg>
             </button>
 
             <div>
@@ -753,8 +893,9 @@
             <button
                 id="btnVolverEntrenamientos"
                 class="botonVolver"
+                aria-label="Volver"
             >
-                ←
+                <svg class="ic" aria-hidden="true"><use href="#ic-volver"/></svg>
             </button>
 
             <div>
@@ -892,7 +1033,7 @@
                 </div>
 
                 <input
-                    id="sonidosActivados"
+                    id="sonidosActivados" aria-label="Sonidos"
                     type="checkbox"
                     checked
                 >
@@ -1162,7 +1303,7 @@
 
 
             <div
-                id="mensajeResultado"
+                id="mensajeResultado" aria-live="polite"
                 class="mensajeResultado"
             >
             </div>
@@ -1327,6 +1468,14 @@
 
 
         <button
+            id="btnCompartirResultado"
+            class="boton botonOscuro"
+        >
+            COMPARTIR POR WHATSAPP
+        </button>
+
+
+        <button
             id="btnResultadosInicio"
             class="boton botonOscuro"
         >
@@ -1354,8 +1503,9 @@
             <button
                 id="btnVolverProgreso"
                 class="botonVolver"
+                aria-label="Volver"
             >
-                ←
+                <svg class="ic" aria-hidden="true"><use href="#ic-volver"/></svg>
             </button>
 
             <div>
@@ -1369,6 +1519,63 @@
                 </p>
 
             </div>
+
+        </div>
+
+
+        <!-- PROGRESO CLARO (gráficos SVG, js/progreso.js) -->
+
+        <div class="tarjeta" id="progresoClaro">
+
+            <div class="tituloFila">
+
+                <div>
+
+                    <small class="etiquetaTitulo">
+                        TU EVOLUCIÓN
+                    </small>
+
+                    <h3>
+                        ¿Cómo vas?
+                    </h3>
+
+                </div>
+
+            </div>
+
+            <div class="segmentado" id="progresoPeriodo" role="group" aria-label="Periodo a mostrar">
+                <button type="button" data-dias="7" aria-pressed="false">7 días</button>
+                <button type="button" data-dias="30" aria-pressed="true">30 días</button>
+                <button type="button" data-dias="0" aria-pressed="false">Todo</button>
+            </div>
+
+            <label class="campoFiltro" for="progresoModo">
+                <span>Ejercicio</span>
+                <select id="progresoModo">
+                    <option value="">Todos los ejercicios</option>
+                </select>
+            </label>
+
+            <p id="progresoFrase" class="progresoFrase" aria-live="polite"></p>
+
+            <figure class="progresoFigura" id="progresoFigReaccion">
+                <figcaption>Tiempo de reacción <small>menos segundos es mejor</small></figcaption>
+                <div id="progresoGrafReaccion"></div>
+            </figure>
+
+            <figure class="progresoFigura" id="progresoFigPrecision">
+                <figcaption>Precisión <small>más porcentaje es mejor</small></figcaption>
+                <div id="progresoGrafPrecision"></div>
+            </figure>
+
+            <figure class="progresoFigura" id="progresoFigSemanas">
+                <figcaption>Constancia <small>días entrenados por semana</small></figcaption>
+                <div id="progresoGrafSemanas"></div>
+            </figure>
+
+            <button type="button" class="boton botonOscuro" id="btnInformePDF" style="width: 100%; margin-top: 4px">
+                📄 Informe profesional (PDF)
+            </button>
 
         </div>
 
@@ -1549,7 +1756,7 @@
 
 
             <p
-                id="textoObjetivoProgreso"
+                id="textoObjetivoProgreso" aria-live="polite"
                 class="textoProgreso"
             >
                 Realiza entrenamientos para comenzar.
@@ -1587,7 +1794,7 @@
 
 
             <p
-                id="mensajeProgreso"
+                id="mensajeProgreso" aria-live="polite"
                 class="mensajeProgreso"
             >
             </p>
@@ -1632,8 +1839,9 @@
             <button
                 id="btnVolverCuentaCloud"
                 class="botonVolver"
+                aria-label="Volver"
             >
-                ←
+                <svg class="ic" aria-hidden="true"><use href="#ic-volver"/></svg>
             </button>
 
             <div>
@@ -1673,8 +1881,9 @@
             <button
                 id="btnEstadisticasInicio"
                 class="botonVolver"
+                aria-label="Volver"
             >
-                ←
+                <svg class="ic" aria-hidden="true"><use href="#ic-volver"/></svg>
             </button>
 
             <div>
@@ -1817,8 +2026,9 @@
             <button
                 id="btnVolverAjustes"
                 class="botonVolver"
+                aria-label="Volver"
             >
-                ←
+                <svg class="ic" aria-hidden="true"><use href="#ic-volver"/></svg>
             </button>
 
             <div>
@@ -1853,10 +2063,105 @@
                 </div>
 
                 <input
-                    id="ajusteSonidos"
+                    id="ajusteSonidos" aria-label="Sonidos"
                     type="checkbox"
                     checked
                 >
+
+            </div>
+            <div class="separador"></div>
+
+            <div class="filaAjuste">
+
+                <div>
+
+                    <strong>
+                        Voz en español
+                    </strong>
+
+                    <small id="ajusteVozEstado">
+                        Cuenta atrás y felicitaciones habladas
+                    </small>
+
+                </div>
+
+                <input
+                    id="ajusteVoz" aria-label="Voz en español"
+                    type="checkbox"
+                    checked
+                >
+
+            </div>
+            <div class="separador"></div>
+
+            <div class="filaAjuste">
+
+                <div>
+
+                    <strong>
+                        Meta semanal
+                    </strong>
+
+                    <small>
+                        Días de entrenamiento por semana
+                    </small>
+
+                </div>
+
+                <select id="ajusteMetaSemanal" aria-label="Meta semanal de días">
+                    <option value="1">1 día</option>
+                    <option value="2">2 días</option>
+                    <option value="3">3 días</option>
+                    <option value="4">4 días</option>
+                    <option value="5">5 días</option>
+                    <option value="6">6 días</option>
+                    <option value="7">7 días</option>
+                </select>
+
+            </div>
+            <div class="separador"></div>
+
+            <div class="filaAjuste">
+
+                <div>
+
+                    <strong>
+                        Recordatorios
+                    </strong>
+
+                    <small id="ajusteRecordatorioEstado">
+                        Un aviso en el teléfono para que no olvides entrenar
+                    </small>
+
+                </div>
+
+                <input
+                    id="ajusteRecordatorio" aria-label="Recordatorios de entrenamiento"
+                    type="checkbox"
+                >
+
+            </div>
+
+            <div class="recordatorioOpc" id="recordatorioOpciones" hidden>
+
+                <div class="segmentado segmentado--7" id="recordatorioDias" role="group" aria-label="Días del recordatorio">
+                    <button type="button" data-dia="1" aria-pressed="false" aria-label="Lunes">L</button>
+                    <button type="button" data-dia="2" aria-pressed="false" aria-label="Martes">M</button>
+                    <button type="button" data-dia="3" aria-pressed="false" aria-label="Miércoles">X</button>
+                    <button type="button" data-dia="4" aria-pressed="false" aria-label="Jueves">J</button>
+                    <button type="button" data-dia="5" aria-pressed="false" aria-label="Viernes">V</button>
+                    <button type="button" data-dia="6" aria-pressed="false" aria-label="Sábado">S</button>
+                    <button type="button" data-dia="7" aria-pressed="false" aria-label="Domingo">D</button>
+                </div>
+
+                <label class="campoFiltro" for="recordatorioHora">
+                    <span>Hora del aviso</span>
+                    <input type="time" id="recordatorioHora" value="18:00">
+                </label>
+
+                <button type="button" class="boton botonOscuro" id="recordatorioPrueba" style="width: 100%">
+                    Enviar un aviso de prueba
+                </button>
 
             </div>
             <div class="separador"></div>
@@ -1870,12 +2175,16 @@
         </strong>
 
         <small>
-            Elige fondo claro u oscuro
+            Automático sigue el modo claro u oscuro del teléfono
         </small>
 
     </div>
 
-    <select id="ajusteTema">
+    <select id="ajusteTema" aria-label="Tema de la app">
+
+        <option value="auto">
+                 Automático (del teléfono)
+                </option>
 
         <option value="oscuro">
                  Oscuro
@@ -1908,12 +2217,61 @@
                 </div>
 
                 <input
-                    id="ajusteVibracion"
+                    id="ajusteVibracion" aria-label="Vibración"
                     type="checkbox"
                     disabled
                 >
 
             </div>
+
+            <div class="separador"></div>
+
+            <div class="filaAjuste">
+
+                <div>
+
+                    <strong>
+                        Notificaciones
+                    </strong>
+
+                    <small id="ajusteNotificacionesEstado">
+                        Avisos de rutinas asignadas y completadas
+                    </small>
+
+                </div>
+
+                <button
+                    id="btnAjusteNotificaciones"
+                    class="boton botonOscuro"
+                    type="button"
+                >
+                    Abrir
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="tarjeta" id="tarjetaColoresAjustes">
+
+            <small class="etiquetaTitulo">
+                COLORES DEL ENTRENAMIENTO
+            </small>
+
+            <h3>
+                Colores de los Pods
+            </h3>
+
+            <p class="textoSecundario">
+                Desmarca los colores que te cuesta distinguir (por ejemplo, rosado o morado):
+                no aparecerán durante el entrenamiento. Se necesitan al menos
+                <span id="ajusteColoresMinimo">4</span> colores activos.
+            </p>
+
+            <div class="ajColores" id="ajusteColoresGrid"></div>
+
+            <p class="ajColores__aviso" id="ajusteColoresAviso" role="status" aria-live="polite"></p>
 
         </div>
 
@@ -1969,6 +2327,16 @@
                 de reacción, velocidad y coordinación.
             </p>
 
+            <a
+                href="privacidad.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="boton botonOscuro"
+                style="margin-top: 10px; display: block; text-align: center; text-decoration: none; border: 1px solid var(--acento); color: var(--acento)"
+            >
+                📄 Términos y Política de Privacidad
+            </a>
+
         </div>
 
     </div>
@@ -1976,7 +2344,33 @@
 </section>
 
 
+</main>
+
+<script src="js/utils.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/plan.js"></script>
+<script src="js/duelo.js"></script>
+<script src="js/rutinas.js"></script>
+<script src="js/compartidas.js"></script>
+<script src="js/metas.js"></script>
+<script src="js/recordatorios.js"></script>
+<script src="js/graficos.js"></script>
+<script src="js/pdf.js"></script>
+<script src="js/informe.js"></script>
+<script src="js/voz.js"></script>
+<script src="js/compartir.js"></script>
+<script src="js/bienvenida.js"></script>
+<script src="vendor/supabase-2.57.4.js"></script>
 <script src="app.js"></script>
+<script src="js/asistente.js"></script>
+<script src="js/misrutinas.js"></script>
+<script src="js/profesional.js"></script>
+<script src="js/dosjugadores.js"></script>
+<script src="js/colores-ajustes.js"></script>
+<script src="js/motivacion.js"></script>
+<script src="js/progreso.js"></script>
+<script src="js/informe-ui.js"></script>
+<script src="js/recordatorios-ui.js"></script>
 
 </body>
 

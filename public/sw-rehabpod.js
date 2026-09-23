@@ -15,13 +15,41 @@
 // nueva en vez de seguir usando la vieja del caché.
 // =====================================================
 
-const CACHE_VERSION = "rehabpod-v3";
+const CACHE_VERSION = "rehabpod-v18-security";
 
 const ARCHIVOS_DEL_CASCARON = [
   "./",
   "./index.html",
   "./style.css",
+  "./js/utils.js",
+  "./js/ui.js",
+  "./js/plan.js",
+  "./js/rutinas.js",
+  "./js/compartidas.js",
+  "./js/duelo.js",
+  "./js/metas.js",
+  "./js/recordatorios.js",
+  "./js/graficos.js",
+  "./js/pdf.js",
+  "./js/informe.js",
+  "./js/voz.js",
+  "./js/compartir.js",
+  "./js/bienvenida.js",
+  "./js/asistente.js",
+  "./js/misrutinas.js",
+  "./js/profesional.js",
+  "./js/dosjugadores.js",
+  "./js/colores-ajustes.js",
+  "./js/motivacion.js",
+  "./js/progreso.js",
+  "./js/informe-ui.js",
+  "./js/recordatorios-ui.js",
+  "./fonts/inter-latin-wght-normal.woff2",
+  "./fonts/jetbrains-mono-latin-wght-normal.woff2",
+  "./fonts/barlow-condensed-latin-700-normal.woff2",
+  "./fonts/barlow-condensed-latin-800-normal.woff2",
   "./app.js",
+  "./vendor/supabase-2.57.4.js",
   "./supabase-config.js",
   "./logo-icon.png",
   "./logo-full.png",

@@ -1,5 +1,11 @@
 {
-  "appId": "com.reactipod.app",
-  "appName": "ReactiPod",
-  "webDir": "public"
+  "appId": "com.rehabpod.app",
+  "appName": "RehabPod",
+  "webDir": "public",
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_notification",
+      "iconColor": "#7ACB22"
+    }
+  }
 }
