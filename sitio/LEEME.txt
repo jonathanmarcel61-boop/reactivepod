@@ -11,7 +11,7 @@ CAMBIOS INCLUIDOS
 3. Aviso al tocar un Pod incorrecto y resultado del mejor tiempo.
 4. Textos ajustados para no prometer precisión clínica ni reconexión automática.
 5. Precios reemplazados por información de acceso anticipado.
-6. Tres vistas demostrativas de la aplicación construidas en HTML/CSS.
+6. Tres capturas reales de la versión web: Inicio, Entrenamientos y Progreso.
 7. Diseño adaptable para teléfono y computadora.
 
 INSTALACIÓN
@@ -27,6 +27,5 @@ INSTALACIÓN
 
 PENDIENTE PARA MÁS ADELANTE
 - Reemplazar [correo de contacto] y los datos legales entre corchetes.
-- Sustituir las vistas demostrativas por capturas reales si se desea.
+- Renovar las capturas cuando cambie significativamente la interfaz de la app.
 - Agregar fotografías y video cuando el diseño físico esté terminado.
-

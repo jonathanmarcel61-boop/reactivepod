@@ -230,6 +230,8 @@ section{padding:96px 0;}
 .resultado-grande{text-align:center;margin:28px 0}.resultado-grande strong{display:block;font-size:35px;color:var(--acento);font-family:var(--fuente-dato)}.resultado-grande span{font-size:11px;color:var(--texto2)}
 .barras{height:145px;display:flex;align-items:end;gap:9px;padding:12px;background:var(--tarjeta);border-radius:13px}.barras i{flex:1;background:linear-gradient(var(--acento),#4e681b);border-radius:5px 5px 2px 2px;min-height:20px;}
 .nota-vistas{font-size:12px!important;margin-top:12px!important;color:var(--texto2);}
+.captura-app{display:block;width:100%;aspect-ratio:1365/926;object-fit:cover;object-position:top;border-radius:18px;border:1px solid var(--borde);background:#eef2ed;box-shadow:0 18px 45px rgba(0,0,0,.28);transition:transform .2s ease,border-color .2s ease;}
+.captura-app:hover{transform:translateY(-4px);border-color:#4d5a54;}
 
 /* ---- cómo funciona ---- */
 
@@ -410,35 +412,19 @@ footer .envoltura{display:flex;justify-content:space-between;align-items:center;
         </div>
         <div class="vistas-app oculto">
             <article class="vista-item">
-                <div class="telefono" aria-label="Vista demostrativa de selección de modo">
-                    <div class="telefono-barra"></div><div class="app-saludo">Hola, es momento de avanzar</div><div class="app-titulo">Elige tu objetivo</div>
-                    <span class="app-chip activo">Velocidad</span><span class="app-chip">Coordinación</span><span class="app-chip">Memoria</span>
-                    <div class="app-card"><strong>Reacción libre</strong><span>Toca el Pod que se ilumina</span></div>
-                    <div class="app-card"><strong>Seguir color</strong><span>Encuentra siempre el color objetivo</span></div>
-                    <div class="app-boton">Continuar</div>
-                </div>
-                <h3>1. Elige</h3><p>Selecciona un modo y adapta su dificultad.</p>
-            </div>
+                <img class="captura-app" src="captura-inicio.jpg" alt="Pantalla principal real de la aplicación RehabPod" loading="lazy">
+                <h3>1. Organiza</h3><p>Accede a rutinas, perfiles y conexión de Pods desde el inicio.</p>
+            </article>
             <article class="vista-item">
-                <div class="telefono" aria-label="Vista demostrativa de una sesión">
-                    <div class="telefono-barra"></div><div class="app-saludo">SESIÓN EN CURSO</div><div class="app-titulo">Toca el azul</div>
-                    <div class="objetivo-app">OBJETIVO</div>
-                    <div class="mini-stats"><div><strong>07</strong>ronda</div><div><strong>428</strong>ms</div><div><strong>92%</strong>precisión</div></div>
-                    <div class="app-boton">Pausar</div>
-                </div>
-                <h3>2. Reacciona</h3><p>Los Pods y la pantalla te guían en cada ronda.</p>
-            </div>
+                <img class="captura-app" src="captura-entrenamientos.jpg" alt="Categorías reales de entrenamiento de RehabPod" loading="lazy">
+                <h3>2. Elige</h3><p>Selecciona actividades deportivas, de fisioterapia o neurología.</p>
+            </article>
             <article class="vista-item">
-                <div class="telefono" aria-label="Vista demostrativa de resultados">
-                    <div class="telefono-barra"></div><div class="app-saludo">SESIÓN COMPLETADA</div><div class="app-titulo">Tu progreso</div>
-                    <div class="resultado-grande"><strong>0.428 s</strong><span>mejor tiempo de reacción</span></div>
-                    <div class="barras" aria-hidden="true"><i style="height:48%"></i><i style="height:72%"></i><i style="height:58%"></i><i style="height:88%"></i><i style="height:66%"></i><i style="height:95%"></i></div>
-                    <div class="app-boton">Repetir sesión</div>
-                </div>
-                <h3>3. Mejora</h3><p>Compara tiempos, precisión y constancia.</p>
+                <img class="captura-app" src="captura-progreso.jpg" alt="Pantalla real de progreso de RehabPod" loading="lazy">
+                <h3>3. Mejora</h3><p>Consulta tiempos, precisión, objetivos y constancia.</p>
             </article>
         </div>
-        <p class="nota-vistas">Vistas demostrativas. Podrán reemplazarse por capturas reales de la aplicación.</p>
+        <p class="nota-vistas">Capturas reales de la versión web de RehabPod. La información mostrada corresponde a un perfil local de demostración.</p>
     </div>
 </section>
 
