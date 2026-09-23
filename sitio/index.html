@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RehabPod — Reacciona antes de pensarlo</title>
-<meta name="description" content="RehabPod conecta pods físicos con luces a tu celular: entrena reacción, coordinación y rehabilitación, y sigue tu progreso al milisegundo.">
+<meta name="description" content="RehabPod conecta pods físicos con luces a tu celular para entrenar reacción y coordinación, apoyar procesos de rehabilitación y registrar tu progreso.">
 <link rel="icon" href="logo-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -137,38 +137,44 @@ nav .envoltura{
     border:1px solid var(--borde);
     border-radius:22px;
     padding:38px;
-    display:flex;
-    flex-wrap:wrap;
+    display:block;
 }
+.pods-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
 .pod{
-    width:calc(50% - 11px);
-    padding-bottom:calc(50% - 11px);
-    height:0;
-    margin:0 22px 22px 0;
+    width:100%;aspect-ratio:1/1;padding:0;
     border-radius:50%;
     background:var(--tarjeta2);
     border:2px solid var(--borde);
     position:relative;
+    cursor:pointer;
+    appearance:none;
     transition:background .12s ease, border-color .12s ease, box-shadow .2s ease, transform .12s ease;
 }
-.pod:nth-child(2n){margin-right:0;}
+.pod:hover{border-color:#46524d;}
+.pod:focus-visible{outline:3px solid var(--acento);outline-offset:4px;}
 .pod::after{
     content:'';position:absolute;inset:14%;border-radius:50%;
     background:rgba(255,255,255,.05);
 }
 .pod.activo{transform:scale(1.04);}
+.pod.fallo{background:var(--rojo);border-color:var(--rojo);animation:falloPod .25s ease 2;}
+@keyframes falloPod{50%{transform:scale(.94);}}
 .pod.activo[data-c="rojo"]{background:var(--rojo);border-color:var(--rojo);box-shadow:0 0 34px rgba(239,68,68,.55);}
 .pod.activo[data-c="azul"]{background:var(--azul);border-color:var(--azul);box-shadow:0 0 34px rgba(59,130,246,.55);}
 .pod.activo[data-c="verde"]{background:var(--verde);border-color:var(--verde);box-shadow:0 0 34px rgba(34,197,94,.55);}
 .pod.activo[data-c="lima"]{background:var(--acento);border-color:var(--acento);box-shadow:0 0 34px rgba(198,255,77,.55);}
 
 .pods-demo-pie{
-    position:absolute;left:38px;right:38px;bottom:-18px;
+    margin-top:18px;
     display:flex;justify-content:space-between;align-items:center;
     background:var(--fondo);border:1px solid var(--borde);border-radius:12px;
     padding:10px 16px;font-family:var(--fuente-dato);font-size:13px;color:var(--texto2);
 }
 .pods-demo-pie strong{color:var(--acento);}
+.demo-controles{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:30px;}
+.demo-estado{font-size:12.5px;color:var(--texto2);max-width:250px;}
+.demo-iniciar{border:0;border-radius:9px;background:var(--acento);color:var(--acento-tinta);font-weight:700;padding:10px 15px;cursor:pointer;}
+.demo-iniciar:disabled{opacity:.55;cursor:wait;}
 
 /* ============ SECCIONES GENERALES ============ */
 
@@ -205,6 +211,26 @@ section{padding:96px 0;}
 .funcion h3{font-size:16px;margin-bottom:8px;}
 .funcion p{font-size:13.5px;}
 
+/* ---- vistas de la app ---- */
+.vistas-app{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:start;}
+@media (max-width:900px){.vistas-app{grid-template-columns:1fr;max-width:420px;margin:0 auto;}}
+.vista-item h3{text-align:center;font-size:16px;margin:18px 0 7px;}
+.vista-item>p{text-align:center;font-size:13.5px;}
+.telefono{max-width:320px;margin:0 auto;background:#090c0b;border:8px solid #252c29;border-radius:34px;padding:16px;min-height:510px;box-shadow:0 20px 50px rgba(0,0,0,.35);}
+.telefono-barra{width:72px;height:5px;border-radius:8px;background:#333d39;margin:0 auto 22px;}
+.app-saludo{font-size:12px;color:var(--texto2);}
+.app-titulo{font-family:var(--fuente-titulo);font-size:22px;margin:5px 0 18px;}
+.app-chip{display:inline-block;padding:7px 10px;border:1px solid var(--borde);border-radius:999px;font-size:10px;color:var(--texto2);margin:0 5px 8px 0;}
+.app-chip.activo{background:var(--acento);color:var(--acento-tinta);border-color:var(--acento);}
+.app-card{background:var(--tarjeta);border:1px solid var(--borde);border-radius:14px;padding:14px;margin-top:10px;}
+.app-card strong{display:block;font-size:13px;}.app-card span{font-size:10px;color:var(--texto2);}
+.app-boton{background:var(--acento);color:var(--acento-tinta);border-radius:11px;text-align:center;padding:11px;font-weight:700;font-size:12px;margin-top:18px;}
+.objetivo-app{width:150px;height:150px;border-radius:50%;background:var(--azul);box-shadow:0 0 35px rgba(59,130,246,.45);margin:45px auto 25px;display:grid;place-items:center;font-weight:700;}
+.mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;text-align:center}.mini-stats div{background:var(--tarjeta);border-radius:10px;padding:10px 4px;font-size:10px}.mini-stats strong{display:block;color:var(--acento);font-family:var(--fuente-dato);font-size:14px;}
+.resultado-grande{text-align:center;margin:28px 0}.resultado-grande strong{display:block;font-size:35px;color:var(--acento);font-family:var(--fuente-dato)}.resultado-grande span{font-size:11px;color:var(--texto2)}
+.barras{height:145px;display:flex;align-items:end;gap:9px;padding:12px;background:var(--tarjeta);border-radius:13px}.barras i{flex:1;background:linear-gradient(var(--acento),#4e681b);border-radius:5px 5px 2px 2px;min-height:20px;}
+.nota-vistas{font-size:12px!important;margin-top:12px!important;color:var(--texto2);}
+
 /* ---- cómo funciona ---- */
 
 .pasos{counter-reset:paso;}
@@ -221,22 +247,10 @@ section{padding:96px 0;}
 .paso h3{font-size:17px;margin-bottom:6px;}
 .paso p{font-size:14.5px;max-width:520px;}
 
-/* ---- precios ---- */
-
-.precios{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
-@media (max-width:760px){ .precios{grid-template-columns:1fr;} }
-.plan{
-    border-radius:18px;padding:32px;border:1px solid var(--borde);background:var(--tarjeta);
-    display:flex;flex-direction:column;
-}
-.plan.destacado{border-color:var(--acento);background:linear-gradient(180deg, rgba(198,255,77,.06), transparent 40%), var(--tarjeta);}
-.plan-etq{font-size:12.5px;color:var(--texto2);}
-.plan h3{font-size:24px;margin:8px 0 4px;}
-.plan .precio{font-family:var(--fuente-dato);font-size:15px;color:var(--texto2);margin-bottom:20px;}
-.plan ul{list-style:none;margin:0 0 26px;padding:0;display:flex;flex-direction:column;gap:11px;}
-.plan li{font-size:14px;color:var(--texto);padding-left:22px;position:relative;}
-.plan li::before{content:'';position:absolute;left:0;top:7px;width:8px;height:8px;border-radius:2px;background:var(--acento);}
-.plan .boton{justify-content:center;margin-top:auto;}
+/* ---- acceso anticipado ---- */
+.acceso-panel{border-radius:22px;padding:38px;border:1px solid var(--acento);background:linear-gradient(120deg,rgba(198,255,77,.08),transparent 58%),var(--tarjeta);display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center;}
+.acceso-panel h3{font-size:25px;margin-bottom:10px}.acceso-panel p{max-width:650px}.acceso-panel .boton{white-space:nowrap;}
+@media(max-width:720px){.acceso-panel{grid-template-columns:1fr}.acceso-panel .boton{justify-content:center;}}
 
 /* ---- cta final ---- */
 
@@ -275,7 +289,8 @@ footer .envoltura{display:flex;justify-content:space-between;align-items:center;
         <div class="nav-links">
             <a href="#funciona">Cómo funciona</a>
             <a href="#quien">Para quién es</a>
-            <a href="#precios">Precios</a>
+            <a href="#experiencia">La app</a>
+            <a href="#disponibilidad">Disponibilidad</a>
         </div>
         <a class="nav-cta" href="#acceso">Solicitar acceso</a>
     </div>
@@ -286,7 +301,7 @@ footer .envoltura{display:flex;justify-content:space-between;align-items:center;
         <div>
             <span class="etiqueta-mono">// entrenamiento de reacción y rehabilitación</span>
             <h1 style="margin-top:14px;">Reacciona antes<br>de pensarlo.</h1>
-            <p class="sub">RehabPod conecta pods físicos con luces a tu celular. Mide tu tiempo de reacción al milisegundo, arma el plan de entrenamiento o rehabilitación que necesitas, y hace seguimiento de tu progreso — sin que tengas que adivinar qué hacer cada día.</p>
+            <p class="sub">RehabPod conecta pods físicos con luces a tu celular. Registra tus tiempos de reacción en milisegundos, organiza el plan de entrenamiento o rehabilitación que necesitas y facilita el seguimiento de tu progreso.</p>
             <div class="hero-ctas">
                 <a class="boton boton-primario" href="#acceso">Solicitar acceso anticipado</a>
                 <a class="boton boton-secundario" href="#funciona">Ver cómo funciona</a>
@@ -294,18 +309,24 @@ footer .envoltura{display:flex;justify-content:space-between;align-items:center;
             <div class="hero-stats">
                 <div><strong>4</strong><span>pods conectados por Bluetooth</span></div>
                 <div><strong>9</strong><span>colores, ajustables por daltonismo</span></div>
-                <div><strong>ms</strong><span>precisión de milisegundos</span></div>
+                <div><strong>ms</strong><span>registro de tiempos de reacción</span></div>
             </div>
         </div>
 
-        <div class="pods-demo">
-            <div class="pod" data-c="rojo"></div>
-            <div class="pod" data-c="azul"></div>
-            <div class="pod" data-c="verde"></div>
-            <div class="pod" data-c="lima"></div>
+        <div class="pods-demo" aria-labelledby="tituloDemo">
+            <div class="pods-grid">
+                <button class="pod" type="button" data-c="rojo" aria-label="Pod rojo"></button>
+                <button class="pod" type="button" data-c="azul" aria-label="Pod azul"></button>
+                <button class="pod" type="button" data-c="verde" aria-label="Pod verde"></button>
+                <button class="pod" type="button" data-c="lima" aria-label="Pod lima"></button>
+            </div>
             <div class="pods-demo-pie">
-                <span>ELIGE UN POD</span>
-                <strong id="tiempoDemo">0.000 s</strong>
+                <span id="tituloDemo">PRUEBA DE REACCIÓN</span>
+                <strong id="tiempoDemo">— ms</strong>
+            </div>
+            <div class="demo-controles">
+                <span class="demo-estado" id="estadoDemo" aria-live="polite">Pulsa iniciar y toca únicamente el Pod iluminado.</span>
+                <button class="demo-iniciar" id="iniciarDemo" type="button">Iniciar prueba</button>
             </div>
         </div>
     </div>
@@ -343,7 +364,7 @@ footer .envoltura{display:flex;justify-content:space-between;align-items:center;
         <div class="pasos oculto">
             <div class="paso">
                 <div class="paso-num"></div>
-                <div><h3>Conecta tus pods</h3><p>Enciende los pods y vincúlalos por Bluetooth desde la app — quedan reconectados automáticamente la próxima vez.</p></div>
+                <div><h3>Conecta tus pods</h3><p>Enciende los Pods y vincúlalos por Bluetooth desde la app. La aplicación recuerda la configuración para facilitar las próximas conexiones.</p></div>
             </div>
             <div class="paso">
                 <div class="paso-num"></div>
@@ -351,7 +372,7 @@ footer .envoltura{display:flex;justify-content:space-between;align-items:center;
             </div>
             <div class="paso">
                 <div class="paso-num"></div>
-                <div><h3>Reacciona</h3><p>Los pods se iluminan, tú tocas el color correcto. La app mide cada tiempo de reacción al milisegundo.</p></div>
+                <div><h3>Reacciona</h3><p>Los Pods se iluminan y tú tocas el objetivo correcto. La app registra cada tiempo de reacción en milisegundos.</p></div>
             </div>
             <div class="paso">
                 <div class="paso-num"></div>
@@ -381,37 +402,51 @@ footer .envoltura{display:flex;justify-content:space-between;align-items:center;
     </div>
 </section>
 
-<section id="precios">
+<section id="experiencia">
     <div class="envoltura">
         <div class="titulo-seccion oculto">
-            <h2>Precios</h2>
-            <p>El entrenamiento individual siempre es gratis. Solo se cobra la gestión de pacientes.</p>
+            <h2>Así se vive RehabPod</h2>
+            <p>Una experiencia sencilla: elegir, reaccionar y revisar el progreso.</p>
         </div>
-        <div class="precios oculto">
-            <div class="plan">
-                <span class="plan-etq">Para entrenar</span>
-                <h3>Gratis</h3>
-                <div class="precio">$0 / siempre</div>
-                <ul>
-                    <li>Todos los modos de entrenamiento</li>
-                    <li>Asistente de rutinas</li>
-                    <li>Progreso y metas semanales</li>
-                    <li>Hasta 2 pacientes vinculados (para Profesionales)</li>
-                </ul>
-                <a class="boton boton-secundario" href="#acceso">Solicitar acceso</a>
+        <div class="vistas-app oculto">
+            <article class="vista-item">
+                <div class="telefono" aria-label="Vista demostrativa de selección de modo">
+                    <div class="telefono-barra"></div><div class="app-saludo">Hola, es momento de avanzar</div><div class="app-titulo">Elige tu objetivo</div>
+                    <span class="app-chip activo">Velocidad</span><span class="app-chip">Coordinación</span><span class="app-chip">Memoria</span>
+                    <div class="app-card"><strong>Reacción libre</strong><span>Toca el Pod que se ilumina</span></div>
+                    <div class="app-card"><strong>Seguir color</strong><span>Encuentra siempre el color objetivo</span></div>
+                    <div class="app-boton">Continuar</div>
+                </div>
+                <h3>1. Elige</h3><p>Selecciona un modo y adapta su dificultad.</p>
             </div>
-            <div class="plan destacado">
-                <span class="plan-etq">Para clínicas y profesionales</span>
-                <h3>Profesional</h3>
-                <div class="precio">Escríbenos por el precio</div>
-                <ul>
-                    <li>Pacientes vinculados ilimitados</li>
-                    <li>Informes en PDF sin límite</li>
-                    <li>Biblioteca de rutinas compartidas</li>
-                    <li>Soporte prioritario</li>
-                </ul>
-                <a class="boton boton-primario" href="#acceso">Contáctanos</a>
+            <article class="vista-item">
+                <div class="telefono" aria-label="Vista demostrativa de una sesión">
+                    <div class="telefono-barra"></div><div class="app-saludo">SESIÓN EN CURSO</div><div class="app-titulo">Toca el azul</div>
+                    <div class="objetivo-app">OBJETIVO</div>
+                    <div class="mini-stats"><div><strong>07</strong>ronda</div><div><strong>428</strong>ms</div><div><strong>92%</strong>precisión</div></div>
+                    <div class="app-boton">Pausar</div>
+                </div>
+                <h3>2. Reacciona</h3><p>Los Pods y la pantalla te guían en cada ronda.</p>
             </div>
+            <article class="vista-item">
+                <div class="telefono" aria-label="Vista demostrativa de resultados">
+                    <div class="telefono-barra"></div><div class="app-saludo">SESIÓN COMPLETADA</div><div class="app-titulo">Tu progreso</div>
+                    <div class="resultado-grande"><strong>0.428 s</strong><span>mejor tiempo de reacción</span></div>
+                    <div class="barras" aria-hidden="true"><i style="height:48%"></i><i style="height:72%"></i><i style="height:58%"></i><i style="height:88%"></i><i style="height:66%"></i><i style="height:95%"></i></div>
+                    <div class="app-boton">Repetir sesión</div>
+                </div>
+                <h3>3. Mejora</h3><p>Compara tiempos, precisión y constancia.</p>
+            </article>
+        </div>
+        <p class="nota-vistas">Vistas demostrativas. Podrán reemplazarse por capturas reales de la aplicación.</p>
+    </div>
+</section>
+
+<section id="disponibilidad">
+    <div class="envoltura">
+        <div class="acceso-panel oculto">
+            <div><h3>RehabPod está en acceso anticipado</h3><p>Actualmente estamos realizando pruebas del kit y de la aplicación. La disponibilidad, los paquetes y los precios definitivos se anunciarán después de validar la experiencia con usuarios y profesionales.</p></div>
+            <a class="boton boton-primario" href="#acceso">Quiero recibir novedades</a>
         </div>
     </div>
 </section>
@@ -443,30 +478,80 @@ footer .envoltura{display:flex;justify-content:space-between;align-items:center;
 <script>
 document.getElementById("anio").textContent = new Date().getFullYear();
 
-// --- animación de los pods (secuencia tipo reacción, en loop) ---
+// --- minijuego táctil de reacción ---
 (function () {
     var pods = document.querySelectorAll(".pod");
     var tiempoEl = document.getElementById("tiempoDemo");
-    if (!pods.length) return;
+    var estadoEl = document.getElementById("estadoDemo");
+    var iniciarBtn = document.getElementById("iniciarDemo");
+    if (!pods.length || !iniciarBtn) return;
 
-    var reducido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reducido) {
-        pods[0].classList.add("activo");
-        return;
-    }
+    var indiceActivo = -1;
+    var inicioRonda = 0;
+    var temporizador = null;
+    var aciertos = 0;
+    var mejor = null;
+    var jugando = false;
 
-    var indice = 0;
-    function encenderSiguiente() {
+    function apagarPods() {
         pods.forEach(function (p) { p.classList.remove("activo"); });
-        indice = Math.floor(Math.random() * pods.length);
-        pods[indice].classList.add("activo");
-
-        var tiempo = (Math.random() * 0.35 + 0.18).toFixed(3);
-        if (tiempoEl) tiempoEl.textContent = tiempo + " s";
+        indiceActivo = -1;
     }
 
-    encenderSiguiente();
-    setInterval(encenderSiguiente, 950);
+    function prepararRonda() {
+        apagarPods();
+        estadoEl.textContent = "Prepárate…";
+        var espera = 650 + Math.random() * 1150;
+        temporizador = window.setTimeout(function () {
+            indiceActivo = Math.floor(Math.random() * pods.length);
+            pods[indiceActivo].classList.add("activo");
+            inicioRonda = performance.now();
+            estadoEl.textContent = "¡Toca el Pod iluminado!";
+        }, espera);
+    }
+
+    function terminar() {
+        jugando = false;
+        apagarPods();
+        iniciarBtn.disabled = false;
+        iniciarBtn.textContent = "Repetir prueba";
+        estadoEl.textContent = "Prueba completa · mejor tiempo: " + mejor + " ms";
+    }
+
+    iniciarBtn.addEventListener("click", function () {
+        window.clearTimeout(temporizador);
+        aciertos = 0;
+        mejor = null;
+        jugando = true;
+        tiempoEl.textContent = "— ms";
+        iniciarBtn.disabled = true;
+        iniciarBtn.textContent = "En curso";
+        prepararRonda();
+    });
+
+    pods.forEach(function (pod, indice) {
+        pod.addEventListener("click", function () {
+            if (!jugando || indiceActivo < 0) return;
+            if (indice !== indiceActivo) {
+                pod.classList.add("fallo");
+                estadoEl.textContent = "Ese no era. Toca el Pod iluminado.";
+                window.setTimeout(function () { pod.classList.remove("fallo"); }, 500);
+                return;
+            }
+
+            var tiempo = Math.round(performance.now() - inicioRonda);
+            mejor = mejor === null ? tiempo : Math.min(mejor, tiempo);
+            aciertos += 1;
+            tiempoEl.textContent = tiempo + " ms";
+            apagarPods();
+            if (aciertos >= 5) {
+                terminar();
+            } else {
+                estadoEl.textContent = "¡Bien! " + aciertos + " de 5";
+                temporizador = window.setTimeout(prepararRonda, 550);
+            }
+        });
+    });
 })();
 
 // --- aparición al hacer scroll ---

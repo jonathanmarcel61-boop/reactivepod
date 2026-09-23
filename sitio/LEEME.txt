@@ -1,0 +1,32 @@
+REHABPOD - SITIO WEB V2
+
+Contenido:
+- index.html: página principal.
+- privacidad.html: términos y política de privacidad actuales.
+- logo-icon.png: icono usado por ambas páginas.
+
+CAMBIOS INCLUIDOS
+1. Minijuego táctil de reacción de cinco rondas.
+2. Registro del tiempo de reacción en milisegundos.
+3. Aviso al tocar un Pod incorrecto y resultado del mejor tiempo.
+4. Textos ajustados para no prometer precisión clínica ni reconexión automática.
+5. Precios reemplazados por información de acceso anticipado.
+6. Tres vistas demostrativas de la aplicación construidas en HTML/CSS.
+7. Diseño adaptable para teléfono y computadora.
+
+INSTALACIÓN
+1. Sustituye en tu proyecto los archivos de la carpeta "sitio" por estos.
+2. Conserva el nombre index.html.
+3. Ejecuta desde la raíz del repositorio:
+
+   git add sitio
+   git commit -m "Actualizar sitio RehabPod V2"
+   git push origin main
+
+4. Vercel desplegará automáticamente la actualización.
+
+PENDIENTE PARA MÁS ADELANTE
+- Reemplazar [correo de contacto] y los datos legales entre corchetes.
+- Sustituir las vistas demostrativas por capturas reales si se desea.
+- Agregar fotografías y video cuando el diseño físico esté terminado.
+
