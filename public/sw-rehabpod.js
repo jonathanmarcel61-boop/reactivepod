@@ -15,7 +15,7 @@
 // nueva en vez de seguir usando la vieja del caché.
 // =====================================================
 
-const CACHE_VERSION = "rehabpod-v19-backup";
+const CACHE_VERSION = "rehabpod-v20-interface";
 
 const ARCHIVOS_DEL_CASCARON = [
   "./",
@@ -42,7 +42,6 @@ const ARCHIVOS_DEL_CASCARON = [
   "./js/colores-ajustes.js",
   "./js/motivacion.js",
   "./js/progreso.js",
-  "./js/informe-ui.js",
   "./js/recordatorios-ui.js",
   "./fonts/inter-latin-wght-normal.woff2",
   "./fonts/jetbrains-mono-latin-wght-normal.woff2",

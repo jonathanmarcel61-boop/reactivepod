@@ -143,30 +143,65 @@
     localStorage.setItem(CLAVE_HUELLA, huella(capturarDatos()));
   }
 
-  function htmlLocal() {
-    let perfiles = 0;
-    let sesiones = 0;
+  function perfilesLocales() {
     try {
       const datos = JSON.parse(localStorage.getItem("reactipodDatos") || "null");
-      perfiles = Array.isArray(datos?.perfiles) ? datos.perfiles.length : 0;
-      sesiones = (datos?.perfiles || []).reduce((n, p) => n + (Array.isArray(p?.historial) ? p.historial.length : 0), 0);
-    } catch (_) {}
-    return `<div class="rehabV40Card"><div class="rehabV40SecTitulo">DATOS EN ESTE TELÉFONO</div>
-      <div class="rehabV40Dato"><span>Perfiles</span><strong>${perfiles}</strong></div>
-      <div class="rehabV40Dato"><span>Entrenamientos guardados</span><strong>${sesiones}</strong></div>
+      return {
+        activo: datos?.perfilActivoId || null,
+        lista: Array.isArray(datos?.perfiles) ? datos.perfiles : [],
+      };
+    } catch (_) {
+      return { activo: null, lista: [] };
+    }
+  }
+
+  function htmlPerfilesEncabezado(conSesion) {
+    const perfiles = perfilesLocales();
+    const chips = perfiles.lista.length
+      ? perfiles.lista
+          .map((perfil) => {
+            const nombre = String(perfil?.nombre || "Perfil");
+            const inicial = nombre.trim().charAt(0).toUpperCase() || "P";
+            const activo = String(perfil?.id) === String(perfiles.activo);
+            return `<div class="rehabV46Perfil ${activo ? "activo" : ""}">
+              <span class="rehabV46PerfilAvatar">${esc(inicial)}</span>
+              <span><strong>${esc(nombre)}</strong><small>${activo ? "Perfil activo" : `${Array.isArray(perfil?.historial) ? perfil.historial.length : 0} sesiones`}</small></span>
+            </div>`;
+          })
+          .join("")
+      : '<div class="rehabV45Nota">Todavía no hay perfiles creados.</div>';
+
+    return `<section class="rehabV46CuentaHero">
+      <div class="rehabV46CuentaEstado"><span class="rehabV46Nube">${conSesion ? "✓" : "☁"}</span><div>
+        <span class="rehabV46Eyebrow">${conSesion ? "CUENTA ACTIVADA" : "RESPALDO OPCIONAL"}</span>
+        <h3>${conSesion ? "Tus datos están protegidos" : "Protege tus entrenamientos"}</h3>
+        <p>${conSesion ? esc(usuario?.email || "") : "Inicia sesión para recuperar tus datos si cambias de teléfono."}</p>
+      </div></div>
+      <div class="rehabV46PerfilesTitulo"><span>PERFILES DE ESTE TELÉFONO</span><strong>${perfiles.lista.length}</strong></div>
+      <div class="rehabV46Perfiles">${chips}</div>
+    </section>`;
+  }
+
+  function htmlLocal() {
+    const locales = perfilesLocales();
+    const perfiles = locales.lista.length;
+    let sesiones = 0;
+    sesiones = locales.lista.reduce((n, p) => n + (Array.isArray(p?.historial) ? p.historial.length : 0), 0);
+    return `<div class="rehabV40Card rehabV46Resumen"><div class="rehabV40SecTitulo">RESUMEN DEL RESPALDO</div>
+      <div class="rehabV46Metricas"><div><strong>${perfiles}</strong><span>Perfiles</span></div><div><strong>${sesiones}</strong><span>Entrenamientos</span></div></div>
       <div class="rehabV45Nota">También se respaldan rutinas, historial, recordatorios y ajustes. Las conexiones Bluetooth no se copian: en un teléfono nuevo debes volver a conectar los Pods.</div></div>`;
   }
 
   function htmlSinSesion() {
-    return `<div class="rehabV40Card"><div class="rehabV40SecTitulo">RESPALDO EN LA NUBE</div>
-      <div class="rehabV40Aviso">La cuenta es opcional y se usa únicamente para guardar tus datos y recuperarlos si cambias o pierdes el teléfono.</div>
-      <div class="rehabV40Acciones"><button id="rehabV45Entrar" class="rehabV40Btn" type="button">INICIAR SESIÓN / CREAR CUENTA</button></div></div>`;
+    return `${htmlPerfilesEncabezado(false)}<div class="rehabV40Card rehabV46Acceso"><div class="rehabV40SecTitulo">RESPALDO EN LA NUBE</div>
+      <h3>Continúa donde lo dejaste</h3><p>La cuenta se usa únicamente para guardar y recuperar tus datos. No necesitas proporcionar peso, altura ni edad.</p>
+      <button id="rehabV45Entrar" class="rehabV40Btn" type="button">INICIAR SESIÓN O CREAR CUENTA</button></div>`;
   }
 
   function htmlConSesion() {
     const dueno = localStorage.getItem(CLAVE_DUENO);
     const otroDispositivo = !!copia && dueno !== usuario.id;
-    return `<div class="rehabV40Hero"><div class="rehabV40Avatar">☁</div><div style="min-width:0"><h3>Respaldo activo</h3><small style="overflow-wrap:anywhere">${esc(usuario.email || "")}</small><span class="rehabV40Badge">Cuenta de respaldo</span></div></div>
+    return `${htmlPerfilesEncabezado(true)}
       <div class="rehabV40Card"><div class="rehabV40SecTitulo">TU COPIA DE SEGURIDAD</div>
         <div class="rehabV40Dato"><span>Última copia</span><strong>${esc(fechaLegible(copia?.updated_at))}</strong></div>
         <div class="rehabV45Estado ${otroDispositivo ? "advertencia" : "ok"}">${otroDispositivo ? "Encontramos una copia existente. Elige restaurarla o reemplazarla con los datos de este teléfono." : "Este teléfono está vinculado. Los cambios se guardarán automáticamente cuando haya conexión."}</div>
@@ -174,11 +209,11 @@
           ${copia ? '<button id="rehabV45Restaurar" class="rehabV40Btn ok" type="button">RESTAURAR EN ESTE TELÉFONO</button>' : ""}
           <button id="rehabV45Guardar" class="rehabV40Btn sec" type="button">${otroDispositivo ? "USAR LOS DATOS DE ESTE TELÉFONO" : "GUARDAR AHORA"}</button>
         </div><div id="rehabV45Mensaje" class="rehabV40Mensaje"></div></div>
-      <div class="rehabV40Card"><div class="rehabV40SecTitulo">SEGURIDAD DE LA CUENTA</div>
-        <div class="rehabV40Campo"><label>NUEVA CONTRASEÑA</label><input id="rehabV45Pass1" type="password" minlength="10" autocomplete="new-password" placeholder="10+ caracteres, mayúscula, minúscula y número"></div>
+      <details class="rehabV40Card rehabV46Desplegable"><summary><span><small>SEGURIDAD</small><strong>Cambiar contraseña</strong></span><b>⌄</b></summary>
+        <div class="rehabV46DesplegableCuerpo"><div class="rehabV40Campo"><label>NUEVA CONTRASEÑA</label><input id="rehabV45Pass1" type="password" minlength="10" autocomplete="new-password" placeholder="10+ caracteres, mayúscula, minúscula y número"></div>
         <div class="rehabV40Campo"><label>REPETIR CONTRASEÑA</label><input id="rehabV45Pass2" type="password" minlength="10" autocomplete="new-password" placeholder="Repite la contraseña"></div>
-        <div class="rehabV40Acciones"><button id="rehabV45CambiarPass" class="rehabV40Btn sec" type="button">CAMBIAR CONTRASEÑA</button><button id="rehabV45Salir" class="rehabV40Btn peligro" type="button">CERRAR SESIÓN</button></div>
-        <div id="rehabV45SegMensaje" class="rehabV40Mensaje"></div></div>`;
+        <button id="rehabV45CambiarPass" class="rehabV40Btn sec" type="button">ACTUALIZAR CONTRASEÑA</button><div id="rehabV45SegMensaje" class="rehabV40Mensaje"></div></div></details>
+      <button id="rehabV45Salir" class="rehabV46CerrarSesion" type="button">Cerrar sesión</button>`;
   }
 
   function mensaje(id, texto, tipo = "") {
@@ -195,7 +230,7 @@
     try {
       const sesion = await cargarEstado();
       if (sesion && !copia) await guardarCopia({ forzar: true });
-      host.innerHTML = `<div class="rehabV40Wrap">${htmlLocal()}${sesion ? htmlConSesion() : htmlSinSesion()}</div>`;
+      host.innerHTML = `<div class="rehabV40Wrap rehabV46Cuenta">${sesion ? htmlConSesion() : htmlSinSesion()}${htmlLocal()}</div>`;
       activarEventos(contentId);
       programarAutomatico();
     } catch (error) {
@@ -212,12 +247,15 @@
     overlay.className = "rehabV45Login";
     overlay.setAttribute("role", "dialog");
     overlay.setAttribute("aria-modal", "true");
-    overlay.innerHTML = `<div class="rehabV45LoginCard"><button id="rehabV45CerrarLogin" class="rehabV45Cerrar" aria-label="Cerrar">×</button><div class="rehabV40SecTitulo">CUENTA DE RESPALDO</div>
-      <p>Usa el mismo correo en tus teléfonos para guardar y recuperar tus datos.</p>
-      <label>Correo</label><input id="rehabV45Email" type="email" autocomplete="email">
-      <label>Contraseña</label><input id="rehabV45Password" type="password" minlength="10" autocomplete="current-password">
-      <div class="rehabV40Acciones"><button id="rehabV45LoginBtn" class="rehabV40Btn" type="button">INICIAR SESIÓN</button><button id="rehabV45CrearBtn" class="rehabV40Btn sec" type="button">CREAR CUENTA</button></div>
-      <button id="rehabV45Recuperar" class="rehabV27Link" type="button">¿Olvidaste tu contraseña?</button><div id="rehabV45LoginMensaje" class="rehabV40Mensaje"></div></div>`;
+    overlay.innerHTML = `<div class="rehabV45LoginCard"><button id="rehabV45CerrarLogin" class="rehabV45Cerrar" aria-label="Cerrar">×</button>
+      <div class="rehabV46LoginMarca"><span>☁</span><div><small>REHABPOD</small><h2>Guarda tu progreso</h2></div></div>
+      <p class="rehabV46LoginIntro">Usa el mismo correo para recuperar perfiles, rutinas, historial y ajustes en otro teléfono.</p>
+      <div class="rehabV46LoginCampos"><label>Correo electrónico</label><input id="rehabV45Email" type="email" autocomplete="email" placeholder="nombre@correo.com">
+      <label>Contraseña</label><input id="rehabV45Password" type="password" minlength="10" autocomplete="current-password" placeholder="Tu contraseña"></div>
+      <button id="rehabV45LoginBtn" class="rehabV40Btn rehabV46LoginPrincipal" type="button">INICIAR SESIÓN</button>
+      <button id="rehabV45CrearBtn" class="rehabV46CrearCuenta" type="button">¿Primera vez? <strong>Crear una cuenta</strong></button>
+      <button id="rehabV45Recuperar" class="rehabV27Link rehabV46Recuperar" type="button">Olvidé mi contraseña</button>
+      <div id="rehabV45LoginMensaje" class="rehabV40Mensaje" aria-live="polite"></div></div>`;
     document.body.appendChild(overlay);
     document.getElementById("rehabV45CerrarLogin").onclick = cerrarLogin;
     overlay.onclick = (e) => { if (e.target === overlay) cerrarLogin(); };

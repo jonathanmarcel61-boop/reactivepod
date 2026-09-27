@@ -2388,7 +2388,7 @@ const catalogoColoresPersonalizados = {
   },
 
   cyan: {
-    nombre: "CIAN",
+    nombre: "CELESTE",
     comando: "cyan",
     css: "#22d3ee",
   },
@@ -2774,7 +2774,7 @@ function crearControlesExperienciaEntrenamiento() {
                 <option value="yellow">Amarillo</option>
                 <option value="white">Blanco</option>
                 <option value="purple">Morado</option>
-                <option value="cyan">Cian</option>
+                <option value="cyan">Celeste</option>
                 <option value="orange">Naranja</option>
                 <option value="pink">Rosado</option>
             </select>
@@ -7459,7 +7459,7 @@ function rehabCrearControlColorMemoria() {
       <option value="yellow">Amarillo</option>
       <option value="white">Blanco</option>
       <option value="purple">Morado</option>
-      <option value="cyan">Cian</option>
+      <option value="cyan">Celeste</option>
       <option value="orange">Naranja</option>
       <option value="pink">Rosado</option>
     </select>
@@ -8075,7 +8075,7 @@ function rehabV19CrearControlColorCaza() {
       <option value="yellow">Amarillo</option>
       <option value="white">Blanco</option>
       <option value="purple">Morado</option>
-      <option value="cyan">Cian</option>
+      <option value="cyan">Celeste</option>
       <option value="orange">Naranja</option>
       <option value="pink">Rosado</option>
     </select>
@@ -16839,8 +16839,23 @@ setTimeout(() => {
     textoObjetivo.textContent = "TOCA EL COLOR ESCRITO";
     nombreColor.textContent = objetivo.nombre;
     nombreColor.style.color = "var(--texto)";
-    colorObjetivo.style.background = "#374151";
-    colorObjetivo.setAttribute("aria-label", `Palabra objetivo: ${objetivo.nombre}`);
+    const claves = rehabElegirClavesContrastantes(
+      2,
+      obtenerClavesColoresActivos(),
+      [objetivo.comando]
+    );
+    const claveDistractora = claves.find((clave) => clave !== objetivo.comando);
+    const distractor =
+      catalogoColoresPersonalizados[claveDistractora] ||
+      (objetivo.comando === "red"
+        ? catalogoColoresPersonalizados.blue
+        : catalogoColoresPersonalizados.red);
+
+    colorObjetivo.style.background = distractor.css;
+    colorObjetivo.setAttribute(
+      "aria-label",
+      `Color distractor: ${distractor.nombre}. Palabra objetivo: ${objetivo.nombre}`
+    );
   }
 
   const activarColoresBaseV44 = activarColores;
@@ -16863,7 +16878,7 @@ setTimeout(() => {
       facil:
         "Observa únicamente el color del círculo y toca el Pod que tenga ese mismo color.",
       media:
-        "Lee el nombre del color y toca el Pod correspondiente. El círculo no revela la respuesta.",
+        "Lee el nombre del color y toca el Pod correspondiente. El círculo muestra otro color para exigir mayor atención.",
       dificil:
         "La pista cambia aleatoriamente entre un círculo de color y una palabra. Lee la regla antes de responder.",
       personalizada:
@@ -16884,7 +16899,7 @@ setTimeout(() => {
         "La forma de indicar el objetivo cambia con la dificultad seleccionada.",
       pasos: [
         "Fácil: observa el círculo y toca el Pod del mismo color.",
-        "Media: lee la palabra y toca el color escrito.",
+        "Media: ignora el color del círculo, lee la palabra y toca el color escrito.",
         "Difícil: identifica si la ronda usa círculo o palabra antes de tocar.",
       ],
     };
