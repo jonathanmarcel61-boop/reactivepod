@@ -3412,6 +3412,13 @@ function iniciarCuenta() {
 
   const intervalo = setInterval(
     () => {
+      // Si la persona retrocede durante la cuenta 3-2-1, no debemos abrir
+      // la pantalla de entrenamiento después de haber salido.
+      if (!entrenamientoActivo) {
+        clearInterval(intervalo);
+        return;
+      }
+
       numero--;
 
       if (numero > 0) {
@@ -16218,4 +16225,506 @@ setTimeout(() => {
   window.rehabV42Pendientes = () => v42LeerCola();
 
   v42Iniciar();
+})();
+// =====================================================
+// REHABPOD V43
+// SEMAFORO DE MARCHA + VISTA DE ESTIMULO A PANTALLA COMPLETA
+// + NAVEGACION ATRAS EN ANDROID Y NAVEGADOR
+// =====================================================
+
+(function () {
+  "use strict";
+
+  const MODO_SEMAFORO = "semaforoMarcha";
+  const SENIALES_SEMAFORO = [
+    { clave: "green", nombre: "VERDE", accion: "CAMINA", css: "#22c55e" },
+    { clave: "yellow", nombre: "AMARILLO", accion: "DESPACIO", css: "#facc15" },
+    { clave: "red", nombre: "ROJO", accion: "DETENTE", css: "#ef4444" },
+  ];
+
+  let temporizadorSemaforo = null;
+  let ultimaSenialSemaforo = "";
+  let colorPantallaCompleta = "#111827";
+  let navegacionAtrasEnCurso = false;
+  let pantallaActualV43 = document.querySelector(".pantalla.activa") || pantallaInicio;
+  const historialPantallasV43 = [];
+
+  // -----------------------------------------------------
+  // 1. REGISTRO DEL MODO EN LAS CATEGORIAS V22
+  // -----------------------------------------------------
+  function registrarModoSemaforo() {
+    if (window.REHAB_V22_MODOS) {
+      window.REHAB_V22_MODOS[MODO_SEMAFORO] = {
+        icono: "🚦",
+        titulo: "Semáforo de marcha",
+        descripcion:
+          "Sigue señales visuales: verde para caminar, amarillo para ir despacio y rojo para detenerte.",
+      };
+    }
+
+    if (Array.isArray(window.REHAB_V22_CATEGORIAS)) {
+      ["fisioterapia", "neurologia"].forEach(function (claveCategoria) {
+        const categoria = window.REHAB_V22_CATEGORIAS.find(function (item) {
+          return item.clave === claveCategoria;
+        });
+        if (categoria && !categoria.modos.includes(MODO_SEMAFORO)) {
+          categoria.modos.push(MODO_SEMAFORO);
+        }
+      });
+    }
+  }
+
+  registrarModoSemaforo();
+
+  // -----------------------------------------------------
+  // 2. CONFIGURACION DEL SEMAFORO
+  // -----------------------------------------------------
+  function crearControlSemaforo() {
+    let panel = document.getElementById("controlSemaforoMarcha");
+    if (panel) return panel;
+
+    panel = document.createElement("div");
+    panel.id = "controlSemaforoMarcha";
+    panel.className = "tarjeta rehabSemaforoConfig";
+    panel.innerHTML = `
+      <label for="duracionSenialSemaforo" class="rehabSemaforoLabel">
+        Duración de cada señal
+      </label>
+      <select id="duracionSenialSemaforo">
+        <option value="2000">2 segundos</option>
+        <option value="3000">3 segundos</option>
+        <option value="4000" selected>4 segundos</option>
+        <option value="5000">5 segundos</option>
+        <option value="7000">7 segundos</option>
+      </select>
+      <small>
+        En dificultad personalizada se usará este tiempo. El ejercicio puede utilizarse
+        solo con la pantalla o también con los Pods conectados.
+      </small>
+    `;
+
+    const referencia = document.getElementById("controlCantidadPodsRehabPod");
+    if (referencia && referencia.parentElement) {
+      referencia.insertAdjacentElement("afterend", panel);
+    } else if (descripcionModo && descripcionModo.parentElement) {
+      descripcionModo.insertAdjacentElement("afterend", panel);
+    }
+
+    return panel;
+  }
+
+  function duracionSenialSemaforo() {
+    const dificultad = dificultadActual || ajustesApp.dificultad || "media";
+    if (dificultad === "facil") return 5000;
+    if (dificultad === "dificil") return 2200;
+    if (dificultad === "personalizada") {
+      return Number(document.getElementById("duracionSenialSemaforo")?.value) || 4000;
+    }
+    return 3500;
+  }
+
+  const configurarModoBaseV43 = configurarModo;
+  configurarModo = function () {
+    configurarModoBaseV43();
+    const panel = crearControlSemaforo();
+    const cantidad = document.getElementById("controlCantidadPodsRehabPod");
+
+    panel.style.display = modoActual === MODO_SEMAFORO ? "block" : "none";
+    if (cantidad) cantidad.style.display = modoActual === MODO_SEMAFORO ? "none" : "";
+
+    if (modoActual === MODO_SEMAFORO) {
+      tituloConfiguracion.textContent = "Semáforo de marcha";
+      iconoConfiguracion.textContent = "🚦";
+      descripcionModo.textContent =
+        "Sigue la señal de la pantalla: verde para caminar, amarillo para reducir la velocidad y rojo para detenerte. Úsalo con supervisión y en un espacio despejado.";
+    }
+  };
+
+  const actualizarDescripcionBaseV43 = rehabActualizarDescripcionModo;
+  rehabActualizarDescripcionModo = function () {
+    actualizarDescripcionBaseV43();
+    if (modoActual === MODO_SEMAFORO && descripcionModo) {
+      descripcionModo.textContent =
+        "Verde: camina. Amarillo: ve despacio. Rojo: detente. Las señales cambian automáticamente y pueden mostrarse a pantalla completa.";
+    }
+  };
+
+  const obtenerNombreModoBaseV43 = obtenerNombreModo;
+  obtenerNombreModo = function () {
+    if (modoActual === MODO_SEMAFORO) return "Semáforo de marcha";
+    return obtenerNombreModoBaseV43();
+  };
+
+  const obtenerGuiaBaseV43 = obtenerGuiaModoV7;
+  obtenerGuiaModoV7 = function () {
+    if (modoActual === MODO_SEMAFORO) {
+      return {
+        icono: "🚦",
+        titulo: "Semáforo de marcha",
+        descripcion:
+          "Ejercicio de apoyo visual para practicar inicio, reducción de velocidad y detención de la marcha.",
+        pasos: [
+          "VERDE: camina manteniendo un paso cómodo y seguro.",
+          "AMARILLO: reduce la velocidad y prepárate para detenerte.",
+          "ROJO: detente de forma estable y espera la siguiente señal.",
+        ],
+      };
+    }
+    return obtenerGuiaBaseV43();
+  };
+
+  // -----------------------------------------------------
+  // 3. EJECUCION DEL SEMAFORO
+  // -----------------------------------------------------
+  function limpiarSemaforo() {
+    clearTimeout(temporizadorSemaforo);
+    temporizadorSemaforo = null;
+    ultimaSenialSemaforo = "";
+  }
+
+  function elegirSenialSemaforo() {
+    const disponibles = SENIALES_SEMAFORO.filter(function (item) {
+      return item.clave !== ultimaSenialSemaforo;
+    });
+    const elegida = disponibles[Math.floor(Math.random() * disponibles.length)];
+    ultimaSenialSemaforo = elegida.clave;
+    return elegida;
+  }
+
+  async function mostrarSenialSemaforo() {
+    if (!entrenamientoActivo || pausado || modoActual !== MODO_SEMAFORO) return;
+
+    clearTimeout(temporizadorSemaforo);
+
+    if (tipoFinalGeneral !== "tiempo" && rondaActual >= totalRondasActual) {
+      await apagarTodosLosPods();
+      finalizarEntrenamiento();
+      return;
+    }
+
+    rondaActual++;
+    const senial = elegirSenialSemaforo();
+    const duracion = duracionSenialSemaforo();
+    const conectados = rehabIndicesPodsConectados().slice(
+      0,
+      Math.max(1, Number(cantidadPodsSeleccionada) || 1)
+    );
+
+    fase = "semaforoMarcha";
+    esperandoRespuesta = false;
+    colorPantallaCompleta = senial.css;
+
+    if (tipoFinalGeneral !== "tiempo") {
+      textoRonda.textContent = `Señal ${rondaActual} de ${totalRondasActual}`;
+    }
+    textoFase.textContent = "SEMÁFORO";
+    textoObjetivo.textContent = senial.accion;
+    nombreColor.textContent = senial.nombre;
+    colorObjetivo.style.background = senial.css;
+    cronometro.textContent = `${(duracion / 1000).toFixed(1)} s`;
+    ultimoTiempo.textContent = "AUTO";
+    mensajeResultado.textContent =
+      senial.clave === "green"
+        ? "Camina"
+        : senial.clave === "yellow"
+          ? "Reduce la velocidad"
+          : "Detente y mantén el equilibrio";
+    mensajeResultado.className = "mensajeResultado";
+
+    apagarVisuales();
+    conectados.forEach(function (indice) {
+      encenderVisual(indice, senial.css);
+    });
+    await Promise.all(
+      conectados.map(function (indice) {
+        return enviarComandoPod(indice, senial.clave);
+      })
+    );
+
+    aciertos++;
+    contadorAciertos.textContent = aciertos;
+    resultados.push({
+      ronda: rondaActual,
+      correcto: true,
+      tiempo: null,
+      estado: `${senial.nombre} · ${senial.accion}`,
+    });
+
+    actualizarPantallaCompleta();
+
+    temporizadorSemaforo = setTimeout(async function () {
+      if (!entrenamientoActivo || modoActual !== MODO_SEMAFORO) return;
+      await apagarTodosLosPods();
+      if (!pausado) mostrarSenialSemaforo();
+    }, duracion);
+  }
+
+  const iniciarRondaBaseV43 = iniciarRonda;
+  iniciarRonda = async function () {
+    if (modoActual === MODO_SEMAFORO) {
+      await mostrarSenialSemaforo();
+      return;
+    }
+    return await iniciarRondaBaseV43();
+  };
+
+  const procesarPulsacionBaseV43 = procesarPulsacion;
+  procesarPulsacion = function (indice) {
+    if (modoActual === MODO_SEMAFORO && entrenamientoActivo) return;
+    return procesarPulsacionBaseV43(indice);
+  };
+
+  // Permite usar este ejercicio únicamente con la pantalla del teléfono.
+  const iniciarEntrenamientoBaseV43 = iniciarEntrenamiento;
+  iniciarEntrenamiento = function () {
+    if (modoActual !== MODO_SEMAFORO) return iniciarEntrenamientoBaseV43();
+
+    const cantidadConectadosReal = cantidadConectados;
+    const indicesActivosReales = rehabIndicesPodsActivos;
+    cantidadConectados = function () {
+      return REHABPOD_MAX_PODS;
+    };
+    rehabIndicesPodsActivos = function () {
+      const reales = rehabIndicesPodsConectados();
+      return reales.length ? reales : [0];
+    };
+
+    try {
+      return iniciarEntrenamientoBaseV43();
+    } finally {
+      cantidadConectados = cantidadConectadosReal;
+      rehabIndicesPodsActivos = indicesActivosReales;
+    }
+  };
+  if (btnComenzar) btnComenzar.onclick = iniciarEntrenamiento;
+
+  const alternarPausaBaseV43 = alternarPausa;
+  alternarPausa = async function () {
+    const eraSemaforo = modoActual === MODO_SEMAFORO;
+    if (eraSemaforo) clearTimeout(temporizadorSemaforo);
+    await alternarPausaBaseV43();
+    if (eraSemaforo && entrenamientoActivo && !pausado) {
+      temporizadorSemaforo = setTimeout(mostrarSenialSemaforo, 300);
+    }
+  };
+  if (btnPausar) btnPausar.onclick = alternarPausa;
+
+  const finalizarEntrenamientoBaseV43 = finalizarEntrenamiento;
+  finalizarEntrenamiento = async function () {
+    limpiarSemaforo();
+    cerrarPantallaCompleta();
+    return await finalizarEntrenamientoBaseV43();
+  };
+
+  const cancelarEntrenamientoBaseV43 = cancelarEntrenamiento;
+  cancelarEntrenamiento = async function () {
+    limpiarSemaforo();
+    cerrarPantallaCompleta();
+    return await cancelarEntrenamientoBaseV43();
+  };
+  if (btnCancelar) btnCancelar.onclick = cancelarEntrenamiento;
+
+  // -----------------------------------------------------
+  // 4. VISTA DE ESTIMULO A PANTALLA COMPLETA
+  // -----------------------------------------------------
+  function crearPantallaCompleta() {
+    let overlay = document.getElementById("rehabPantallaEstimulo");
+    if (overlay) return overlay;
+
+    overlay = document.createElement("div");
+    overlay.id = "rehabPantallaEstimulo";
+    overlay.className = "rehabPantallaEstimulo";
+    overlay.hidden = true;
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", "Estímulo a pantalla completa");
+    overlay.innerHTML = `
+      <button id="rehabCerrarPantallaEstimulo" type="button" aria-label="Salir de pantalla completa">✕</button>
+      <div class="rehabPantallaEstimuloContenido">
+        <div id="rehabPantallaEstimuloAccion">PREPÁRATE</div>
+        <div id="rehabPantallaEstimuloCirculo"></div>
+        <div id="rehabPantallaEstimuloColor">—</div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    document.getElementById("rehabCerrarPantallaEstimulo").onclick = cerrarPantallaCompleta;
+    return overlay;
+  }
+
+  function actualizarPantallaCompleta() {
+    const overlay = document.getElementById("rehabPantallaEstimulo");
+    if (!overlay || overlay.hidden) return;
+
+    const fondo = colorPantallaCompleta || colorObjetivo?.style?.background || "#111827";
+    overlay.style.background = fondo;
+    document.getElementById("rehabPantallaEstimuloCirculo").style.background = fondo;
+    document.getElementById("rehabPantallaEstimuloAccion").textContent =
+      textoObjetivo?.textContent || "TOCA";
+    document.getElementById("rehabPantallaEstimuloColor").textContent =
+      nombreColor?.textContent || "—";
+  }
+
+  async function abrirPantallaCompleta() {
+    const overlay = crearPantallaCompleta();
+    colorPantallaCompleta = colorObjetivo?.style?.background || colorPantallaCompleta;
+    overlay.hidden = false;
+    document.body.classList.add("rehabEstimuloAbierto");
+    actualizarPantallaCompleta();
+
+    try {
+      if (!document.fullscreenElement && overlay.requestFullscreen) {
+        await overlay.requestFullscreen();
+      }
+    } catch (_) {
+      // El overlay fijo sigue cubriendo toda la app aunque el WebView no admita la API.
+    }
+  }
+
+  async function cerrarPantallaCompleta() {
+    const overlay = document.getElementById("rehabPantallaEstimulo");
+    if (overlay) overlay.hidden = true;
+    document.body.classList.remove("rehabEstimuloAbierto");
+    try {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        await document.exitFullscreen();
+      }
+    } catch (_) {}
+  }
+
+  function crearBotonPantallaCompleta() {
+    if (document.getElementById("btnPantallaCompletaEstimulo")) return;
+    const boton = document.createElement("button");
+    boton.id = "btnPantallaCompletaEstimulo";
+    boton.type = "button";
+    boton.className = "boton botonSecundario rehabBtnPantallaCompleta";
+    boton.textContent = "⛶ PANTALLA COMPLETA";
+    boton.onclick = abrirPantallaCompleta;
+    const referencia = btnPausar?.parentElement || pantallaEntrenamiento?.querySelector(".contenedorApp");
+    if (referencia) referencia.appendChild(boton);
+  }
+
+  const observadorEstimulo = new MutationObserver(function () {
+    if (modoActual !== MODO_SEMAFORO) {
+      colorPantallaCompleta = colorObjetivo?.style?.background || colorPantallaCompleta;
+    }
+    actualizarPantallaCompleta();
+  });
+  if (colorObjetivo) observadorEstimulo.observe(colorObjetivo, { attributes: true });
+  if (textoObjetivo) observadorEstimulo.observe(textoObjetivo, { childList: true });
+  if (nombreColor) observadorEstimulo.observe(nombreColor, { childList: true });
+
+  // -----------------------------------------------------
+  // 5. BOTON ATRAS: ANDROID, NAVEGADOR Y TECLADO
+  // -----------------------------------------------------
+  const mostrarPantallaBaseV43 = mostrarPantalla;
+  mostrarPantalla = function (pantalla) {
+    if (
+      !navegacionAtrasEnCurso &&
+      pantallaActualV43 &&
+      pantallaActualV43 !== pantalla
+    ) {
+      historialPantallasV43.push(pantallaActualV43);
+      if (historialPantallasV43.length > 30) historialPantallasV43.shift();
+    }
+    mostrarPantallaBaseV43(pantalla);
+    pantallaActualV43 = pantalla;
+  };
+
+  async function retrocederEnApp() {
+    const overlay = document.getElementById("rehabPantallaEstimulo");
+    if (overlay && !overlay.hidden) {
+      await cerrarPantallaCompleta();
+      return true;
+    }
+
+    const intro = document.getElementById("introEntrenamientoReactiPod");
+    if (intro) {
+      document.getElementById("btnVolverIntroReactiPod")?.click();
+      return true;
+    }
+
+    const detalleCategorias = document.getElementById("rehabV22Detalle");
+    if (
+      pantallaActualV43 === pantallaTiposEntrenamiento &&
+      detalleCategorias &&
+      !detalleCategorias.hidden
+    ) {
+      document.getElementById("rehabV22Volver")?.click();
+      return true;
+    }
+
+    if (
+      entrenamientoActivo &&
+      (pantallaActualV43 === pantallaCuenta || pantallaActualV43 === pantallaEntrenamiento)
+    ) {
+      navegacionAtrasEnCurso = true;
+      try {
+        await cancelarEntrenamiento();
+        pantallaActualV43 = document.querySelector(".pantalla.activa") || pantallaActualV43;
+      } finally {
+        navegacionAtrasEnCurso = false;
+      }
+      return true;
+    }
+
+    let anterior = historialPantallasV43.pop();
+    while (anterior === pantallaActualV43) anterior = historialPantallasV43.pop();
+
+    if (!anterior && pantallaActualV43 !== pantallaInicio) anterior = pantallaInicio;
+    if (!anterior) return false;
+
+    navegacionAtrasEnCurso = true;
+    try {
+      mostrarPantallaBaseV43(anterior);
+      pantallaActualV43 = anterior;
+    } finally {
+      navegacionAtrasEnCurso = false;
+    }
+    return true;
+  }
+
+  try {
+    history.replaceState({ rehabpod: "inicio" }, "", location.href);
+    history.pushState({ rehabpod: "guard" }, "", location.href);
+    window.addEventListener("popstate", async function () {
+      await retrocederEnApp();
+      history.pushState({ rehabpod: "guard" }, "", location.href);
+    });
+  } catch (_) {}
+
+  const AppNativa = window.Capacitor?.Plugins?.App;
+  if (AppNativa?.addListener) {
+    AppNativa.addListener("backButton", function () {
+      retrocederEnApp();
+    });
+  }
+
+  window.addEventListener("keydown", function (evento) {
+    if (evento.key === "Escape") {
+      const overlay = document.getElementById("rehabPantallaEstimulo");
+      if (overlay && !overlay.hidden) {
+        evento.preventDefault();
+        cerrarPantallaCompleta();
+      }
+    }
+  });
+
+  // -----------------------------------------------------
+  // 6. INICIALIZACION
+  // -----------------------------------------------------
+  crearControlSemaforo().style.display = "none";
+  crearPantallaCompleta();
+  crearBotonPantallaCompleta();
+
+  // Si V22 ya alcanzó a dibujarse, se vuelve a aplicar con el modo registrado.
+  setTimeout(function () {
+    if (typeof window.rehabV22AplicarCategorias === "function") {
+      window.rehabV22AplicarCategorias();
+    }
+  }, 120);
+
+  window.rehabV43Retroceder = retrocederEnApp;
+  console.log(
+    "RehabPod V43: Semáforo de marcha, estímulo completo y navegación Atrás activados."
+  );
 })();
