@@ -2449,8 +2449,70 @@ function obtenerClavesColoresActivos() {
   return validas.length >= MINIMO_COLORES_ACTIVOS ? validas : CLAVES_COLORES_REACTIPOD;
 }
 
+// Colores que pueden confundirse cuando aparecen al mismo tiempo. La relación
+// se usa en todos los modos automáticos; el modo entrenador conserva la
+// elección manual del profesional.
+const REHAB_COLORES_SIMILARES = {
+  red: ["pink", "purple", "orange"],
+  pink: ["red", "purple"],
+  purple: ["red", "pink", "blue"],
+  orange: ["red", "yellow"],
+  yellow: ["orange", "white"],
+  white: ["yellow"],
+  blue: ["cyan", "purple"],
+  cyan: ["blue", "green"],
+  green: ["cyan"],
+};
+
+function rehabExpandirColoresExcluidos(claves) {
+  const excluidos = new Set((Array.isArray(claves) ? claves : []).filter(Boolean));
+
+  [...excluidos].forEach((clave) => {
+    (REHAB_COLORES_SIMILARES[clave] || []).forEach((similar) => {
+      excluidos.add(similar);
+    });
+
+    Object.entries(REHAB_COLORES_SIMILARES).forEach(([otraClave, similares]) => {
+      if (similares.includes(clave)) excluidos.add(otraClave);
+    });
+  });
+
+  return [...excluidos];
+}
+
+function rehabSonColoresConfundibles(claveA, claveB) {
+  if (!claveA || !claveB || claveA === claveB) return claveA === claveB;
+  return rehabExpandirColoresExcluidos([claveA]).includes(claveB);
+}
+
+function rehabElegirClavesContrastantes(cantidad, paleta, prioritarias = []) {
+  const disponibles = [...new Set((paleta || []).filter((clave) =>
+    Boolean(catalogoColoresPersonalizados[clave])
+  ))];
+  const elegidas = [...new Set(prioritarias.filter((clave) => disponibles.includes(clave)))];
+
+  while (elegidas.length < cantidad && elegidas.length < disponibles.length) {
+    let candidatas = disponibles.filter(
+      (clave) =>
+        !elegidas.includes(clave) &&
+        elegidas.every((elegida) => !rehabSonColoresConfundibles(elegida, clave))
+    );
+
+    // Si los colores activados por el usuario no permiten completar la
+    // cantidad solicitada, se conserva la unicidad como respaldo.
+    if (!candidatas.length) {
+      candidatas = disponibles.filter((clave) => !elegidas.includes(clave));
+    }
+
+    if (!candidatas.length) break;
+    elegidas.push(candidatas[Math.floor(Math.random() * candidatas.length)]);
+  }
+
+  return elegidas;
+}
+
 function obtenerColorAleatorioParaPod(indice, excluidos = []) {
-  const bloqueados = new Set(excluidos.filter(Boolean));
+  const bloqueados = new Set(rehabExpandirColoresExcluidos(excluidos));
   const ultimo = ultimoColorAleatorioPorPod[indice];
   const paleta = obtenerClavesColoresActivos();
 
@@ -7040,7 +7102,7 @@ activarDobleEstimulo = async function () {
   var colorPrimero = obtenerColorEstimulo(primero);
   var colorSegundo = obtenerColorEstimulo(segundo, [colorPrimero.comando]);
 
-  colorObjetivo.style.background = `linear-gradient(135deg, ${colorPrimero.css} 0 48%, ${colorSegundo.css} 52% 100%)`;
+  colorObjetivo.style.background = `linear-gradient(to bottom, ${colorPrimero.css} 0 50%, ${colorSegundo.css} 50% 100%)`;
   encenderVisual(primero, colorPrimero.css);
 
   encenderVisual(segundo, colorSegundo.css);
@@ -7877,7 +7939,14 @@ function rehabObtenerColorCaza() {
 }
 
 function rehabColoresCazaSecundarios() {
-  return rehabObtenerColoresCazaActivos().filter(function (clave) {
+  var activas = rehabObtenerColoresCazaActivos();
+  var contrastantes = rehabElegirClavesContrastantes(
+    Math.min(REHABPOD_MAX_PODS, activas.length),
+    activas,
+    [rehabColorCaza]
+  );
+
+  return contrastantes.filter(function (clave) {
     return clave !== rehabColorCaza;
   })
     .map(function (clave) {
@@ -8555,7 +8624,7 @@ function rehabDificultad() {
 }
 
 function rehabElegirColorClave(excluir) {
-  excluir = excluir || [];
+  excluir = rehabExpandirColoresExcluidos(excluir || []);
   var paletaActiva = rehabObtenerColoresCazaActivos();
   var disponibles = paletaActiva.filter(function (c) {
     return !excluir.includes(c) && catalogoColoresPersonalizados[c];
@@ -8716,7 +8785,13 @@ activarColorProhibido = async function () {
   indiceColorProhibido = mezclados[0]; // compatibilidad con variables antiguas
   coloresActuales = new Array(podsBLE.length).fill(null);
 
-  var clavesPermitidas = rehabObtenerColoresCazaActivos().filter(function (c) {
+  var coloresNecesarios = 1 + Math.max(1, activos.length - cantidadProhibidos);
+  var clavesRonda = rehabElegirClavesContrastantes(
+    coloresNecesarios,
+    rehabObtenerColoresCazaActivos(),
+    [claveProhibida]
+  );
+  var clavesPermitidas = clavesRonda.filter(function (c) {
     return c !== claveProhibida;
   });
   var pos = 0;
@@ -8950,7 +9025,12 @@ async function rehabV20ActivarStroop() {
       ? rehabColorSemanticoStroop
       : rehabColorVisualStroop;
   var claveObjetivo = rehabReglaStroopActual === "palabra" ? clavePalabra : claveVisual;
-  var otrasClaves = rehabObtenerColoresCazaActivos().filter(function (c) {
+  var clavesStroop = rehabElegirClavesContrastantes(
+    activos.length,
+    rehabObtenerColoresCazaActivos(),
+    [claveObjetivo]
+  );
+  var otrasClaves = clavesStroop.filter(function (c) {
     return c !== claveObjetivo;
   });
   otrasClaves = rehabMezclarCopia(otrasClaves);
@@ -16726,5 +16806,114 @@ setTimeout(() => {
   window.rehabV43Retroceder = retrocederEnApp;
   console.log(
     "RehabPod V43: Semáforo de marcha, estímulo completo y navegación Atrás activados."
+  );
+})();
+// =====================================================
+// REHABPOD V44
+// REACCION POR COLORES PROGRESIVA + CONTRASTE PERCEPTUAL
+// =====================================================
+
+(function () {
+  "use strict";
+
+  let tipoPistaColorActual = "visual";
+
+  function elegirTipoPistaColor() {
+    const dificultad = dificultadActual || ajustesApp.dificultad || "media";
+
+    if (dificultad === "facil") return "visual";
+    if (dificultad === "media") return "palabra";
+
+    // Difícil y personalizada mezclan las dos clases de pista por ronda.
+    return Math.random() < 0.5 ? "visual" : "palabra";
+  }
+
+  function presentarPistaReaccionColor(objetivo) {
+    if (!objetivo || modoActual !== "colores") return;
+
+    tipoPistaColorActual = elegirTipoPistaColor();
+    nombreColor.style.color = "";
+    nombreColor.style.textShadow = "";
+
+    if (tipoPistaColorActual === "visual") {
+      textoFase.textContent = "PISTA VISUAL";
+      textoObjetivo.textContent = "TOCA ESTE COLOR";
+      nombreColor.textContent = "OBSERVA EL CÍRCULO";
+      colorObjetivo.style.background = objetivo.css;
+      colorObjetivo.setAttribute("aria-label", `Color objetivo: ${objetivo.nombre}`);
+      return;
+    }
+
+    textoFase.textContent = "PISTA DE PALABRA";
+    textoObjetivo.textContent = "TOCA EL COLOR ESCRITO";
+    nombreColor.textContent = objetivo.nombre;
+    nombreColor.style.color = "var(--texto)";
+    colorObjetivo.style.background = "#374151";
+    colorObjetivo.setAttribute("aria-label", `Palabra objetivo: ${objetivo.nombre}`);
+  }
+
+  const activarColoresBaseV44 = activarColores;
+  activarColores = async function () {
+    await activarColoresBaseV44();
+
+    if (modoActual === "colores" && objetivoCorrecto >= 0) {
+      presentarPistaReaccionColor(coloresActuales[objetivoCorrecto]);
+    }
+  };
+
+  const actualizarDescripcionBaseV44 = rehabActualizarDescripcionModo;
+  rehabActualizarDescripcionModo = function () {
+    actualizarDescripcionBaseV44();
+
+    if (modoActual !== "colores" || !descripcionModo) return;
+
+    const dificultad = dificultadActual || ajustesApp.dificultad || "media";
+    const textos = {
+      facil:
+        "Observa únicamente el color del círculo y toca el Pod que tenga ese mismo color.",
+      media:
+        "Lee el nombre del color y toca el Pod correspondiente. El círculo no revela la respuesta.",
+      dificil:
+        "La pista cambia aleatoriamente entre un círculo de color y una palabra. Lee la regla antes de responder.",
+      personalizada:
+        "Combina aleatoriamente pistas visuales y palabras utilizando los tiempos personalizados.",
+    };
+
+    descripcionModo.textContent = textos[dificultad] || textos.media;
+  };
+
+  const obtenerGuiaBaseV44 = obtenerGuiaModoV7;
+  obtenerGuiaModoV7 = function () {
+    if (modoActual !== "colores") return obtenerGuiaBaseV44();
+
+    return {
+      icono: "🎨",
+      titulo: "Reacción por colores",
+      descripcion:
+        "La forma de indicar el objetivo cambia con la dificultad seleccionada.",
+      pasos: [
+        "Fácil: observa el círculo y toca el Pod del mismo color.",
+        "Media: lee la palabra y toca el color escrito.",
+        "Difícil: identifica si la ronda usa círculo o palabra antes de tocar.",
+      ],
+    };
+  };
+
+  document.querySelectorAll("[data-dificultad]").forEach(function (boton) {
+    boton.addEventListener("click", function () {
+      setTimeout(rehabActualizarDescripcionModo, 0);
+    });
+  });
+
+  window.rehabV44Colores = {
+    sonConfundibles: rehabSonColoresConfundibles,
+    elegirContrastantes: rehabElegirClavesContrastantes,
+    tipoPistaActual: function () {
+      return tipoPistaColorActual;
+    },
+  };
+
+  console.log(
+    "RehabPod V44: pistas de color por dificultad y separación de colores similares activadas."
   );
 })();
