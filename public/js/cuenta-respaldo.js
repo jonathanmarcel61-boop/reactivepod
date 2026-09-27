@@ -1,0 +1,321 @@
+// =====================================================
+// REHABPOD V45 — CUENTA SOLO PARA RESPALDO Y RECUPERACION
+// =====================================================
+
+(function () {
+  "use strict";
+
+  const TABLA = "rehab_user_backups";
+  const VERSION = 1;
+  const CLAVE_DUENO = "rehabpodBackupOwnerV45";
+  const CLAVE_HUELLA = "rehabpodBackupFingerprintV45";
+  const MAX_ITEM = 1_500_000;
+  const CLAVES_EXACTAS = new Set([
+    "reactipodDatos",
+    "reactipodAjustes",
+    "rehabpodRutinas",
+    "rehabpodHistorialRutinas",
+    "rehabpodRecordatorios",
+    "rehabpodMetaSemanal",
+    "rehabpodAsistentePrefs",
+    "rehabpodVoz",
+    "rehabpodCantidadPods",
+    "rehabpodModoVirtual",
+    "rehabpodColorMemoria",
+    "rehabpodColorCaza",
+    "rehabpodTiempoAutomatico",
+    "rehabpodDosJugadores",
+  ]);
+  const PREFIJOS = ["rehabpodRutinas:"];
+
+  let cloud = null;
+  let usuario = null;
+  let copia = null;
+  let sincronizando = false;
+  let intervalo = null;
+
+  const esc = (valor) =>
+    typeof escaparHTML === "function"
+      ? escaparHTML(String(valor ?? ""))
+      : String(valor ?? "").replace(/[&<>\"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '\"': "&quot;" })[c]);
+
+  function clavePermitida(clave) {
+    return CLAVES_EXACTAS.has(clave) || PREFIJOS.some((p) => clave.startsWith(p));
+  }
+
+  function capturarDatos() {
+    const datos = {};
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const clave = localStorage.key(i);
+      if (!clave || !clavePermitida(clave)) continue;
+      const valor = localStorage.getItem(clave);
+      if (typeof valor === "string" && valor.length <= MAX_ITEM) datos[clave] = valor;
+    }
+    return datos;
+  }
+
+  function huella(datos) {
+    const texto = JSON.stringify(datos);
+    let h = 2166136261;
+    for (let i = 0; i < texto.length; i += 1) {
+      h ^= texto.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return (h >>> 0).toString(16);
+  }
+
+  function fechaLegible(fecha) {
+    if (!fecha) return "Todavía no hay una copia";
+    try {
+      return new Intl.DateTimeFormat("es", { dateStyle: "medium", timeStyle: "short" }).format(new Date(fecha));
+    } catch (_) {
+      return String(fecha);
+    }
+  }
+
+  async function cliente() {
+    if (typeof window.rehabGetSupabaseClient !== "function") return null;
+    cloud = await window.rehabGetSupabaseClient();
+    return cloud;
+  }
+
+  async function cargarEstado() {
+    copia = null;
+    const c = await cliente();
+    if (!c) return false;
+    const { data: sesion, error: sesionError } = await c.auth.getSession();
+    if (sesionError) throw sesionError;
+    usuario = sesion?.session?.user || null;
+    if (!usuario) return false;
+
+    const { data, error } = await c
+      .from(TABLA)
+      .select("payload, schema_version, updated_at")
+      .eq("user_id", usuario.id)
+      .maybeSingle();
+    if (error) throw error;
+    copia = data || null;
+    return true;
+  }
+
+  async function guardarCopia({ forzar = false } = {}) {
+    if (sincronizando || !usuario || !cloud) return false;
+    const dueno = localStorage.getItem(CLAVE_DUENO);
+    if (!forzar && copia && dueno !== usuario.id) return false;
+
+    const datos = capturarDatos();
+    const fingerprint = huella(datos);
+    if (!forzar && fingerprint === localStorage.getItem(CLAVE_HUELLA)) return true;
+
+    sincronizando = true;
+    try {
+      const { data, error } = await cloud
+        .from(TABLA)
+        .upsert(
+          { user_id: usuario.id, payload: datos, schema_version: VERSION, updated_at: new Date().toISOString() },
+          { onConflict: "user_id" }
+        )
+        .select("payload, schema_version, updated_at")
+        .single();
+      if (error) throw error;
+      copia = data;
+      localStorage.setItem(CLAVE_DUENO, usuario.id);
+      localStorage.setItem(CLAVE_HUELLA, fingerprint);
+      return true;
+    } finally {
+      sincronizando = false;
+    }
+  }
+
+  function aplicarCopia(payload) {
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+      throw new Error("La copia guardada no tiene un formato válido.");
+    }
+    for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+      const clave = localStorage.key(i);
+      if (clave && clavePermitida(clave)) localStorage.removeItem(clave);
+    }
+    for (const [clave, valor] of Object.entries(payload)) {
+      if (!clavePermitida(clave) || typeof valor !== "string" || valor.length > MAX_ITEM) continue;
+      localStorage.setItem(clave, valor);
+    }
+    localStorage.setItem(CLAVE_DUENO, usuario.id);
+    localStorage.setItem(CLAVE_HUELLA, huella(capturarDatos()));
+  }
+
+  function htmlLocal() {
+    let perfiles = 0;
+    let sesiones = 0;
+    try {
+      const datos = JSON.parse(localStorage.getItem("reactipodDatos") || "null");
+      perfiles = Array.isArray(datos?.perfiles) ? datos.perfiles.length : 0;
+      sesiones = (datos?.perfiles || []).reduce((n, p) => n + (Array.isArray(p?.historial) ? p.historial.length : 0), 0);
+    } catch (_) {}
+    return `<div class="rehabV40Card"><div class="rehabV40SecTitulo">DATOS EN ESTE TELÉFONO</div>
+      <div class="rehabV40Dato"><span>Perfiles</span><strong>${perfiles}</strong></div>
+      <div class="rehabV40Dato"><span>Entrenamientos guardados</span><strong>${sesiones}</strong></div>
+      <div class="rehabV45Nota">También se respaldan rutinas, historial, recordatorios y ajustes. Las conexiones Bluetooth no se copian: en un teléfono nuevo debes volver a conectar los Pods.</div></div>`;
+  }
+
+  function htmlSinSesion() {
+    return `<div class="rehabV40Card"><div class="rehabV40SecTitulo">RESPALDO EN LA NUBE</div>
+      <div class="rehabV40Aviso">La cuenta es opcional y se usa únicamente para guardar tus datos y recuperarlos si cambias o pierdes el teléfono.</div>
+      <div class="rehabV40Acciones"><button id="rehabV45Entrar" class="rehabV40Btn" type="button">INICIAR SESIÓN / CREAR CUENTA</button></div></div>`;
+  }
+
+  function htmlConSesion() {
+    const dueno = localStorage.getItem(CLAVE_DUENO);
+    const otroDispositivo = !!copia && dueno !== usuario.id;
+    return `<div class="rehabV40Hero"><div class="rehabV40Avatar">☁</div><div style="min-width:0"><h3>Respaldo activo</h3><small style="overflow-wrap:anywhere">${esc(usuario.email || "")}</small><span class="rehabV40Badge">Cuenta de respaldo</span></div></div>
+      <div class="rehabV40Card"><div class="rehabV40SecTitulo">TU COPIA DE SEGURIDAD</div>
+        <div class="rehabV40Dato"><span>Última copia</span><strong>${esc(fechaLegible(copia?.updated_at))}</strong></div>
+        <div class="rehabV45Estado ${otroDispositivo ? "advertencia" : "ok"}">${otroDispositivo ? "Encontramos una copia existente. Elige restaurarla o reemplazarla con los datos de este teléfono." : "Este teléfono está vinculado. Los cambios se guardarán automáticamente cuando haya conexión."}</div>
+        <div class="rehabV40Acciones">
+          ${copia ? '<button id="rehabV45Restaurar" class="rehabV40Btn ok" type="button">RESTAURAR EN ESTE TELÉFONO</button>' : ""}
+          <button id="rehabV45Guardar" class="rehabV40Btn sec" type="button">${otroDispositivo ? "USAR LOS DATOS DE ESTE TELÉFONO" : "GUARDAR AHORA"}</button>
+        </div><div id="rehabV45Mensaje" class="rehabV40Mensaje"></div></div>
+      <div class="rehabV40Card"><div class="rehabV40SecTitulo">SEGURIDAD DE LA CUENTA</div>
+        <div class="rehabV40Campo"><label>NUEVA CONTRASEÑA</label><input id="rehabV45Pass1" type="password" minlength="10" autocomplete="new-password" placeholder="10+ caracteres, mayúscula, minúscula y número"></div>
+        <div class="rehabV40Campo"><label>REPETIR CONTRASEÑA</label><input id="rehabV45Pass2" type="password" minlength="10" autocomplete="new-password" placeholder="Repite la contraseña"></div>
+        <div class="rehabV40Acciones"><button id="rehabV45CambiarPass" class="rehabV40Btn sec" type="button">CAMBIAR CONTRASEÑA</button><button id="rehabV45Salir" class="rehabV40Btn peligro" type="button">CERRAR SESIÓN</button></div>
+        <div id="rehabV45SegMensaje" class="rehabV40Mensaje"></div></div>`;
+  }
+
+  function mensaje(id, texto, tipo = "") {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = `rehabV40Mensaje ${tipo}`;
+    el.textContent = texto;
+  }
+
+  async function render(contentId = "contenidoCuentaCloud") {
+    const host = document.getElementById(contentId);
+    if (!host) return;
+    host.innerHTML = '<div class="rehabV40Aviso">Comprobando tu respaldo...</div>';
+    try {
+      const sesion = await cargarEstado();
+      if (sesion && !copia) await guardarCopia({ forzar: true });
+      host.innerHTML = `<div class="rehabV40Wrap">${htmlLocal()}${sesion ? htmlConSesion() : htmlSinSesion()}</div>`;
+      activarEventos(contentId);
+      programarAutomatico();
+    } catch (error) {
+      host.innerHTML = `<div class="rehabV40Wrap">${htmlLocal()}<div class="rehabV40Aviso">${esc(typeof rehabMensajeError === "function" ? rehabMensajeError(error) : error.message)}</div></div>`;
+    }
+  }
+
+  function cerrarLogin() { document.getElementById("rehabV45Login")?.remove(); }
+
+  function abrirLogin() {
+    cerrarLogin();
+    const overlay = document.createElement("div");
+    overlay.id = "rehabV45Login";
+    overlay.className = "rehabV45Login";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.innerHTML = `<div class="rehabV45LoginCard"><button id="rehabV45CerrarLogin" class="rehabV45Cerrar" aria-label="Cerrar">×</button><div class="rehabV40SecTitulo">CUENTA DE RESPALDO</div>
+      <p>Usa el mismo correo en tus teléfonos para guardar y recuperar tus datos.</p>
+      <label>Correo</label><input id="rehabV45Email" type="email" autocomplete="email">
+      <label>Contraseña</label><input id="rehabV45Password" type="password" minlength="10" autocomplete="current-password">
+      <div class="rehabV40Acciones"><button id="rehabV45LoginBtn" class="rehabV40Btn" type="button">INICIAR SESIÓN</button><button id="rehabV45CrearBtn" class="rehabV40Btn sec" type="button">CREAR CUENTA</button></div>
+      <button id="rehabV45Recuperar" class="rehabV27Link" type="button">¿Olvidaste tu contraseña?</button><div id="rehabV45LoginMensaje" class="rehabV40Mensaje"></div></div>`;
+    document.body.appendChild(overlay);
+    document.getElementById("rehabV45CerrarLogin").onclick = cerrarLogin;
+    overlay.onclick = (e) => { if (e.target === overlay) cerrarLogin(); };
+    document.getElementById("rehabV45LoginBtn").onclick = () => autenticar(false);
+    document.getElementById("rehabV45CrearBtn").onclick = () => autenticar(true);
+    document.getElementById("rehabV45Recuperar").onclick = recuperar;
+    document.getElementById("rehabV45Email").focus();
+  }
+
+  async function autenticar(crear) {
+    const email = String(document.getElementById("rehabV45Email")?.value || "").trim();
+    const password = String(document.getElementById("rehabV45Password")?.value || "");
+    if (!rehabValidarEmail(email)) return mensaje("rehabV45LoginMensaje", "Escribe un correo válido.", "error");
+    if (!rehabValidarPassword(password)) return mensaje("rehabV45LoginMensaje", "Usa al menos 10 caracteres, con mayúscula, minúscula y número.", "error");
+    try {
+      const c = await cliente();
+      let respuesta;
+      if (crear) {
+        const nombre = (typeof obtenerPerfilActivo === "function" && obtenerPerfilActivo()?.nombre) || "Usuario RehabPod";
+        respuesta = await c.auth.signUp({ email, password, options: { data: { full_name: nombre, role: "user", specialty: "unspecified" } } });
+      } else {
+        respuesta = await c.auth.signInWithPassword({ email, password });
+      }
+      if (respuesta.error) throw respuesta.error;
+      if (crear && !respuesta.data?.session) return mensaje("rehabV45LoginMensaje", "Cuenta creada. Revisa tu correo, confirma la cuenta y luego inicia sesión.", "ok");
+      cerrarLogin();
+      await render("contenidoCuentaCloud");
+    } catch (error) { mensaje("rehabV45LoginMensaje", rehabMensajeError(error), "error"); }
+  }
+
+  async function recuperar() {
+    const email = String(document.getElementById("rehabV45Email")?.value || "").trim();
+    if (!rehabValidarEmail(email)) return mensaje("rehabV45LoginMensaje", "Escribe tu correo primero.", "error");
+    try {
+      const c = await cliente();
+      const { error } = await c.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+      if (error) throw error;
+      mensaje("rehabV45LoginMensaje", "Si la cuenta existe, recibirás un enlace para cambiar la contraseña.", "ok");
+    } catch (error) { mensaje("rehabV45LoginMensaje", rehabMensajeError(error), "error"); }
+  }
+
+  function activarEventos(contentId) {
+    document.getElementById("rehabV45Entrar")?.addEventListener("click", abrirLogin);
+    document.getElementById("rehabV45Guardar")?.addEventListener("click", async (e) => {
+      const reemplaza = !!copia && localStorage.getItem(CLAVE_DUENO) !== usuario.id;
+      if (reemplaza) {
+        const ok = await confirmarRehab({ titulo: "Reemplazar copia", mensaje: "Esto reemplazará la copia de tu otro teléfono con los datos de este dispositivo.", aceptar: "Reemplazar copia" });
+        if (!ok) return;
+      }
+      e.currentTarget.disabled = true;
+      try { await guardarCopia({ forzar: true }); mensaje("rehabV45Mensaje", "Copia guardada correctamente.", "ok"); setTimeout(() => render(contentId), 700); }
+      catch (error) { mensaje("rehabV45Mensaje", rehabMensajeError(error), "error"); }
+      finally { e.currentTarget.disabled = false; }
+    });
+    document.getElementById("rehabV45Restaurar")?.addEventListener("click", async () => {
+      const ok = await confirmarRehab({ titulo: "Restaurar copia", mensaje: "Los datos guardados en este teléfono serán reemplazados por la copia de la nube.", aceptar: "Restaurar" });
+      if (!ok) return;
+      try { aplicarCopia(copia.payload); avisarRehab("Copia restaurada. La app se reiniciará para cargar tus datos.", { tipo: "exito" }); setTimeout(() => location.reload(), 900); }
+      catch (error) { mensaje("rehabV45Mensaje", error.message, "error"); }
+    });
+    document.getElementById("rehabV45CambiarPass")?.addEventListener("click", async () => {
+      const p1 = String(document.getElementById("rehabV45Pass1")?.value || "");
+      const p2 = String(document.getElementById("rehabV45Pass2")?.value || "");
+      if (!rehabValidarPassword(p1)) return mensaje("rehabV45SegMensaje", "Usa al menos 10 caracteres, con mayúscula, minúscula y número.", "error");
+      if (p1 !== p2) return mensaje("rehabV45SegMensaje", "Las contraseñas no coinciden.", "error");
+      const { error } = await cloud.auth.updateUser({ password: p1 });
+      mensaje("rehabV45SegMensaje", error ? rehabMensajeError(error) : "Contraseña actualizada.", error ? "error" : "ok");
+    });
+    document.getElementById("rehabV45Salir")?.addEventListener("click", async () => {
+      const ok = await confirmarRehab({ titulo: "Cerrar sesión", mensaje: "La copia seguirá guardada en la nube.", aceptar: "Cerrar sesión" });
+      if (!ok) return;
+      await cloud.auth.signOut(); usuario = null; copia = null; programarAutomatico(); await render(contentId);
+    });
+  }
+
+  function programarAutomatico() {
+    if (intervalo) clearInterval(intervalo);
+    intervalo = null;
+    if (!usuario || localStorage.getItem(CLAVE_DUENO) !== usuario.id) return;
+    intervalo = setInterval(() => guardarCopia().catch((e) => console.warn("V45 respaldo automático:", e)), 60000);
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden" && usuario && localStorage.getItem(CLAVE_DUENO) === usuario.id) {
+      guardarCopia().catch(() => {});
+    }
+  });
+
+  function ocultarFuncionesProfesionales() {
+    ["rehabV28HomeBtn", "rehabV27BtnCloud"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = "none";
+    });
+  }
+
+  window.rehabV40RenderCuenta = render;
+  window.rehabCloudAbrir = abrirLogin;
+  window.rehabV45GuardarCopia = guardarCopia;
+  setTimeout(ocultarFuncionesProfesionales, 0);
+  setTimeout(ocultarFuncionesProfesionales, 1600);
+})();

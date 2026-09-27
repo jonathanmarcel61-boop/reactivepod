@@ -27,6 +27,15 @@ test("el cliente no permite elegir ni modificar el rol profesional", () => {
   assert.doesNotMatch(app, /\.update\(\{\s*full_name:\s*nombre,\s*role:/s);
 });
 
+test("la cuenta se usa como respaldo y no carga la interfaz profesional", () => {
+  const html = leer("public/index.html");
+  const respaldo = leer("public/js/cuenta-respaldo.js");
+  assert.doesNotMatch(html, /<script src="js\/profesional\.js"/);
+  assert.match(html, /js\/cuenta-respaldo\.js/);
+  assert.match(respaldo, /rehab_user_backups/);
+  assert.match(respaldo, /RESTAURAR EN ESTE TELÉFONO/);
+});
+
 test("Android bloquea texto claro y copias de seguridad", () => {
   const manifest = leer("android/app/src/main/AndroidManifest.xml");
   assert.match(manifest, /android:usesCleartextTraffic="false"/);

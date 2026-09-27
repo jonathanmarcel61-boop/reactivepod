@@ -29,13 +29,13 @@ test("los scripts se cargan en un orden que respeta sus dependencias", () => {
   antes("js/pdf.js", "js/informe.js");
   antes("js/metas.js", "js/recordatorios.js");
   antes("js/informe.js", "app.js");
+  antes("app.js", "js/cuenta-respaldo.js");
+  antes("js/cuenta-respaldo.js", "js/asistente.js");
   antes("app.js", "js/asistente.js");
   antes("js/asistente.js", "js/misrutinas.js");
   antes("js/asistente.js", "js/dosjugadores.js");
   antes("js/motivacion.js", "js/recordatorios-ui.js");
   antes("js/progreso.js", "js/informe-ui.js");
   antes("js/rutinas.js", "js/compartidas.js");
-  antes("js/compartidas.js", "js/profesional.js");
-  antes("js/misrutinas.js", "js/profesional.js");
   antes("app.js", "js/colores-ajustes.js");
 });

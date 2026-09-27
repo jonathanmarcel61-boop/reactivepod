@@ -7376,3 +7376,15 @@ select {
 .bib-item__cab small { color: var(--texto2); font-size: 13px; line-height: 1.4; }
 .bib-detalle summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-size: 14px; color: var(--acento-texto); }
 .bib-detalle ol { margin: 0 0 4px; padding-left: 22px; font-size: 14px; line-height: 1.5; }
+/* RehabPod V45: cuenta de respaldo */
+.rehabV45Nota{font-size:.8rem;line-height:1.5;opacity:.72;margin-top:12px}
+.rehabV45Estado{padding:11px 12px;border-radius:12px;margin:12px 0;font-size:.84rem;line-height:1.45}
+.rehabV45Estado.ok{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3)}
+.rehabV45Estado.advertencia{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35)}
+.rehabV45Login{position:fixed;inset:0;z-index:var(--z-bloqueo);display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.72)}
+.rehabV45LoginCard{position:relative;width:min(440px,100%);padding:24px;border-radius:18px;background:var(--tarjeta);border:1px solid var(--borde);color:var(--texto);box-shadow:0 24px 70px rgba(0,0,0,.42)}
+.rehabV45LoginCard p{font-size:.88rem;line-height:1.5;color:var(--texto2)}
+.rehabV45LoginCard label{display:block;font-size:.72rem;font-weight:800;margin:12px 0 5px}
+.rehabV45LoginCard input{width:100%;padding:12px;border-radius:11px;border:1px solid var(--borde);background:var(--tarjeta2);color:var(--texto)}
+.rehabV45Cerrar{position:absolute;right:12px;top:10px;border:0;background:transparent;color:inherit;font-size:1.8rem;cursor:pointer}
+#rehabV28HomeBtn,#rehabV27BtnCloud{display:none!important}

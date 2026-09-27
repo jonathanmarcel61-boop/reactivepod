@@ -1870,9 +1870,9 @@ function mostrarGateTerminos() {
             </p>
 
             <p style="font-size:14px;line-height:1.55;color:var(--texto2);margin:0 0 16px;">
-                RehabPod también ofrece, de forma opcional, una cuenta en la nube para
-                profesionales y usuarios que quieran vincularse y compartir rutinas. Si
-                decides crear esa cuenta, tu correo, nombre y rutinas asignadas se guardan
+                RehabPod también ofrece, de forma opcional, una cuenta para crear una copia
+                privada de tus perfiles, progreso, rutinas y ajustes. Así puedes recuperar
+                tus datos si cambias o pierdes el teléfono. La copia y tu correo se guardan
                 en nuestro proveedor de nube (Supabase), fuera de Ecuador, únicamente con tu
                 autorización explícita al momento de registrarte.
             </p>
@@ -14736,18 +14736,9 @@ const contenidoProgresoLocal = document.getElementById("contenidoProgresoLocal")
 const contenidoProgresoCloud = document.getElementById("contenidoProgresoCloud");
 
 async function navHaySesionCloud() {
-  if (typeof window.rehabGetSupabaseClient !== "function") {
-    return false;
-  }
-
-  try {
-    const cloud = await window.rehabGetSupabaseClient();
-    const { data } = await cloud.auth.getSession();
-    return !!data?.session?.user;
-  } catch (error) {
-    console.warn("Nav: no se pudo verificar sesión Cloud", error);
-    return false;
-  }
+  // V45: la cuenta ya no habilita paneles profesionales ni rutinas asignadas.
+  // Se conserva únicamente para respaldo y recuperación desde Cuenta.
+  return false;
 }
 
 async function abrirInicioNav() {
