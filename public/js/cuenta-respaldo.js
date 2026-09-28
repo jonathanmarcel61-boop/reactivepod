@@ -31,6 +31,7 @@
   let cloud = null;
   let usuario = null;
   let copia = null;
+  let perfilCuenta = null;
   let sincronizando = false;
   let intervalo = null;
 
@@ -81,12 +82,40 @@
 
   async function cargarEstado() {
     copia = null;
+    perfilCuenta = null;
     const c = await cliente();
     if (!c) return false;
     const { data: sesion, error: sesionError } = await c.auth.getSession();
     if (sesionError) throw sesionError;
     usuario = sesion?.session?.user || null;
     if (!usuario) return false;
+
+    const { data: perfil, error: perfilError } = await c
+      .from("rehab_profiles")
+      .select("full_name, specialty, age, weight_kg, height_cm")
+      .eq("user_id", usuario.id)
+      .maybeSingle();
+    if (perfilError) throw perfilError;
+    perfilCuenta = perfil || null;
+
+    const registro = usuario.user_metadata?.rehabpod_registration;
+    if (registro && perfilCuenta) {
+      const cambios = {};
+      if ((!perfilCuenta.specialty || perfilCuenta.specialty === "unspecified") && registro.specialty) cambios.specialty = registro.specialty;
+      if (perfilCuenta.age == null && registro.age != null) cambios.age = registro.age;
+      if (perfilCuenta.weight_kg == null && registro.weight_kg != null) cambios.weight_kg = registro.weight_kg;
+      if (perfilCuenta.height_cm == null && registro.height_cm != null) cambios.height_cm = registro.height_cm;
+      if (Object.keys(cambios).length) {
+        const { data: actualizado, error: actualizarError } = await c
+          .from("rehab_profiles")
+          .update(cambios)
+          .eq("user_id", usuario.id)
+          .select("full_name, specialty, age, weight_kg, height_cm")
+          .single();
+        if (actualizarError) throw actualizarError;
+        perfilCuenta = actualizado;
+      }
+    }
 
     const { data, error } = await c
       .from(TABLA)
@@ -209,11 +238,38 @@
           ${copia ? '<button id="rehabV45Restaurar" class="rehabV40Btn ok" type="button">RESTAURAR EN ESTE TELÉFONO</button>' : ""}
           <button id="rehabV45Guardar" class="rehabV40Btn sec" type="button">${otroDispositivo ? "USAR LOS DATOS DE ESTE TELÉFONO" : "GUARDAR AHORA"}</button>
         </div><div id="rehabV45Mensaje" class="rehabV40Mensaje"></div></div>
+      ${htmlDatosCuenta()}
       <details class="rehabV40Card rehabV46Desplegable"><summary><span><small>SEGURIDAD</small><strong>Cambiar contraseña</strong></span><b>⌄</b></summary>
         <div class="rehabV46DesplegableCuerpo"><div class="rehabV40Campo"><label>NUEVA CONTRASEÑA</label><input id="rehabV45Pass1" type="password" minlength="10" autocomplete="new-password" placeholder="10+ caracteres, mayúscula, minúscula y número"></div>
         <div class="rehabV40Campo"><label>REPETIR CONTRASEÑA</label><input id="rehabV45Pass2" type="password" minlength="10" autocomplete="new-password" placeholder="Repite la contraseña"></div>
         <button id="rehabV45CambiarPass" class="rehabV40Btn sec" type="button">ACTUALIZAR CONTRASEÑA</button><div id="rehabV45SegMensaje" class="rehabV40Mensaje"></div></div></details>
       <button id="rehabV45Salir" class="rehabV46CerrarSesion" type="button">Cerrar sesión</button>`;
+  }
+
+  function etiquetaTipoUso(valor) {
+    const opciones = {
+      athlete: "Deportista",
+      fitness: "Fitness / gimnasio",
+      rehabilitation: "Rehabilitación / fisioterapia",
+      cognitive_training: "Entrenamiento cognitivo",
+      recreational: "Recreativo",
+      other: "Otro",
+      unspecified: "Sin especificar",
+    };
+    return opciones[valor] || "Sin especificar";
+  }
+
+  function htmlDatosCuenta() {
+    if (!perfilCuenta) return "";
+    const opcionales = [
+      perfilCuenta.age != null ? `${perfilCuenta.age} años` : null,
+      perfilCuenta.weight_kg != null ? `${Number(perfilCuenta.weight_kg)} kg` : null,
+      perfilCuenta.height_cm != null ? `${Number(perfilCuenta.height_cm)} cm` : null,
+    ].filter(Boolean);
+    return `<div class="rehabV40Card rehabV47DatosCuenta"><div class="rehabV40SecTitulo">DATOS DE LA CUENTA</div>
+      <div class="rehabV40Dato"><span>Tipo de uso</span><strong>${esc(etiquetaTipoUso(perfilCuenta.specialty))}</strong></div>
+      <div class="rehabV40Dato"><span>Datos opcionales</span><strong>${esc(opcionales.length ? opcionales.join(" · ") : "No proporcionados")}</strong></div>
+      <div class="rehabV45Nota">La edad, el peso y la altura son opcionales y no cambian los entrenamientos actuales.</div></div>`;
   }
 
   function mensaje(id, texto, tipo = "") {
@@ -250,17 +306,38 @@
     overlay.innerHTML = `<div class="rehabV45LoginCard"><button id="rehabV45CerrarLogin" class="rehabV45Cerrar" aria-label="Cerrar">×</button>
       <div class="rehabV46LoginMarca"><span>☁</span><div><small>REHABPOD</small><h2>Guarda tu progreso</h2></div></div>
       <p class="rehabV46LoginIntro">Usa el mismo correo para recuperar perfiles, rutinas, historial y ajustes en otro teléfono.</p>
+      <div class="rehabV47Pestanas" role="tablist" aria-label="Acceso a la cuenta"><button id="rehabV47TabLogin" type="button" role="tab" aria-selected="true">Iniciar sesión</button><button id="rehabV47TabCrear" type="button" role="tab" aria-selected="false">Crear cuenta</button></div>
       <div class="rehabV46LoginCampos"><label>Correo electrónico</label><input id="rehabV45Email" type="email" autocomplete="email" placeholder="nombre@correo.com">
-      <label>Contraseña</label><input id="rehabV45Password" type="password" minlength="10" autocomplete="current-password" placeholder="Tu contraseña"></div>
-      <button id="rehabV45LoginBtn" class="rehabV40Btn rehabV46LoginPrincipal" type="button">INICIAR SESIÓN</button>
-      <button id="rehabV45CrearBtn" class="rehabV46CrearCuenta" type="button">¿Primera vez? <strong>Crear una cuenta</strong></button>
+      <label>Contraseña</label><input id="rehabV45Password" type="password" minlength="10" autocomplete="current-password" placeholder="Tu contraseña">
+      <div id="rehabV47CamposRegistro" hidden>
+        <label>Tipo de uso</label><select id="rehabV47TipoUso">
+          <option value="athlete">Deportista</option><option value="fitness">Fitness / gimnasio</option><option value="rehabilitation">Rehabilitación / fisioterapia</option><option value="cognitive_training">Entrenamiento cognitivo</option><option value="recreational">Recreativo</option><option value="other">Otro</option>
+        </select>
+        <div class="rehabV47OpcionalesTitulo"><strong>Datos opcionales</strong><span>Puedes dejarlos vacíos</span></div>
+        <div class="rehabV47Opcionales"><label>Edad<input id="rehabV47Edad" type="number" inputmode="numeric" min="5" max="100" placeholder="Ej. 26"></label><label>Peso (kg)<input id="rehabV47Peso" type="number" inputmode="decimal" min="20" max="300" step="0.1" placeholder="Ej. 63"></label><label>Altura (cm)<input id="rehabV47Altura" type="number" inputmode="decimal" min="80" max="230" step="0.1" placeholder="Ej. 166"></label></div>
+        <p class="rehabV47Privacidad">Estos datos no son obligatorios y no se usan para diagnóstico médico.</p>
+      </div></div>
+      <button id="rehabV47Enviar" class="rehabV40Btn rehabV46LoginPrincipal" type="button">INICIAR SESIÓN</button>
       <button id="rehabV45Recuperar" class="rehabV27Link rehabV46Recuperar" type="button">Olvidé mi contraseña</button>
       <div id="rehabV45LoginMensaje" class="rehabV40Mensaje" aria-live="polite"></div></div>`;
     document.body.appendChild(overlay);
     document.getElementById("rehabV45CerrarLogin").onclick = cerrarLogin;
     overlay.onclick = (e) => { if (e.target === overlay) cerrarLogin(); };
-    document.getElementById("rehabV45LoginBtn").onclick = () => autenticar(false);
-    document.getElementById("rehabV45CrearBtn").onclick = () => autenticar(true);
+    let creando = false;
+    const cambiarModo = (crear) => {
+      creando = crear;
+      overlay.classList.toggle("rehabV47Registro", crear);
+      document.getElementById("rehabV47TabLogin").setAttribute("aria-selected", String(!crear));
+      document.getElementById("rehabV47TabCrear").setAttribute("aria-selected", String(crear));
+      document.getElementById("rehabV47CamposRegistro").hidden = !crear;
+      document.getElementById("rehabV47Enviar").textContent = crear ? "CREAR CUENTA" : "INICIAR SESIÓN";
+      document.getElementById("rehabV45Recuperar").hidden = crear;
+      document.getElementById("rehabV45Password").autocomplete = crear ? "new-password" : "current-password";
+      mensaje("rehabV45LoginMensaje", "");
+    };
+    document.getElementById("rehabV47TabLogin").onclick = () => cambiarModo(false);
+    document.getElementById("rehabV47TabCrear").onclick = () => cambiarModo(true);
+    document.getElementById("rehabV47Enviar").onclick = () => autenticar(creando);
     document.getElementById("rehabV45Recuperar").onclick = recuperar;
     document.getElementById("rehabV45Email").focus();
   }
@@ -270,17 +347,43 @@
     const password = String(document.getElementById("rehabV45Password")?.value || "");
     if (!rehabValidarEmail(email)) return mensaje("rehabV45LoginMensaje", "Escribe un correo válido.", "error");
     if (!rehabValidarPassword(password)) return mensaje("rehabV45LoginMensaje", "Usa al menos 10 caracteres, con mayúscula, minúscula y número.", "error");
+    let registro = null;
+    if (crear) {
+      const opcional = (id, minimo, maximo, etiqueta) => {
+        const texto = String(document.getElementById(id)?.value || "").trim();
+        if (!texto) return null;
+        const valor = Number(texto);
+        if (!Number.isFinite(valor) || valor < minimo || valor > maximo) {
+          throw new Error(`${etiqueta} debe estar entre ${minimo} y ${maximo}.`);
+        }
+        return valor;
+      };
+      try {
+        registro = {
+          specialty: String(document.getElementById("rehabV47TipoUso")?.value || "other"),
+          age: opcional("rehabV47Edad", 5, 100, "La edad"),
+          weight_kg: opcional("rehabV47Peso", 20, 300, "El peso"),
+          height_cm: opcional("rehabV47Altura", 80, 230, "La altura"),
+        };
+      } catch (error) {
+        return mensaje("rehabV45LoginMensaje", error.message, "error");
+      }
+    }
     try {
       const c = await cliente();
       let respuesta;
       if (crear) {
         const nombre = (typeof obtenerPerfilActivo === "function" && obtenerPerfilActivo()?.nombre) || "Usuario RehabPod";
-        respuesta = await c.auth.signUp({ email, password, options: { data: { full_name: nombre, role: "user", specialty: "unspecified" } } });
+        respuesta = await c.auth.signUp({ email, password, options: { data: { full_name: nombre, role: "user", specialty: registro.specialty, rehabpod_registration: registro } } });
       } else {
         respuesta = await c.auth.signInWithPassword({ email, password });
       }
       if (respuesta.error) throw respuesta.error;
       if (crear && !respuesta.data?.session) return mensaje("rehabV45LoginMensaje", "Cuenta creada. Revisa tu correo, confirma la cuenta y luego inicia sesión.", "ok");
+      if (crear && respuesta.data?.user) {
+        const { error: perfilError } = await c.from("rehab_profiles").update(registro).eq("user_id", respuesta.data.user.id);
+        if (perfilError) throw perfilError;
+      }
       cerrarLogin();
       await render("contenidoCuentaCloud");
     } catch (error) { mensaje("rehabV45LoginMensaje", rehabMensajeError(error), "error"); }
