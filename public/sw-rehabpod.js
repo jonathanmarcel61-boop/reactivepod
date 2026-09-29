@@ -15,7 +15,7 @@
 // nueva en vez de seguir usando la vieja del caché.
 // =====================================================
 
-const CACHE_VERSION = "rehabpod-v23-brand-icons";
+const CACHE_VERSION = "rehabpod-v24-voice-contrast";
 
 const ARCHIVOS_DEL_CASCARON = [
   "./",

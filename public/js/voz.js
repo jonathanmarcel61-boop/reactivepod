@@ -1,7 +1,7 @@
 // =====================================================
 // REHABPOD — VOZ EN ESPAÑOL
 //
-// Locución con la síntesis de voz del teléfono (speechSynthesis): cuenta
+// Locución con la síntesis nativa del teléfono o speechSynthesis en la web: cuenta
 // atrás, avisos de la rutina y felicitaciones, útil cuando la persona mira
 // los Pods y no la pantalla. Si el dispositivo no tiene voz, no pasa nada:
 // la app sigue igual, solo sin locución.
@@ -20,6 +20,18 @@
 
   const NUMEROS = { 1: "uno", 2: "dos", 3: "tres", 4: "cuatro", 5: "cinco" };
 
+  function motorNativo() {
+    return raiz.Capacitor?.Plugins?.TextToSpeech || null;
+  }
+
+  function motorWebDisponible() {
+    return (
+      typeof window !== "undefined" &&
+      "speechSynthesis" in window &&
+      typeof window.SpeechSynthesisUtterance !== "undefined"
+    );
+  }
+
   /** Elige la mejor voz en español de una lista de voces del sistema. */
   function elegirVozDe(voces) {
     const es = (voces || []).filter((v) => /^es\b|^es[-_]/i.test(v.lang || ""));
@@ -32,11 +44,7 @@
   }
 
   function disponible() {
-    return (
-      typeof window !== "undefined" &&
-      "speechSynthesis" in window &&
-      typeof window.SpeechSynthesisUtterance !== "undefined"
-    );
+    return Boolean(motorNativo()) || motorWebDisponible();
   }
 
   function activa() {
@@ -56,8 +64,28 @@
 
   function callar() {
     try {
-      if (disponible()) window.speechSynthesis.cancel();
+      motorNativo()?.stop?.().catch(() => {});
+      if (motorWebDisponible()) window.speechSynthesis.cancel();
     } catch (_) {}
+  }
+
+  function hablarEnWeb(texto, opciones) {
+    if (!motorWebDisponible()) return false;
+    const o = opciones || {};
+    const synth = window.speechSynthesis;
+    if (o.interrumpir !== false) synth.cancel();
+    const u = new window.SpeechSynthesisUtterance(String(texto));
+    const voz = elegirVozDe(synth.getVoices());
+    if (voz) {
+      u.voice = voz;
+      u.lang = voz.lang;
+    } else {
+      u.lang = "es-419";
+    }
+    u.rate = o.velocidad || 1.05;
+    u.pitch = 1;
+    synth.speak(u);
+    return true;
   }
 
   /**
@@ -68,20 +96,25 @@
     if (!texto || !disponible() || !activa()) return false;
     const o = opciones || {};
     try {
-      const synth = window.speechSynthesis;
-      if (o.interrumpir !== false) synth.cancel();
-      const u = new window.SpeechSynthesisUtterance(String(texto));
-      const voz = elegirVozDe(synth.getVoices());
-      if (voz) {
-        u.voice = voz;
-        u.lang = voz.lang;
-      } else {
-        u.lang = "es-419";
+      const nativo = motorNativo();
+      if (nativo) {
+        const reproducir = async () => {
+          if (o.interrumpir !== false) await nativo.stop().catch(() => {});
+          await nativo.speak({
+            text: String(texto),
+            lang: "es-EC",
+            rate: o.velocidad || 1.05,
+            pitch: 1,
+            volume: 1,
+            queueStrategy: o.interrumpir === false ? 1 : 0,
+          });
+        };
+        reproducir().catch(() => {
+          try { hablarEnWeb(texto, o); } catch (_) {}
+        });
+        return true;
       }
-      u.rate = o.velocidad || 1.05;
-      u.pitch = 1;
-      synth.speak(u);
-      return true;
+      return hablarEnWeb(texto, o);
     } catch (_) {
       return false;
     }

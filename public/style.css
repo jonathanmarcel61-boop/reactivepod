@@ -5104,12 +5104,25 @@ body.rehabEstimuloAbierto {
 
 #rehabPantallaEstimuloAccion,
 #rehabPantallaEstimuloColor {
+    min-width: 0;
+    width: 100%;
     max-width: 95vw;
     color: #07110b;
     font-weight: 1000;
     line-height: .95;
     letter-spacing: .025em;
     text-shadow: 0 2px 0 rgba(255, 255, 255, .35), 0 7px 22px rgba(0, 0, 0, .18);
+    overflow-wrap: anywhere;
+}
+
+.rehabPantallaPreparando #rehabPantallaEstimuloAccion {
+    color: #f8fafc;
+    text-shadow: 0 4px 18px rgba(0, 0, 0, .85);
+}
+
+.rehabPantallaPreparando #rehabPantallaEstimuloColor {
+    color: #86efac;
+    text-shadow: 0 4px 18px rgba(0, 0, 0, .9);
 }
 
 #rehabPantallaEstimuloAccion {
@@ -5132,20 +5145,20 @@ body.rehabEstimuloAbierto {
 
 @media (orientation: landscape) {
     .rehabPantallaEstimuloContenido {
-        grid-template-columns: 1fr auto 1fr;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
         align-items: center;
-        gap: clamp(18px, 4vw, 48px);
-        width: min(96vw, 1200px);
+        gap: clamp(12px, 2.3vw, 32px);
+        width: min(96vw, 1320px);
     }
 
     #rehabPantallaEstimuloAccion,
     #rehabPantallaEstimuloColor {
         margin: 0;
-        font-size: clamp(2rem, 6vw, 5.5rem);
+        font-size: clamp(1.65rem, 4.25vw, 4.25rem);
     }
 
     #rehabPantallaEstimuloCirculo {
-        width: min(38vw, 68vh, 470px);
+        width: min(32vw, 62vh, 420px);
     }
 }
 
