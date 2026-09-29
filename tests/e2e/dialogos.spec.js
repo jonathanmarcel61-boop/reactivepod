@@ -49,6 +49,24 @@ test("Nuevo deportista: rechaza un nombre repetido", async ({ page }) => {
   expect(nativos).toEqual([]);
 });
 
+test("Perfil: permite cambiar el nombre y lo actualiza en Inicio", async ({ page }) => {
+  const errores = vigilarErrores(page);
+  await abrirApp(page);
+  await page.click("#btnPerfiles");
+  await page.locator("[data-editar]").first().click();
+
+  const campo = page.getByRole("textbox", { name: "Nombre del deportista" });
+  await expect(campo).toHaveValue("Jugador 1");
+  await campo.fill("Jonathan");
+  await page.keyboard.press("Enter");
+
+  await expect(page.locator("#listaPerfiles")).toContainText("Jonathan");
+  await page.click("#btnVolverPerfiles");
+  await expect(page.locator("#nombrePerfilInicio")).toHaveText("Jonathan");
+  await expect.poll(() => page.evaluate(() => obtenerPerfilActivo().nombre)).toBe("Jonathan");
+  expect(errores).toEqual([]);
+});
+
 test("Objetivo: se edita con validación en el diálogo y acepta coma decimal", async ({ page }) => {
   const nativos = vigilarNativos(page);
   await abrirApp(page);
