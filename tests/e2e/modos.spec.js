@@ -1,4 +1,4 @@
-// Humo de los 13 modos de entrenamiento con pods virtuales (sin hardware BLE).
+// Humo de los modos de entrenamiento con pods virtuales (sin hardware BLE).
 const { test, expect } = require("@playwright/test");
 const {
   vigilarErrores, abrirApp, elegirModo, comenzarEntrenamiento, jugarHastaResultados,
@@ -7,6 +7,7 @@ const {
 const MODOS = [
   "simple", "persecucion", "doble", "circuito", "contrarreloj", "colores",
   "cazaColor", "automatico", "libre", "entrenador", "secuencia", "prohibido", "stroop",
+  "semaforoMarcha",
 ];
 
 for (const modo of MODOS) {

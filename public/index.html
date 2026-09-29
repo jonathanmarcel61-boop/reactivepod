@@ -19,6 +19,12 @@
 
     <title>RehabPod</title>
 
+    <!-- Iconos con fondo oscuro y trazos de alto contraste para pestañas y accesos directos. -->
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2">
+    <link rel="shortcut icon" type="image/png" href="favicon-32.png?v=2">
+    <link rel="apple-touch-icon" sizes="192x192" href="favicon-192.png?v=2">
+    <meta name="theme-color" content="#070b09">
+
     <link
         rel="preload"
         href="fonts/inter-latin-wght-normal.woff2"
@@ -1573,10 +1579,6 @@
                 <div id="progresoGrafSemanas"></div>
             </figure>
 
-            <button type="button" class="boton botonOscuro" id="btnInformePDF" style="width: 100%; margin-top: 4px">
-                📄 Informe profesional (PDF)
-            </button>
-
         </div>
 
 
@@ -1851,7 +1853,7 @@
                 </h2>
 
                 <p class="textoSecundario">
-                    Perfil, nube y ajustes
+                    Respaldo y recuperación de datos
                 </p>
 
             </div>
@@ -2362,14 +2364,13 @@
 <script src="js/bienvenida.js"></script>
 <script src="vendor/supabase-2.57.4.js"></script>
 <script src="app.js"></script>
+<script src="js/cuenta-respaldo.js"></script>
 <script src="js/asistente.js"></script>
 <script src="js/misrutinas.js"></script>
-<script src="js/profesional.js"></script>
 <script src="js/dosjugadores.js"></script>
 <script src="js/colores-ajustes.js"></script>
 <script src="js/motivacion.js"></script>
 <script src="js/progreso.js"></script>
-<script src="js/informe-ui.js"></script>
 <script src="js/recordatorios-ui.js"></script>
 
 </body>

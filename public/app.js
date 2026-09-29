@@ -1870,9 +1870,9 @@ function mostrarGateTerminos() {
             </p>
 
             <p style="font-size:14px;line-height:1.55;color:var(--texto2);margin:0 0 16px;">
-                RehabPod también ofrece, de forma opcional, una cuenta en la nube para
-                profesionales y usuarios que quieran vincularse y compartir rutinas. Si
-                decides crear esa cuenta, tu correo, nombre y rutinas asignadas se guardan
+                RehabPod también ofrece, de forma opcional, una cuenta para crear una copia
+                privada de tus perfiles, progreso, rutinas y ajustes. Así puedes recuperar
+                tus datos si cambias o pierdes el teléfono. La copia y tu correo se guardan
                 en nuestro proveedor de nube (Supabase), fuera de Ecuador, únicamente con tu
                 autorización explícita al momento de registrarte.
             </p>
@@ -2388,7 +2388,7 @@ const catalogoColoresPersonalizados = {
   },
 
   cyan: {
-    nombre: "CIAN",
+    nombre: "CELESTE",
     comando: "cyan",
     css: "#22d3ee",
   },
@@ -2449,8 +2449,70 @@ function obtenerClavesColoresActivos() {
   return validas.length >= MINIMO_COLORES_ACTIVOS ? validas : CLAVES_COLORES_REACTIPOD;
 }
 
+// Colores que pueden confundirse cuando aparecen al mismo tiempo. La relación
+// se usa en todos los modos automáticos; el modo entrenador conserva la
+// elección manual del profesional.
+const REHAB_COLORES_SIMILARES = {
+  red: ["pink", "purple", "orange"],
+  pink: ["red", "purple"],
+  purple: ["red", "pink", "blue"],
+  orange: ["red", "yellow"],
+  yellow: ["orange", "white"],
+  white: ["yellow"],
+  blue: ["cyan", "purple"],
+  cyan: ["blue", "green"],
+  green: ["cyan"],
+};
+
+function rehabExpandirColoresExcluidos(claves) {
+  const excluidos = new Set((Array.isArray(claves) ? claves : []).filter(Boolean));
+
+  [...excluidos].forEach((clave) => {
+    (REHAB_COLORES_SIMILARES[clave] || []).forEach((similar) => {
+      excluidos.add(similar);
+    });
+
+    Object.entries(REHAB_COLORES_SIMILARES).forEach(([otraClave, similares]) => {
+      if (similares.includes(clave)) excluidos.add(otraClave);
+    });
+  });
+
+  return [...excluidos];
+}
+
+function rehabSonColoresConfundibles(claveA, claveB) {
+  if (!claveA || !claveB || claveA === claveB) return claveA === claveB;
+  return rehabExpandirColoresExcluidos([claveA]).includes(claveB);
+}
+
+function rehabElegirClavesContrastantes(cantidad, paleta, prioritarias = []) {
+  const disponibles = [...new Set((paleta || []).filter((clave) =>
+    Boolean(catalogoColoresPersonalizados[clave])
+  ))];
+  const elegidas = [...new Set(prioritarias.filter((clave) => disponibles.includes(clave)))];
+
+  while (elegidas.length < cantidad && elegidas.length < disponibles.length) {
+    let candidatas = disponibles.filter(
+      (clave) =>
+        !elegidas.includes(clave) &&
+        elegidas.every((elegida) => !rehabSonColoresConfundibles(elegida, clave))
+    );
+
+    // Si los colores activados por el usuario no permiten completar la
+    // cantidad solicitada, se conserva la unicidad como respaldo.
+    if (!candidatas.length) {
+      candidatas = disponibles.filter((clave) => !elegidas.includes(clave));
+    }
+
+    if (!candidatas.length) break;
+    elegidas.push(candidatas[Math.floor(Math.random() * candidatas.length)]);
+  }
+
+  return elegidas;
+}
+
 function obtenerColorAleatorioParaPod(indice, excluidos = []) {
-  const bloqueados = new Set(excluidos.filter(Boolean));
+  const bloqueados = new Set(rehabExpandirColoresExcluidos(excluidos));
   const ultimo = ultimoColorAleatorioPorPod[indice];
   const paleta = obtenerClavesColoresActivos();
 
@@ -2712,7 +2774,7 @@ function crearControlesExperienciaEntrenamiento() {
                 <option value="yellow">Amarillo</option>
                 <option value="white">Blanco</option>
                 <option value="purple">Morado</option>
-                <option value="cyan">Cian</option>
+                <option value="cyan">Celeste</option>
                 <option value="orange">Naranja</option>
                 <option value="pink">Rosado</option>
             </select>
@@ -3412,6 +3474,13 @@ function iniciarCuenta() {
 
   const intervalo = setInterval(
     () => {
+      // Si la persona retrocede durante la cuenta 3-2-1, no debemos abrir
+      // la pantalla de entrenamiento después de haber salido.
+      if (!entrenamientoActivo) {
+        clearInterval(intervalo);
+        return;
+      }
+
       numero--;
 
       if (numero > 0) {
@@ -7033,7 +7102,7 @@ activarDobleEstimulo = async function () {
   var colorPrimero = obtenerColorEstimulo(primero);
   var colorSegundo = obtenerColorEstimulo(segundo, [colorPrimero.comando]);
 
-  colorObjetivo.style.background = `linear-gradient(135deg, ${colorPrimero.css} 0 48%, ${colorSegundo.css} 52% 100%)`;
+  colorObjetivo.style.background = `linear-gradient(to bottom, ${colorPrimero.css} 0 50%, ${colorSegundo.css} 50% 100%)`;
   encenderVisual(primero, colorPrimero.css);
 
   encenderVisual(segundo, colorSegundo.css);
@@ -7312,18 +7381,57 @@ var rehabColorMemoria = localStorage.getItem(REHABPOD_CLAVE_COLOR_MEMORIA) || "b
 
 // En Memoria NO se permiten rojo ni verde porque quedan reservados para
 // feedback de error/correcto al terminar la secuencia.
-var REHABPOD_COLORES_MEMORIA = CLAVES_COLORES_REACTIPOD.filter(function (clave) {
-  return clave !== "red" && clave !== "green";
-});
+function rehabObtenerColoresMemoriaActivos() {
+  // Respeta los colores habilitados por el usuario. Rojo y verde siguen
+  // reservados para el feedback de correcto/incorrecto.
+  var activos = obtenerClavesColoresActivos().filter(function (clave) {
+    return clave !== "red" && clave !== "green";
+  });
 
-if (!REHABPOD_COLORES_MEMORIA.includes(rehabColorMemoria)) {
-  rehabColorMemoria = "blue";
+  // Con el mínimo global de cuatro colores normalmente siempre habrá opciones.
+  // Este respaldo evita romper el modo si los ajustes guardados están dañados.
+  return activos.length
+    ? activos
+    : CLAVES_COLORES_REACTIPOD.filter(function (clave) {
+        return clave !== "red" && clave !== "green";
+      });
+}
+
+function rehabNormalizarColorMemoria() {
+  var permitidos = rehabObtenerColoresMemoriaActivos();
+
+  if (!permitidos.includes(rehabColorMemoria)) {
+    rehabColorMemoria = permitidos[0] || "blue";
+    localStorage.setItem(REHABPOD_CLAVE_COLOR_MEMORIA, rehabColorMemoria);
+  }
+
+  return permitidos;
 }
 
 function rehabObtenerColorMemoria() {
+  rehabNormalizarColorMemoria();
   return (
     catalogoColoresPersonalizados[rehabColorMemoria] || catalogoColoresPersonalizados.blue
   );
+}
+
+function rehabSincronizarSelectorColores(selector, permitidos, valorActual) {
+  if (!selector) return valorActual;
+
+  selector.replaceChildren();
+  permitidos.forEach(function (clave) {
+    var color = catalogoColoresPersonalizados[clave];
+    if (!color) return;
+
+    var opcion = document.createElement("option");
+    opcion.value = clave;
+    opcion.textContent = color.nombre;
+    selector.appendChild(opcion);
+  });
+
+  var valor = permitidos.includes(valorActual) ? valorActual : permitidos[0];
+  if (valor) selector.value = valor;
+  return valor;
 }
 
 // -----------------------------------------------------
@@ -7351,7 +7459,7 @@ function rehabCrearControlColorMemoria() {
       <option value="yellow">Amarillo</option>
       <option value="white">Blanco</option>
       <option value="purple">Morado</option>
-      <option value="cyan">Cian</option>
+      <option value="cyan">Celeste</option>
       <option value="orange">Naranja</option>
       <option value="pink">Rosado</option>
     </select>
@@ -7371,13 +7479,19 @@ function rehabCrearControlColorMemoria() {
   }
 
   var selector = panel.querySelector("#colorMemoriaRehabPod");
-  selector.value = rehabColorMemoria;
+  var coloresMemoria = rehabNormalizarColorMemoria();
+  rehabColorMemoria = rehabSincronizarSelectorColores(
+    selector,
+    coloresMemoria,
+    rehabColorMemoria
+  );
 
   selector.addEventListener("change", function () {
     var nuevo = selector.value;
+    var permitidos = rehabObtenerColoresMemoriaActivos();
 
-    if (!REHABPOD_COLORES_MEMORIA.includes(nuevo)) {
-      nuevo = "blue";
+    if (!permitidos.includes(nuevo)) {
+      nuevo = permitidos[0] || "blue";
     }
 
     rehabColorMemoria = nuevo;
@@ -7404,7 +7518,12 @@ function rehabActualizarControlColorMemoria() {
   }
 
   var selector = panel.querySelector("#colorMemoriaRehabPod");
-  selector.value = rehabColorMemoria;
+  var coloresMemoria = rehabNormalizarColorMemoria();
+  rehabColorMemoria = rehabSincronizarSelectorColores(
+    selector,
+    coloresMemoria,
+    rehabColorMemoria
+  );
 
   var color = rehabObtenerColorMemoria();
   selector.style.borderColor = color.css;
@@ -7782,10 +7901,23 @@ var rehabTiempoAutomaticoMs = Number(
   localStorage.getItem(REHABPOD_CLAVE_TIEMPO_AUTOMATICO) || 1000
 );
 
-var REHABPOD_COLORES_CAZA = CLAVES_COLORES_REACTIPOD.slice();
+function rehabObtenerColoresCazaActivos() {
+  // La paleta se consulta en cada estímulo para que un cambio en Ajustes
+  // se aplique sin conservar una copia antigua con los nueve colores.
+  return obtenerClavesColoresActivos().filter(function (clave) {
+    return Boolean(catalogoColoresPersonalizados[clave]);
+  });
+}
 
-if (!REHABPOD_COLORES_CAZA.includes(rehabColorCaza)) {
-  rehabColorCaza = "red";
+function rehabNormalizarColorCaza() {
+  var permitidos = rehabObtenerColoresCazaActivos();
+
+  if (!permitidos.includes(rehabColorCaza)) {
+    rehabColorCaza = permitidos[0] || "red";
+    localStorage.setItem(REHABPOD_CLAVE_COLOR_CAZA, rehabColorCaza);
+  }
+
+  return permitidos;
 }
 
 if (![500, 750, 1000, 1500, 2000, 3000].includes(rehabTiempoAutomaticoMs)) {
@@ -7800,13 +7932,21 @@ var rehabTemporizadorAutomatico = null;
 var rehabUltimoPodAutomatico = -1;
 
 function rehabObtenerColorCaza() {
+  rehabNormalizarColorCaza();
   return (
     catalogoColoresPersonalizados[rehabColorCaza] || catalogoColoresPersonalizados.red
   );
 }
 
 function rehabColoresCazaSecundarios() {
-  return REHABPOD_COLORES_CAZA.filter(function (clave) {
+  var activas = rehabObtenerColoresCazaActivos();
+  var contrastantes = rehabElegirClavesContrastantes(
+    Math.min(REHABPOD_MAX_PODS, activas.length),
+    activas,
+    [rehabColorCaza]
+  );
+
+  return contrastantes.filter(function (clave) {
     return clave !== rehabColorCaza;
   })
     .map(function (clave) {
@@ -7935,7 +8075,7 @@ function rehabV19CrearControlColorCaza() {
       <option value="yellow">Amarillo</option>
       <option value="white">Blanco</option>
       <option value="purple">Morado</option>
-      <option value="cyan">Cian</option>
+      <option value="cyan">Celeste</option>
       <option value="orange">Naranja</option>
       <option value="pink">Rosado</option>
     </select>
@@ -7958,12 +8098,14 @@ function rehabV19CrearControlColorCaza() {
   }
 
   var selector = panel.querySelector("#colorCazaRehabPod");
-  selector.value = rehabColorCaza;
+  var coloresCaza = rehabNormalizarColorCaza();
+  rehabColorCaza = rehabSincronizarSelectorColores(selector, coloresCaza, rehabColorCaza);
 
   selector.addEventListener("change", function () {
     rehabColorCaza = selector.value;
-    if (!REHABPOD_COLORES_CAZA.includes(rehabColorCaza)) {
-      rehabColorCaza = "red";
+    var permitidos = rehabObtenerColoresCazaActivos();
+    if (!permitidos.includes(rehabColorCaza)) {
+      rehabColorCaza = permitidos[0] || "red";
     }
 
     localStorage.setItem(REHABPOD_CLAVE_COLOR_CAZA, rehabColorCaza);
@@ -7983,7 +8125,8 @@ function rehabV19ActualizarControlColorCaza() {
 
   if (mostrar) {
     var selector = panel.querySelector("#colorCazaRehabPod");
-    selector.value = rehabColorCaza;
+    var coloresCaza = rehabNormalizarColorCaza();
+    rehabColorCaza = rehabSincronizarSelectorColores(selector, coloresCaza, rehabColorCaza);
     selector.style.borderColor = rehabObtenerColorCaza().css;
   }
 }
@@ -8481,11 +8624,12 @@ function rehabDificultad() {
 }
 
 function rehabElegirColorClave(excluir) {
-  excluir = excluir || [];
-  var disponibles = REHABPOD_COLORES_CAZA.filter(function (c) {
+  excluir = rehabExpandirColoresExcluidos(excluir || []);
+  var paletaActiva = rehabObtenerColoresCazaActivos();
+  var disponibles = paletaActiva.filter(function (c) {
     return !excluir.includes(c) && catalogoColoresPersonalizados[c];
   });
-  if (!disponibles.length) disponibles = REHABPOD_COLORES_CAZA.slice();
+  if (!disponibles.length) disponibles = paletaActiva.slice();
   return disponibles[Math.floor(Math.random() * disponibles.length)];
 }
 
@@ -8641,7 +8785,13 @@ activarColorProhibido = async function () {
   indiceColorProhibido = mezclados[0]; // compatibilidad con variables antiguas
   coloresActuales = new Array(podsBLE.length).fill(null);
 
-  var clavesPermitidas = REHABPOD_COLORES_CAZA.filter(function (c) {
+  var coloresNecesarios = 1 + Math.max(1, activos.length - cantidadProhibidos);
+  var clavesRonda = rehabElegirClavesContrastantes(
+    coloresNecesarios,
+    rehabObtenerColoresCazaActivos(),
+    [claveProhibida]
+  );
+  var clavesPermitidas = clavesRonda.filter(function (c) {
     return c !== claveProhibida;
   });
   var pos = 0;
@@ -8875,7 +9025,12 @@ async function rehabV20ActivarStroop() {
       ? rehabColorSemanticoStroop
       : rehabColorVisualStroop;
   var claveObjetivo = rehabReglaStroopActual === "palabra" ? clavePalabra : claveVisual;
-  var otrasClaves = REHABPOD_COLORES_CAZA.filter(function (c) {
+  var clavesStroop = rehabElegirClavesContrastantes(
+    activos.length,
+    rehabObtenerColoresCazaActivos(),
+    [claveObjetivo]
+  );
+  var otrasClaves = clavesStroop.filter(function (c) {
     return c !== claveObjetivo;
   });
   otrasClaves = rehabMezclarCopia(otrasClaves);
@@ -14581,18 +14736,9 @@ const contenidoProgresoLocal = document.getElementById("contenidoProgresoLocal")
 const contenidoProgresoCloud = document.getElementById("contenidoProgresoCloud");
 
 async function navHaySesionCloud() {
-  if (typeof window.rehabGetSupabaseClient !== "function") {
-    return false;
-  }
-
-  try {
-    const cloud = await window.rehabGetSupabaseClient();
-    const { data } = await cloud.auth.getSession();
-    return !!data?.session?.user;
-  } catch (error) {
-    console.warn("Nav: no se pudo verificar sesión Cloud", error);
-    return false;
-  }
+  // V45: la cuenta ya no habilita paneles profesionales ni rutinas asignadas.
+  // Se conserva únicamente para respaldo y recuperación desde Cuenta.
+  return false;
 }
 
 async function abrirInicioNav() {
@@ -16150,4 +16296,688 @@ setTimeout(() => {
   window.rehabV42Pendientes = () => v42LeerCola();
 
   v42Iniciar();
+})();
+// =====================================================
+// REHABPOD V43
+// SEMAFORO DE MARCHA + VISTA DE ESTIMULO A PANTALLA COMPLETA
+// + NAVEGACION ATRAS EN ANDROID Y NAVEGADOR
+// =====================================================
+
+(function () {
+  "use strict";
+
+  const MODO_SEMAFORO = "semaforoMarcha";
+  const SENIALES_SEMAFORO = [
+    { clave: "green", nombre: "VERDE", accion: "CAMINA", css: "#22c55e" },
+    { clave: "yellow", nombre: "AMARILLO", accion: "DESPACIO", css: "#facc15" },
+    { clave: "red", nombre: "ROJO", accion: "DETENTE", css: "#ef4444" },
+  ];
+
+  let temporizadorSemaforo = null;
+  let ultimaSenialSemaforo = "";
+  let colorPantallaCompleta = "#111827";
+  let navegacionAtrasEnCurso = false;
+  let pantallaActualV43 = document.querySelector(".pantalla.activa") || pantallaInicio;
+  const historialPantallasV43 = [];
+
+  // -----------------------------------------------------
+  // 1. REGISTRO DEL MODO EN LAS CATEGORIAS V22
+  // -----------------------------------------------------
+  function registrarModoSemaforo() {
+    if (window.REHAB_V22_MODOS) {
+      window.REHAB_V22_MODOS[MODO_SEMAFORO] = {
+        icono: "🚦",
+        titulo: "Semáforo de marcha",
+        descripcion:
+          "Sigue señales visuales: verde para caminar, amarillo para ir despacio y rojo para detenerte.",
+      };
+    }
+
+    if (Array.isArray(window.REHAB_V22_CATEGORIAS)) {
+      ["fisioterapia", "neurologia"].forEach(function (claveCategoria) {
+        const categoria = window.REHAB_V22_CATEGORIAS.find(function (item) {
+          return item.clave === claveCategoria;
+        });
+        if (categoria && !categoria.modos.includes(MODO_SEMAFORO)) {
+          categoria.modos.push(MODO_SEMAFORO);
+        }
+      });
+    }
+  }
+
+  registrarModoSemaforo();
+
+  // -----------------------------------------------------
+  // 2. CONFIGURACION DEL SEMAFORO
+  // -----------------------------------------------------
+  function crearControlSemaforo() {
+    let panel = document.getElementById("controlSemaforoMarcha");
+    if (panel) return panel;
+
+    panel = document.createElement("div");
+    panel.id = "controlSemaforoMarcha";
+    panel.className = "tarjeta rehabSemaforoConfig";
+    panel.innerHTML = `
+      <label for="duracionSenialSemaforo" class="rehabSemaforoLabel">
+        Duración de cada señal
+      </label>
+      <select id="duracionSenialSemaforo">
+        <option value="2000">2 segundos</option>
+        <option value="3000">3 segundos</option>
+        <option value="4000" selected>4 segundos</option>
+        <option value="5000">5 segundos</option>
+        <option value="7000">7 segundos</option>
+      </select>
+      <small>
+        En dificultad personalizada se usará este tiempo. El ejercicio puede utilizarse
+        solo con la pantalla o también con los Pods conectados.
+      </small>
+    `;
+
+    const referencia = document.getElementById("controlCantidadPodsRehabPod");
+    if (referencia && referencia.parentElement) {
+      referencia.insertAdjacentElement("afterend", panel);
+    } else if (descripcionModo && descripcionModo.parentElement) {
+      descripcionModo.insertAdjacentElement("afterend", panel);
+    }
+
+    return panel;
+  }
+
+  function duracionSenialSemaforo() {
+    const dificultad = dificultadActual || ajustesApp.dificultad || "media";
+    if (dificultad === "facil") return 5000;
+    if (dificultad === "dificil") return 2200;
+    if (dificultad === "personalizada") {
+      return Number(document.getElementById("duracionSenialSemaforo")?.value) || 4000;
+    }
+    return 3500;
+  }
+
+  const configurarModoBaseV43 = configurarModo;
+  configurarModo = function () {
+    configurarModoBaseV43();
+    const panel = crearControlSemaforo();
+    const cantidad = document.getElementById("controlCantidadPodsRehabPod");
+
+    panel.style.display = modoActual === MODO_SEMAFORO ? "block" : "none";
+    if (cantidad) cantidad.style.display = modoActual === MODO_SEMAFORO ? "none" : "";
+
+    if (modoActual === MODO_SEMAFORO) {
+      tituloConfiguracion.textContent = "Semáforo de marcha";
+      iconoConfiguracion.textContent = "🚦";
+      descripcionModo.textContent =
+        "Sigue la señal de la pantalla: verde para caminar, amarillo para reducir la velocidad y rojo para detenerte. Úsalo con supervisión y en un espacio despejado.";
+    }
+  };
+
+  const actualizarDescripcionBaseV43 = rehabActualizarDescripcionModo;
+  rehabActualizarDescripcionModo = function () {
+    actualizarDescripcionBaseV43();
+    if (modoActual === MODO_SEMAFORO && descripcionModo) {
+      descripcionModo.textContent =
+        "Verde: camina. Amarillo: ve despacio. Rojo: detente. Las señales cambian automáticamente y pueden mostrarse a pantalla completa.";
+    }
+  };
+
+  const obtenerNombreModoBaseV43 = obtenerNombreModo;
+  obtenerNombreModo = function () {
+    if (modoActual === MODO_SEMAFORO) return "Semáforo de marcha";
+    return obtenerNombreModoBaseV43();
+  };
+
+  const obtenerGuiaBaseV43 = obtenerGuiaModoV7;
+  obtenerGuiaModoV7 = function () {
+    if (modoActual === MODO_SEMAFORO) {
+      return {
+        icono: "🚦",
+        titulo: "Semáforo de marcha",
+        descripcion:
+          "Ejercicio de apoyo visual para practicar inicio, reducción de velocidad y detención de la marcha.",
+        pasos: [
+          "VERDE: camina manteniendo un paso cómodo y seguro.",
+          "AMARILLO: reduce la velocidad y prepárate para detenerte.",
+          "ROJO: detente de forma estable y espera la siguiente señal.",
+        ],
+      };
+    }
+    return obtenerGuiaBaseV43();
+  };
+
+  // -----------------------------------------------------
+  // 3. EJECUCION DEL SEMAFORO
+  // -----------------------------------------------------
+  function limpiarSemaforo() {
+    clearTimeout(temporizadorSemaforo);
+    temporizadorSemaforo = null;
+    ultimaSenialSemaforo = "";
+  }
+
+  function elegirSenialSemaforo() {
+    const disponibles = SENIALES_SEMAFORO.filter(function (item) {
+      return item.clave !== ultimaSenialSemaforo;
+    });
+    const elegida = disponibles[Math.floor(Math.random() * disponibles.length)];
+    ultimaSenialSemaforo = elegida.clave;
+    return elegida;
+  }
+
+  async function mostrarSenialSemaforo() {
+    if (!entrenamientoActivo || pausado || modoActual !== MODO_SEMAFORO) return;
+
+    clearTimeout(temporizadorSemaforo);
+
+    if (tipoFinalGeneral !== "tiempo" && rondaActual >= totalRondasActual) {
+      await apagarTodosLosPods();
+      finalizarEntrenamiento();
+      return;
+    }
+
+    rondaActual++;
+    const senial = elegirSenialSemaforo();
+    const duracion = duracionSenialSemaforo();
+    const conectados = rehabIndicesPodsConectados().slice(
+      0,
+      Math.max(1, Number(cantidadPodsSeleccionada) || 1)
+    );
+
+    fase = "semaforoMarcha";
+    esperandoRespuesta = false;
+    colorPantallaCompleta = senial.css;
+
+    if (tipoFinalGeneral !== "tiempo") {
+      textoRonda.textContent = `Señal ${rondaActual} de ${totalRondasActual}`;
+    }
+    textoFase.textContent = "SEMÁFORO";
+    textoObjetivo.textContent = senial.accion;
+    nombreColor.textContent = senial.nombre;
+    colorObjetivo.style.background = senial.css;
+    cronometro.textContent = `${(duracion / 1000).toFixed(1)} s`;
+    ultimoTiempo.textContent = "AUTO";
+    mensajeResultado.textContent =
+      senial.clave === "green"
+        ? "Camina"
+        : senial.clave === "yellow"
+          ? "Reduce la velocidad"
+          : "Detente y mantén el equilibrio";
+    mensajeResultado.className = "mensajeResultado";
+
+    apagarVisuales();
+    conectados.forEach(function (indice) {
+      encenderVisual(indice, senial.css);
+    });
+    await Promise.all(
+      conectados.map(function (indice) {
+        return enviarComandoPod(indice, senial.clave);
+      })
+    );
+
+    aciertos++;
+    contadorAciertos.textContent = aciertos;
+    resultados.push({
+      ronda: rondaActual,
+      correcto: true,
+      tiempo: null,
+      estado: `${senial.nombre} · ${senial.accion}`,
+    });
+
+    actualizarPantallaCompleta();
+
+    temporizadorSemaforo = setTimeout(async function () {
+      if (!entrenamientoActivo || modoActual !== MODO_SEMAFORO) return;
+      await apagarTodosLosPods();
+      if (!pausado) mostrarSenialSemaforo();
+    }, duracion);
+  }
+
+  const iniciarRondaBaseV43 = iniciarRonda;
+  iniciarRonda = async function () {
+    if (modoActual === MODO_SEMAFORO) {
+      await mostrarSenialSemaforo();
+      return;
+    }
+    return await iniciarRondaBaseV43();
+  };
+
+  const procesarPulsacionBaseV43 = procesarPulsacion;
+  procesarPulsacion = function (indice) {
+    if (modoActual === MODO_SEMAFORO && entrenamientoActivo) return;
+    return procesarPulsacionBaseV43(indice);
+  };
+
+  // Permite usar este ejercicio únicamente con la pantalla del teléfono.
+  const iniciarEntrenamientoBaseV43 = iniciarEntrenamiento;
+  iniciarEntrenamiento = function () {
+    if (modoActual !== MODO_SEMAFORO) return iniciarEntrenamientoBaseV43();
+
+    const cantidadConectadosReal = cantidadConectados;
+    const indicesActivosReales = rehabIndicesPodsActivos;
+    cantidadConectados = function () {
+      return REHABPOD_MAX_PODS;
+    };
+    rehabIndicesPodsActivos = function () {
+      const reales = rehabIndicesPodsConectados();
+      return reales.length ? reales : [0];
+    };
+
+    try {
+      return iniciarEntrenamientoBaseV43();
+    } finally {
+      cantidadConectados = cantidadConectadosReal;
+      rehabIndicesPodsActivos = indicesActivosReales;
+    }
+  };
+  if (btnComenzar) btnComenzar.onclick = iniciarEntrenamiento;
+
+  const alternarPausaBaseV43 = alternarPausa;
+  alternarPausa = async function () {
+    const eraSemaforo = modoActual === MODO_SEMAFORO;
+    if (eraSemaforo) clearTimeout(temporizadorSemaforo);
+    await alternarPausaBaseV43();
+    if (eraSemaforo && entrenamientoActivo && !pausado) {
+      temporizadorSemaforo = setTimeout(mostrarSenialSemaforo, 300);
+    }
+  };
+  if (btnPausar) btnPausar.onclick = alternarPausa;
+
+  const finalizarEntrenamientoBaseV43 = finalizarEntrenamiento;
+  finalizarEntrenamiento = async function () {
+    limpiarSemaforo();
+    cerrarPantallaCompleta();
+    return await finalizarEntrenamientoBaseV43();
+  };
+
+  const cancelarEntrenamientoBaseV43 = cancelarEntrenamiento;
+  cancelarEntrenamiento = async function () {
+    limpiarSemaforo();
+    cerrarPantallaCompleta();
+    return await cancelarEntrenamientoBaseV43();
+  };
+  if (btnCancelar) btnCancelar.onclick = cancelarEntrenamiento;
+
+  // -----------------------------------------------------
+  // 4. VISTA DE ESTIMULO A PANTALLA COMPLETA
+  // -----------------------------------------------------
+  function crearPantallaCompleta() {
+    let overlay = document.getElementById("rehabPantallaEstimulo");
+    if (overlay) return overlay;
+
+    overlay = document.createElement("div");
+    overlay.id = "rehabPantallaEstimulo";
+    overlay.className = "rehabPantallaEstimulo";
+    overlay.hidden = true;
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", "Estímulo a pantalla completa");
+    overlay.innerHTML = `
+      <button id="rehabCerrarPantallaEstimulo" type="button" aria-label="Salir de pantalla completa"><span aria-hidden="true">✕</span> SALIR</button>
+      <div class="rehabPantallaEstimuloContenido">
+        <div id="rehabPantallaEstimuloAccion">PREPÁRATE</div>
+        <div id="rehabPantallaEstimuloCirculo"></div>
+        <div id="rehabPantallaEstimuloColor">—</div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    document.getElementById("rehabCerrarPantallaEstimulo").onclick = cerrarPantallaCompleta;
+    return overlay;
+  }
+
+  function actualizarPantallaCompleta() {
+    const overlay = document.getElementById("rehabPantallaEstimulo");
+    if (!overlay || overlay.hidden) return;
+
+    const fondo = colorPantallaCompleta || colorObjetivo?.style?.background || "#111827";
+    overlay.style.background = fondo;
+    document.getElementById("rehabPantallaEstimuloCirculo").style.background = fondo;
+    document.getElementById("rehabPantallaEstimuloAccion").textContent =
+      textoObjetivo?.textContent || "TOCA";
+    document.getElementById("rehabPantallaEstimuloColor").textContent =
+      nombreColor?.textContent || "—";
+  }
+
+  async function abrirPantallaCompleta(opciones) {
+    const overlay = crearPantallaCompleta();
+    const preparando = opciones?.preparando === true;
+    colorPantallaCompleta = preparando
+      ? "#111827"
+      : colorObjetivo?.style?.background || colorPantallaCompleta;
+    overlay.hidden = false;
+    document.body.classList.add("rehabEstimuloAbierto");
+    if (preparando) {
+      overlay.style.background = colorPantallaCompleta;
+      document.getElementById("rehabPantallaEstimuloCirculo").style.background = colorPantallaCompleta;
+      document.getElementById("rehabPantallaEstimuloAccion").textContent = numeroCuenta?.textContent || "3";
+      document.getElementById("rehabPantallaEstimuloColor").textContent = "PREPÁRATE";
+    } else {
+      actualizarPantallaCompleta();
+    }
+
+    try {
+      if (!document.fullscreenElement && overlay.requestFullscreen) {
+        await overlay.requestFullscreen();
+      }
+    } catch (_) {
+      // El overlay fijo sigue cubriendo toda la app aunque el WebView no admita la API.
+    }
+  }
+
+  async function cerrarPantallaCompleta() {
+    const overlay = document.getElementById("rehabPantallaEstimulo");
+    if (overlay) overlay.hidden = true;
+    document.body.classList.remove("rehabEstimuloAbierto");
+    try {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        await document.exitFullscreen();
+      }
+    } catch (_) {}
+  }
+
+  function crearBotonPantallaCompleta() {
+    if (document.getElementById("btnPantallaCompletaEstimulo")) return;
+    const boton = document.createElement("button");
+    boton.id = "btnPantallaCompletaEstimulo";
+    boton.type = "button";
+    boton.className = "boton botonSecundario rehabBtnPantallaCompleta";
+    boton.innerHTML = '<span aria-hidden="true">⛶</span><span><strong>VER EN PANTALLA COMPLETA</strong><small>Amplía el estímulo y el color objetivo</small></span>';
+    boton.onclick = abrirPantallaCompleta;
+    const referencia = btnPausar?.parentElement || pantallaEntrenamiento?.querySelector(".contenedorApp");
+    if (referencia) referencia.appendChild(boton);
+  }
+
+  const observadorEstimulo = new MutationObserver(function () {
+    if (modoActual !== MODO_SEMAFORO) {
+      colorPantallaCompleta = colorObjetivo?.style?.background || colorPantallaCompleta;
+    }
+    actualizarPantallaCompleta();
+  });
+  if (colorObjetivo) observadorEstimulo.observe(colorObjetivo, { attributes: true });
+  if (textoObjetivo) observadorEstimulo.observe(textoObjetivo, { childList: true });
+  if (nombreColor) observadorEstimulo.observe(nombreColor, { childList: true });
+
+  // La opción se ofrece antes de cada ejercicio. Al abrirla desde el botón
+  // COMENZAR conservamos el gesto del usuario, necesario para la API Fullscreen
+  // de los navegadores; en Android el overlay fijo funciona igualmente.
+  const mostrarIntroduccionBaseV48 = mostrarIntroduccionEntrenamiento;
+  mostrarIntroduccionEntrenamiento = function () {
+    const resultado = mostrarIntroduccionBaseV48();
+    const intro = document.getElementById("introEntrenamientoReactiPod");
+    const acciones = intro?.querySelector(".introAccionesV7");
+    const comenzar = document.getElementById("btnComenzarIntroReactiPod");
+    if (!intro || !acciones || !comenzar || document.getElementById("rehabV48ElegirPantalla")) {
+      return resultado;
+    }
+
+    const opcion = document.createElement("button");
+    opcion.id = "rehabV48ElegirPantalla";
+    opcion.type = "button";
+    opcion.className = "rehabV48ElegirPantalla";
+    opcion.setAttribute("aria-pressed", "false");
+    opcion.innerHTML = `
+      <span class="rehabV48Icono" aria-hidden="true">⛶</span>
+      <span class="rehabV48Texto"><strong>Pantalla completa</strong><small>Mostrar únicamente el estímulo y el color durante el ejercicio</small></span>
+      <span class="rehabV48Estado">ACTIVAR</span>
+    `;
+    acciones.insertAdjacentElement("beforebegin", opcion);
+
+    let seleccionada = false;
+    opcion.onclick = function () {
+      seleccionada = !seleccionada;
+      opcion.setAttribute("aria-pressed", String(seleccionada));
+      opcion.querySelector(".rehabV48Estado").textContent = seleccionada ? "ACTIVADA ✓" : "ACTIVAR";
+    };
+
+    const comenzarOriginal = comenzar.onclick;
+    comenzar.onclick = async function (evento) {
+      if (seleccionada) await abrirPantallaCompleta({ preparando: true });
+      return comenzarOriginal?.call(this, evento);
+    };
+    return resultado;
+  };
+
+  const observadorCuentaCompleta = new MutationObserver(function () {
+    const overlay = document.getElementById("rehabPantallaEstimulo");
+    if (!overlay || overlay.hidden || !pantallaCuenta?.classList.contains("activa")) return;
+    document.getElementById("rehabPantallaEstimuloAccion").textContent = numeroCuenta?.textContent || "3";
+    document.getElementById("rehabPantallaEstimuloColor").textContent = "PREPÁRATE";
+  });
+  if (numeroCuenta) observadorCuentaCompleta.observe(numeroCuenta, { childList: true });
+
+  // -----------------------------------------------------
+  // 5. BOTON ATRAS: ANDROID, NAVEGADOR Y TECLADO
+  // -----------------------------------------------------
+  const mostrarPantallaBaseV43 = mostrarPantalla;
+  mostrarPantalla = function (pantalla) {
+    if (
+      !navegacionAtrasEnCurso &&
+      pantallaActualV43 &&
+      pantallaActualV43 !== pantalla
+    ) {
+      historialPantallasV43.push(pantallaActualV43);
+      if (historialPantallasV43.length > 30) historialPantallasV43.shift();
+    }
+    mostrarPantallaBaseV43(pantalla);
+    pantallaActualV43 = pantalla;
+  };
+
+  async function retrocederEnApp() {
+    const overlay = document.getElementById("rehabPantallaEstimulo");
+    if (overlay && !overlay.hidden) {
+      await cerrarPantallaCompleta();
+      return true;
+    }
+
+    const intro = document.getElementById("introEntrenamientoReactiPod");
+    if (intro) {
+      document.getElementById("btnVolverIntroReactiPod")?.click();
+      return true;
+    }
+
+    const detalleCategorias = document.getElementById("rehabV22Detalle");
+    if (
+      pantallaActualV43 === pantallaTiposEntrenamiento &&
+      detalleCategorias &&
+      !detalleCategorias.hidden
+    ) {
+      document.getElementById("rehabV22Volver")?.click();
+      return true;
+    }
+
+    if (
+      entrenamientoActivo &&
+      (pantallaActualV43 === pantallaCuenta || pantallaActualV43 === pantallaEntrenamiento)
+    ) {
+      navegacionAtrasEnCurso = true;
+      try {
+        await cancelarEntrenamiento();
+        pantallaActualV43 = document.querySelector(".pantalla.activa") || pantallaActualV43;
+      } finally {
+        navegacionAtrasEnCurso = false;
+      }
+      return true;
+    }
+
+    let anterior = historialPantallasV43.pop();
+    while (anterior === pantallaActualV43) anterior = historialPantallasV43.pop();
+
+    if (!anterior && pantallaActualV43 !== pantallaInicio) anterior = pantallaInicio;
+    if (!anterior) return false;
+
+    navegacionAtrasEnCurso = true;
+    try {
+      mostrarPantallaBaseV43(anterior);
+      pantallaActualV43 = anterior;
+    } finally {
+      navegacionAtrasEnCurso = false;
+    }
+    return true;
+  }
+
+  try {
+    history.replaceState({ rehabpod: "inicio" }, "", location.href);
+    history.pushState({ rehabpod: "guard" }, "", location.href);
+    window.addEventListener("popstate", async function () {
+      await retrocederEnApp();
+      history.pushState({ rehabpod: "guard" }, "", location.href);
+    });
+  } catch (_) {}
+
+  const AppNativa = window.Capacitor?.Plugins?.App;
+  if (AppNativa?.addListener) {
+    AppNativa.addListener("backButton", function () {
+      retrocederEnApp();
+    });
+  }
+
+  window.addEventListener("keydown", function (evento) {
+    if (evento.key === "Escape") {
+      const overlay = document.getElementById("rehabPantallaEstimulo");
+      if (overlay && !overlay.hidden) {
+        evento.preventDefault();
+        cerrarPantallaCompleta();
+      }
+    }
+  });
+
+  // -----------------------------------------------------
+  // 6. INICIALIZACION
+  // -----------------------------------------------------
+  crearControlSemaforo().style.display = "none";
+  crearPantallaCompleta();
+  crearBotonPantallaCompleta();
+
+  // Si V22 ya alcanzó a dibujarse, se vuelve a aplicar con el modo registrado.
+  setTimeout(function () {
+    if (typeof window.rehabV22AplicarCategorias === "function") {
+      window.rehabV22AplicarCategorias();
+    }
+  }, 120);
+
+  window.rehabV43Retroceder = retrocederEnApp;
+  console.log(
+    "RehabPod V43: Semáforo de marcha, estímulo completo y navegación Atrás activados."
+  );
+})();
+// =====================================================
+// REHABPOD V44
+// REACCION POR COLORES PROGRESIVA + CONTRASTE PERCEPTUAL
+// =====================================================
+
+(function () {
+  "use strict";
+
+  let tipoPistaColorActual = "visual";
+
+  function elegirTipoPistaColor() {
+    const dificultad = dificultadActual || ajustesApp.dificultad || "media";
+
+    if (dificultad === "facil") return "visual";
+    if (dificultad === "media") return "palabra";
+
+    // Difícil y personalizada mezclan las dos clases de pista por ronda.
+    return Math.random() < 0.5 ? "visual" : "palabra";
+  }
+
+  function presentarPistaReaccionColor(objetivo) {
+    if (!objetivo || modoActual !== "colores") return;
+
+    tipoPistaColorActual = elegirTipoPistaColor();
+    nombreColor.style.color = "";
+    nombreColor.style.textShadow = "";
+
+    if (tipoPistaColorActual === "visual") {
+      textoFase.textContent = "PISTA VISUAL";
+      textoObjetivo.textContent = "TOCA ESTE COLOR";
+      nombreColor.textContent = "OBSERVA EL CÍRCULO";
+      colorObjetivo.style.background = objetivo.css;
+      colorObjetivo.setAttribute("aria-label", `Color objetivo: ${objetivo.nombre}`);
+      return;
+    }
+
+    textoFase.textContent = "PISTA DE PALABRA";
+    textoObjetivo.textContent = "TOCA EL COLOR ESCRITO";
+    nombreColor.textContent = objetivo.nombre;
+    nombreColor.style.color = "var(--texto)";
+    const claves = rehabElegirClavesContrastantes(
+      2,
+      obtenerClavesColoresActivos(),
+      [objetivo.comando]
+    );
+    const claveDistractora = claves.find((clave) => clave !== objetivo.comando);
+    const distractor =
+      catalogoColoresPersonalizados[claveDistractora] ||
+      (objetivo.comando === "red"
+        ? catalogoColoresPersonalizados.blue
+        : catalogoColoresPersonalizados.red);
+
+    colorObjetivo.style.background = distractor.css;
+    colorObjetivo.setAttribute(
+      "aria-label",
+      `Color distractor: ${distractor.nombre}. Palabra objetivo: ${objetivo.nombre}`
+    );
+  }
+
+  const activarColoresBaseV44 = activarColores;
+  activarColores = async function () {
+    await activarColoresBaseV44();
+
+    if (modoActual === "colores" && objetivoCorrecto >= 0) {
+      presentarPistaReaccionColor(coloresActuales[objetivoCorrecto]);
+    }
+  };
+
+  const actualizarDescripcionBaseV44 = rehabActualizarDescripcionModo;
+  rehabActualizarDescripcionModo = function () {
+    actualizarDescripcionBaseV44();
+
+    if (modoActual !== "colores" || !descripcionModo) return;
+
+    const dificultad = dificultadActual || ajustesApp.dificultad || "media";
+    const textos = {
+      facil:
+        "Observa únicamente el color del círculo y toca el Pod que tenga ese mismo color.",
+      media:
+        "Lee el nombre del color y toca el Pod correspondiente. El círculo muestra otro color para exigir mayor atención.",
+      dificil:
+        "La pista cambia aleatoriamente entre un círculo de color y una palabra. Lee la regla antes de responder.",
+      personalizada:
+        "Combina aleatoriamente pistas visuales y palabras utilizando los tiempos personalizados.",
+    };
+
+    descripcionModo.textContent = textos[dificultad] || textos.media;
+  };
+
+  const obtenerGuiaBaseV44 = obtenerGuiaModoV7;
+  obtenerGuiaModoV7 = function () {
+    if (modoActual !== "colores") return obtenerGuiaBaseV44();
+
+    return {
+      icono: "🎨",
+      titulo: "Reacción por colores",
+      descripcion:
+        "La forma de indicar el objetivo cambia con la dificultad seleccionada.",
+      pasos: [
+        "Fácil: observa el círculo y toca el Pod del mismo color.",
+        "Media: ignora el color del círculo, lee la palabra y toca el color escrito.",
+        "Difícil: identifica si la ronda usa círculo o palabra antes de tocar.",
+      ],
+    };
+  };
+
+  document.querySelectorAll("[data-dificultad]").forEach(function (boton) {
+    boton.addEventListener("click", function () {
+      setTimeout(rehabActualizarDescripcionModo, 0);
+    });
+  });
+
+  window.rehabV44Colores = {
+    sonConfundibles: rehabSonColoresConfundibles,
+    elegirContrastantes: rehabElegirClavesContrastantes,
+    tipoPistaActual: function () {
+      return tipoPistaColorActual;
+    },
+  };
+
+  console.log(
+    "RehabPod V44: pistas de color por dificultad y separación de colores similares activadas."
+  );
 })();
