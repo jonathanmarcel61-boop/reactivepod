@@ -15,7 +15,7 @@
 // nueva en vez de seguir usando la vieja del caché.
 // =====================================================
 
-const CACHE_VERSION = "rehabpod-v21-account-form";
+const CACHE_VERSION = "rehabpod-v22-fullscreen-choice";
 
 const ARCHIVOS_DEL_CASCARON = [
   "./",

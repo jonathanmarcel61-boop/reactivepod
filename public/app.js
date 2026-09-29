@@ -16610,7 +16610,7 @@ setTimeout(() => {
     overlay.setAttribute("aria-modal", "true");
     overlay.setAttribute("aria-label", "Estímulo a pantalla completa");
     overlay.innerHTML = `
-      <button id="rehabCerrarPantallaEstimulo" type="button" aria-label="Salir de pantalla completa">✕</button>
+      <button id="rehabCerrarPantallaEstimulo" type="button" aria-label="Salir de pantalla completa"><span aria-hidden="true">✕</span> SALIR</button>
       <div class="rehabPantallaEstimuloContenido">
         <div id="rehabPantallaEstimuloAccion">PREPÁRATE</div>
         <div id="rehabPantallaEstimuloCirculo"></div>
@@ -16635,12 +16635,22 @@ setTimeout(() => {
       nombreColor?.textContent || "—";
   }
 
-  async function abrirPantallaCompleta() {
+  async function abrirPantallaCompleta(opciones) {
     const overlay = crearPantallaCompleta();
-    colorPantallaCompleta = colorObjetivo?.style?.background || colorPantallaCompleta;
+    const preparando = opciones?.preparando === true;
+    colorPantallaCompleta = preparando
+      ? "#111827"
+      : colorObjetivo?.style?.background || colorPantallaCompleta;
     overlay.hidden = false;
     document.body.classList.add("rehabEstimuloAbierto");
-    actualizarPantallaCompleta();
+    if (preparando) {
+      overlay.style.background = colorPantallaCompleta;
+      document.getElementById("rehabPantallaEstimuloCirculo").style.background = colorPantallaCompleta;
+      document.getElementById("rehabPantallaEstimuloAccion").textContent = numeroCuenta?.textContent || "3";
+      document.getElementById("rehabPantallaEstimuloColor").textContent = "PREPÁRATE";
+    } else {
+      actualizarPantallaCompleta();
+    }
 
     try {
       if (!document.fullscreenElement && overlay.requestFullscreen) {
@@ -16668,7 +16678,7 @@ setTimeout(() => {
     boton.id = "btnPantallaCompletaEstimulo";
     boton.type = "button";
     boton.className = "boton botonSecundario rehabBtnPantallaCompleta";
-    boton.textContent = "⛶ PANTALLA COMPLETA";
+    boton.innerHTML = '<span aria-hidden="true">⛶</span><span><strong>VER EN PANTALLA COMPLETA</strong><small>Amplía el estímulo y el color objetivo</small></span>';
     boton.onclick = abrirPantallaCompleta;
     const referencia = btnPausar?.parentElement || pantallaEntrenamiento?.querySelector(".contenedorApp");
     if (referencia) referencia.appendChild(boton);
@@ -16683,6 +16693,54 @@ setTimeout(() => {
   if (colorObjetivo) observadorEstimulo.observe(colorObjetivo, { attributes: true });
   if (textoObjetivo) observadorEstimulo.observe(textoObjetivo, { childList: true });
   if (nombreColor) observadorEstimulo.observe(nombreColor, { childList: true });
+
+  // La opción se ofrece antes de cada ejercicio. Al abrirla desde el botón
+  // COMENZAR conservamos el gesto del usuario, necesario para la API Fullscreen
+  // de los navegadores; en Android el overlay fijo funciona igualmente.
+  const mostrarIntroduccionBaseV48 = mostrarIntroduccionEntrenamiento;
+  mostrarIntroduccionEntrenamiento = function () {
+    const resultado = mostrarIntroduccionBaseV48();
+    const intro = document.getElementById("introEntrenamientoReactiPod");
+    const acciones = intro?.querySelector(".introAccionesV7");
+    const comenzar = document.getElementById("btnComenzarIntroReactiPod");
+    if (!intro || !acciones || !comenzar || document.getElementById("rehabV48ElegirPantalla")) {
+      return resultado;
+    }
+
+    const opcion = document.createElement("button");
+    opcion.id = "rehabV48ElegirPantalla";
+    opcion.type = "button";
+    opcion.className = "rehabV48ElegirPantalla";
+    opcion.setAttribute("aria-pressed", "false");
+    opcion.innerHTML = `
+      <span class="rehabV48Icono" aria-hidden="true">⛶</span>
+      <span class="rehabV48Texto"><strong>Pantalla completa</strong><small>Mostrar únicamente el estímulo y el color durante el ejercicio</small></span>
+      <span class="rehabV48Estado">ACTIVAR</span>
+    `;
+    acciones.insertAdjacentElement("beforebegin", opcion);
+
+    let seleccionada = false;
+    opcion.onclick = function () {
+      seleccionada = !seleccionada;
+      opcion.setAttribute("aria-pressed", String(seleccionada));
+      opcion.querySelector(".rehabV48Estado").textContent = seleccionada ? "ACTIVADA ✓" : "ACTIVAR";
+    };
+
+    const comenzarOriginal = comenzar.onclick;
+    comenzar.onclick = async function (evento) {
+      if (seleccionada) await abrirPantallaCompleta({ preparando: true });
+      return comenzarOriginal?.call(this, evento);
+    };
+    return resultado;
+  };
+
+  const observadorCuentaCompleta = new MutationObserver(function () {
+    const overlay = document.getElementById("rehabPantallaEstimulo");
+    if (!overlay || overlay.hidden || !pantallaCuenta?.classList.contains("activa")) return;
+    document.getElementById("rehabPantallaEstimuloAccion").textContent = numeroCuenta?.textContent || "3";
+    document.getElementById("rehabPantallaEstimuloColor").textContent = "PREPÁRATE";
+  });
+  if (numeroCuenta) observadorCuentaCompleta.observe(numeroCuenta, { childList: true });
 
   // -----------------------------------------------------
   // 5. BOTON ATRAS: ANDROID, NAVEGADOR Y TECLADO

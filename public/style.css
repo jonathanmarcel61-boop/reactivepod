@@ -4956,6 +4956,96 @@ Total output lines: 4912
 .rehabBtnPantallaCompleta {
     width: 100%;
     margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 62px;
+    border: 2px solid rgba(34, 197, 94, .7);
+    background: linear-gradient(135deg, rgba(34, 197, 94, .2), rgba(13, 148, 136, .16));
+    color: var(--texto);
+    box-shadow: 0 10px 28px rgba(13, 148, 136, .16);
+}
+
+.rehabBtnPantallaCompleta > span:first-child {
+    font-size: 28px;
+}
+
+.rehabBtnPantallaCompleta strong,
+.rehabBtnPantallaCompleta small {
+    display: block;
+    text-align: left;
+}
+
+.rehabBtnPantallaCompleta small {
+    margin-top: 2px;
+    color: var(--texto2);
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.rehabV48ElegirPantalla {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 72px;
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border: 2px solid #334155;
+    border-radius: 16px;
+    background: #101b2e;
+    color: #f8fafc;
+    text-align: left;
+    cursor: pointer;
+}
+
+.rehabV48ElegirPantalla[aria-pressed="true"] {
+    border-color: #22c55e;
+    background: linear-gradient(135deg, rgba(34, 197, 94, .22), rgba(13, 148, 136, .16));
+    box-shadow: 0 9px 25px rgba(34, 197, 94, .17);
+}
+
+.rehabV48Icono {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: #1e293b;
+    font-size: 25px;
+}
+
+.rehabV48Texto strong,
+.rehabV48Texto small {
+    display: block;
+}
+
+.rehabV48Texto strong {
+    font-size: 14px;
+}
+
+.rehabV48Texto small {
+    margin-top: 3px;
+    color: #cbd5e1;
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.rehabV48Estado {
+    padding: 7px 9px;
+    border-radius: 999px;
+    background: #1e293b;
+    color: #cbd5e1;
+    font-size: 10px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.rehabV48ElegirPantalla[aria-pressed="true"] .rehabV48Estado {
+    background: #22c55e;
+    color: #05200e;
 }
 
 body.rehabEstimuloAbierto {
@@ -4980,18 +5070,29 @@ body.rehabEstimuloAbierto {
 }
 
 #rehabCerrarPantallaEstimulo {
-    position: absolute;
+    position: fixed;
     top: max(14px, env(safe-area-inset-top));
     right: max(14px, env(safe-area-inset-right));
-    width: 48px;
-    height: 48px;
-    border: 2px solid rgba(0, 0, 0, .48);
+    z-index: 2;
+    min-width: 104px;
+    min-height: 52px;
+    padding: 0 17px;
+    border: 3px solid #ffffff;
     border-radius: 999px;
-    background: rgba(255, 255, 255, .7);
-    color: #07110b;
-    font-size: 22px;
+    background: rgba(7, 17, 11, .9);
+    color: #ffffff;
+    font-size: 15px;
     font-weight: 950;
-    box-shadow: 0 8px 28px rgba(0, 0, 0, .2);
+    letter-spacing: .04em;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .35);
+    cursor: pointer;
+}
+
+#rehabCerrarPantallaEstimulo span { margin-right: 5px; }
+
+@media (max-width: 380px) {
+    .rehabV48ElegirPantalla { grid-template-columns: auto 1fr; }
+    .rehabV48Estado { grid-column: 1 / -1; justify-self: stretch; text-align: center; }
 }
 
 .rehabPantallaEstimuloContenido {
