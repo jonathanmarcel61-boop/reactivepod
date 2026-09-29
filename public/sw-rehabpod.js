@@ -15,7 +15,7 @@
 // nueva en vez de seguir usando la vieja del caché.
 // =====================================================
 
-const CACHE_VERSION = "rehabpod-v22-fullscreen-choice";
+const CACHE_VERSION = "rehabpod-v23-brand-icons";
 
 const ARCHIVOS_DEL_CASCARON = [
   "./",
@@ -51,6 +51,8 @@ const ARCHIVOS_DEL_CASCARON = [
   "./vendor/supabase-2.57.4.js",
   "./supabase-config.js",
   "./logo-icon.png",
+  "./favicon-32.png",
+  "./favicon-192.png",
   "./logo-full.png",
 ];
 
