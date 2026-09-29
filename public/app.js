@@ -16626,6 +16626,10 @@ setTimeout(() => {
     const overlay = document.getElementById("rehabPantallaEstimulo");
     if (!overlay || overlay.hidden) return;
 
+    if (!pantallaCuenta?.classList.contains("activa")) {
+      overlay.classList.remove("rehabPantallaPreparando");
+    }
+
     const fondo = colorPantallaCompleta || colorObjetivo?.style?.background || "#111827";
     overlay.style.background = fondo;
     document.getElementById("rehabPantallaEstimuloCirculo").style.background = fondo;
@@ -16638,6 +16642,7 @@ setTimeout(() => {
   async function abrirPantallaCompleta(opciones) {
     const overlay = crearPantallaCompleta();
     const preparando = opciones?.preparando === true;
+    overlay.classList.toggle("rehabPantallaPreparando", preparando);
     colorPantallaCompleta = preparando
       ? "#111827"
       : colorObjetivo?.style?.background || colorPantallaCompleta;
@@ -16663,7 +16668,10 @@ setTimeout(() => {
 
   async function cerrarPantallaCompleta() {
     const overlay = document.getElementById("rehabPantallaEstimulo");
-    if (overlay) overlay.hidden = true;
+    if (overlay) {
+      overlay.hidden = true;
+      overlay.classList.remove("rehabPantallaPreparando");
+    }
     document.body.classList.remove("rehabEstimuloAbierto");
     try {
       if (document.fullscreenElement && document.exitFullscreen) {
@@ -16737,6 +16745,7 @@ setTimeout(() => {
   const observadorCuentaCompleta = new MutationObserver(function () {
     const overlay = document.getElementById("rehabPantallaEstimulo");
     if (!overlay || overlay.hidden || !pantallaCuenta?.classList.contains("activa")) return;
+    overlay.classList.add("rehabPantallaPreparando");
     document.getElementById("rehabPantallaEstimuloAccion").textContent = numeroCuenta?.textContent || "3";
     document.getElementById("rehabPantallaEstimuloColor").textContent = "PREPÁRATE";
   });

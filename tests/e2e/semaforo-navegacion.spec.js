@@ -42,10 +42,29 @@ test("la introducción permite iniciar en pantalla completa y salir con un botó
   await expect(opcion).toHaveAttribute("aria-pressed", "true");
 
   await page.click("#btnComenzarIntroReactiPod");
-  await expect(page.locator("#rehabPantallaEstimulo")).toBeVisible();
+  const pantallaCompleta = page.locator("#rehabPantallaEstimulo");
+  await expect(pantallaCompleta).toBeVisible();
+  await expect(pantallaCompleta).toHaveClass(/rehabPantallaPreparando/);
+  await expect(page.locator("#rehabPantallaEstimuloAccion")).toHaveCSS("color", "rgb(248, 250, 252)");
+  await expect(page.locator("#rehabPantallaEstimuloColor")).toHaveCSS("color", "rgb(134, 239, 172)");
   await expect(page.locator("#rehabCerrarPantallaEstimulo")).toBeVisible();
   await expect(page.locator("#rehabCerrarPantallaEstimulo")).toContainText("SALIR");
 
   await page.click("#rehabCerrarPantallaEstimulo");
   await expect(page.locator("#rehabPantallaEstimulo")).toBeHidden();
+});
+
+test("el nombre largo del color cabe en pantalla completa horizontal", async ({ page }) => {
+  await page.setViewportSize({ width: 1365, height: 768 });
+  await abrirApp(page);
+  expect(await elegirModo(page, "simple")).toBe(true);
+  await comenzarEntrenamiento(page);
+  await page.click("#btnPantallaCompletaEstimulo");
+  await page.locator("#rehabPantallaEstimuloColor").evaluate((elemento) => {
+    elemento.textContent = "AMARILLO";
+  });
+
+  const caja = await page.locator("#rehabPantallaEstimuloColor").boundingBox();
+  expect(caja.x).toBeGreaterThanOrEqual(0);
+  expect(caja.x + caja.width).toBeLessThanOrEqual(1365);
 });
