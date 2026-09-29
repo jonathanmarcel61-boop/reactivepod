@@ -1637,6 +1637,13 @@ function mostrarPerfiles() {
                         >
                             📷 FOTO
                         </button>
+
+                        <button
+                            class="btnPerfilEditar"
+                            data-editar="${perfil.id}"
+                        >
+                            ✏️ CAMBIAR NOMBRE
+                        </button>
  
                         ${
                           datosApp.perfiles.length > 1
@@ -1677,11 +1684,59 @@ function mostrarPerfiles() {
     };
   });
 
+  document.querySelectorAll("[data-editar]").forEach((boton) => {
+    boton.onclick = () => {
+      editarNombrePerfil(boton.dataset.editar);
+    };
+  });
+
   document.querySelectorAll("[data-eliminar]").forEach((boton) => {
     boton.onclick = () => {
       eliminarPerfil(boton.dataset.eliminar);
     };
   });
+}
+
+async function editarNombrePerfil(idPerfil) {
+  const perfil = datosApp.perfiles.find((item) => item.id === idPerfil);
+
+  if (!perfil) {
+    avisarRehab("No se encontró el perfil.", { tipo: "error" });
+    return;
+  }
+
+  const nombre = await pedirTextoRehab({
+    titulo: "Cambiar nombre",
+    etiqueta: "Nombre del deportista",
+    valor: perfil.nombre,
+    maxLongitud: 30,
+    aceptar: "Guardar nombre",
+    validar: (texto) => {
+      if (texto.length < 2 || texto.length > 30) {
+        return "El nombre debe tener entre 2 y 30 caracteres.";
+      }
+
+      const repetido = datosApp.perfiles.some(
+        (item) =>
+          item.id !== perfil.id &&
+          item.nombre.toLowerCase() === texto.toLowerCase()
+      );
+
+      return repetido ? "Ya existe un deportista con ese nombre." : null;
+    },
+  });
+
+  if (nombre === null || nombre === perfil.nombre) {
+    return;
+  }
+
+  perfil.nombre = nombre;
+  guardarDatos();
+  actualizarNombresPerfil();
+  actualizarFotoPerfilInicio();
+  mostrarPerfiles();
+  actualizarResumenInicio();
+  avisarRehab("Nombre actualizado correctamente.", { tipo: "exito" });
 }
 
 function seleccionarFotoPerfil(idPerfil) {

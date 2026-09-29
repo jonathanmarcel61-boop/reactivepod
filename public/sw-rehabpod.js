@@ -15,7 +15,7 @@
 // nueva en vez de seguir usando la vieja del caché.
 // =====================================================
 
-const CACHE_VERSION = "rehabpod-v24-voice-contrast";
+const CACHE_VERSION = "rehabpod-v25-profile-name";
 
 const ARCHIVOS_DEL_CASCARON = [
   "./",
