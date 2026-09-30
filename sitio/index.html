@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RehabPod — Reacciona antes de pensarlo</title>
+<title>RehabPod — Activa tus reflejos</title>
 <meta name="description" content="RehabPod conecta pods físicos con luces a tu celular para entrenar reacción y coordinación, apoyar procesos de rehabilitación y registrar tu progreso.">
 <link rel="icon" href="logo-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -183,7 +183,8 @@ section{padding:96px 0;}
 .titulo-seccion h2{font-size:clamp(28px,3.6vw,38px);}
 .titulo-seccion p{margin-top:14px;font-size:16px;}
 
-.oculto{opacity:0;transform:translateY(18px);transition:opacity .6s ease, transform .6s ease;}
+.oculto{opacity:1;transform:none;}
+.animaciones .oculto{opacity:0;transform:translateY(18px);transition:opacity .6s ease, transform .6s ease;}
 .oculto.visible{opacity:1;transform:none;}
 
 /* ---- para quién es ---- */
@@ -278,6 +279,28 @@ footer .envoltura{display:flex;justify-content:space-between;align-items:center;
     *{transition-duration:.001ms !important; animation-duration:.001ms !important;}
 }
 
+
+/* Claridad, profundidad y movimiento sutil. */
+:root{--texto2:#b0bcb4;}
+section{scroll-margin-top:85px;}
+#tituloDemo{scroll-margin-top:120px;}
+.incluida{display:inline-block;margin-top:22px;padding:9px 13px;border:1px solid #526633;border-radius:100px;color:#d5f5a2;font-size:13px;}
+.demo-etiqueta{margin-bottom:24px;font-size:13px;color:var(--acento);}
+.pods-demo{background:radial-gradient(ellipse at top right,#24352a,transparent 65%),var(--tarjeta);box-shadow:0 24px 90px #0005;}
+.pod::before{content:'+';position:absolute;inset:0;display:grid;place-items:center;font-size:32px;color:#b0bcb4;}
+.pod.activo::before{content:'●';color:#08120c;}
+.panel-quien,.funcion{transition:transform .25s ease,background .25s ease;}
+.panel-quien:hover,.funcion:hover{transform:translateY(-4px);background:#1c2821;}
+.preguntas{display:grid;gap:12px;max-width:850px;}
+details{border:1px solid var(--borde);border-radius:14px;background:var(--tarjeta);padding:18px 22px;}
+summary{cursor:pointer;font-weight:600;}
+details p{margin-top:12px;font-size:14px;}
+:focus-visible{outline:3px solid var(--acento);outline-offset:5px;}
+.hero .envoltura>div{animation:entrada .7s ease both;}
+.hero .pods-demo{animation-delay:.12s;}
+@keyframes entrada{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@media(max-width:560px){.hero{padding:42px 0 48px}.envoltura{padding:0 18px}.hero-stats{gap:16px}.pods-demo{padding:22px}.demo-controles{flex-direction:column;align-items:stretch}.demo-iniciar{min-height:44px}.cta-final{padding:38px 22px}section{padding:56px 0}.titulo-seccion{margin-bottom:28px}.incluida{border-radius:14px}.nav-cta{padding:10px 12px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.animaciones .oculto{opacity:1;transform:none}.panel-quien:hover,.funcion:hover{transform:none}}
 </style>
 </head>
 <body>
@@ -292,22 +315,23 @@ footer .envoltura{display:flex;justify-content:space-between;align-items:center;
             <a href="#funciona">Cómo funciona</a>
             <a href="#quien">Para quién es</a>
             <a href="#experiencia">La app</a>
-            <a href="#disponibilidad">Disponibilidad</a>
+            <a href="#disponibilidad">Kit y app</a>
         </div>
-        <a class="nav-cta" href="#acceso">Solicitar acceso</a>
+        <a class="nav-cta" href="https://reactivepod.vercel.app/">Abrir app</a>
     </div>
 </nav>
 
 <header class="hero">
     <div class="envoltura">
         <div>
-            <span class="etiqueta-mono">// entrenamiento de reacción y rehabilitación</span>
-            <h1 style="margin-top:14px;">Reacciona antes<br>de pensarlo.</h1>
-            <p class="sub">RehabPod conecta pods físicos con luces a tu celular. Registra tus tiempos de reacción en milisegundos, organiza el plan de entrenamiento o rehabilitación que necesitas y facilita el seguimiento de tu progreso.</p>
+            <span class="etiqueta-mono">REACCIÓN · COORDINACIÓN · MOVIMIENTO</span>
+            <h1 style="margin-top:14px;">Activa tus reflejos.<br><span style="color:var(--acento)">Supera tu marca.</span></h1>
+            <p class="sub">Cuatro pods, luces de colores y un objetivo: tocar el indicado. Conecta por Bluetooth, elige tu ejercicio y sigue tus tiempos y aciertos desde la app.</p>
             <div class="hero-ctas">
-                <a class="boton boton-primario" href="#acceso">Solicitar acceso anticipado</a>
-                <a class="boton boton-secundario" href="#funciona">Ver cómo funciona</a>
+                <a class="boton boton-primario" href="#funciona">Conocer RehabPod</a>
+                <a class="boton boton-secundario" href="#tituloDemo">Probar la demo</a>
             </div>
+            <p class="incluida">App incluida con la compra del kit · Sin suscripción</p>
             <div class="hero-stats">
                 <div><strong>4</strong><span>pods conectados por Bluetooth</span></div>
                 <div><strong>9</strong><span>colores, ajustables por daltonismo</span></div>
@@ -316,6 +340,7 @@ footer .envoltura{display:flex;justify-content:space-between;align-items:center;
         </div>
 
         <div class="pods-demo" aria-labelledby="tituloDemo">
+            <p class="demo-etiqueta">Pruébalo aquí · 5 rondas</p>
             <div class="pods-grid">
                 <button class="pod" type="button" data-c="rojo" aria-label="Pod rojo"></button>
                 <button class="pod" type="button" data-c="azul" aria-label="Pod azul"></button>
@@ -431,21 +456,26 @@ footer .envoltura{display:flex;justify-content:space-between;align-items:center;
 <section id="disponibilidad">
     <div class="envoltura">
         <div class="acceso-panel oculto">
-            <div><h3>RehabPod está en acceso anticipado</h3><p>Actualmente estamos realizando pruebas del kit y de la aplicación. La disponibilidad, los paquetes y los precios definitivos se anunciarán después de validar la experiencia con usuarios y profesionales.</p></div>
-            <a class="boton boton-primario" href="#acceso">Quiero recibir novedades</a>
+            <div><h3>Tu kit incluye la app</h3><p>La compra de RehabPod incluye el acceso a la aplicación, sin suscripción. Conecta tus pods, realiza ejercicios y consulta tu progreso. La disponibilidad y el precio del kit se confirmarán antes de la compra.</p></div>
+            <a class="boton boton-primario" href="https://reactivepod.vercel.app/">Explorar la app</a>
         </div>
     </div>
 </section>
 
 <section id="acceso">
     <div class="envoltura">
-        <div class="cta-final oculto">
-            <span class="etiqueta-mono">RehabPod está en etapa de acceso anticipado</span>
-            <h2 style="margin-top:14px;">Sé de los primeros en probarlo</h2>
-            <p>Escríbenos y te avisamos apenas esté disponible para descargar en tu celular.</p>
-            <div class="hero-ctas">
-                <a class="boton boton-primario" href="mailto:[correo de contacto]?subject=Quiero%20probar%20RehabPod">Escribir a [correo de contacto]</a>
-            </div>
+        <div class="titulo-seccion oculto"><h2>Todo claro antes de empezar</h2><p>Conoce el kit y lo que necesitas para usarlo.</p></div>
+        <div class="preguntas">
+            <details><summary>¿Tengo que pagar una suscripción?</summary><p>No. La app viene incluida con la compra del producto.</p></details>
+            <details><summary>¿Cómo se conectan los pods?</summary><p>Por Bluetooth desde la app. Enciende tus pods, abre la gestión de dispositivos y conéctalos antes de iniciar el ejercicio.</p></details>
+            <details><summary>¿Necesito internet para entrenar?</summary><p>El entrenamiento local y el registro en tu dispositivo funcionan sin internet. Las funciones de cuenta y sincronización necesitan conexión.</p></details>
+            <details><summary>¿La demo controla los pods físicos?</summary><p>No. Esta prueba en pantalla muestra la dinámica de reacción. Para entrenar con el kit, usa la app y conecta tus pods.</p></details>
+        </div>
+        <div class="cta-final oculto" style="margin-top:32px">
+            <span class="etiqueta-mono">TU SIGUIENTE REACCIÓN EMPIEZA AQUÍ</span>
+            <h2 style="margin-top:14px">Enciende. Reacciona. Mejora.</h2>
+            <p>Descubre los ejercicios y la experiencia de RehabPod.</p>
+            <div class="hero-ctas"><a class="boton boton-primario" href="https://reactivepod.vercel.app/">Abrir la app</a><a class="boton boton-secundario" href="#tituloDemo">Probar en pantalla</a></div>
         </div>
     </div>
 </section>
@@ -456,7 +486,7 @@ footer .envoltura{display:flex;justify-content:space-between;align-items:center;
         <div class="footer-links">
             <a href="privacidad.html#terminos">Términos de uso</a>
             <a href="privacidad.html#privacidad">Privacidad</a>
-            <a href="mailto:[correo de contacto]">Contacto</a>
+            <a href="#acceso">Preguntas frecuentes</a>
         </div>
     </div>
 </footer>
@@ -547,6 +577,7 @@ document.getElementById("anio").textContent = new Date().getFullYear();
         elementos.forEach(function (el) { el.classList.add("visible"); });
         return;
     }
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("animaciones");
     var observador = new IntersectionObserver(function (entradas) {
         entradas.forEach(function (entrada) {
             if (entrada.isIntersecting) {
