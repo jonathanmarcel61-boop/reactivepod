@@ -2917,6 +2917,8 @@ function crearControlesExperienciaEntrenamiento() {
 
 function pintarControlesExperiencia() {
   dificultadActual = ajustesApp.dificultad || "media";
+  const bloqueDificultad = document.getElementById("bloqueDificultadReactiPod");
+  if (bloqueDificultad) bloqueDificultad.hidden = modoActual === "entrenador";
 
   document.querySelectorAll(".btnDificultadReactiPod").forEach((boton) => {
     boton.classList.toggle("activa", boton.dataset.dificultad === dificultadActual);
@@ -3662,6 +3664,12 @@ async function iniciarRonda() {
     return;
   }
 
+  if (modoActual === "cazaColor") {
+    // Sin espera aleatoria: seguir continuamente el color elegido.
+    await rehabV19ActivarCazaColor();
+    return;
+  }
+
   if (modoActual === "persecucion") {
     activarPersecucion();
 
@@ -4256,7 +4264,9 @@ function continuar() {
   temporizador = setTimeout(
     iniciarRonda,
 
-    pausaRondasMs
+    modoActual === "cazaColor"
+      ? REHAB_V21_DURACION + (rehabDificultad() === "facil" ? 450 : rehabDificultad() === "dificil" ? 80 : rehabDificultad() === "personalizada" ? pausaRondasMs : 220)
+      : pausaRondasMs
   );
 }
 
@@ -5937,7 +5947,7 @@ function organizarModosPorCategoriaV8() {
       titulo: "Velocidad",
       subtitulo: "Reacción rápida y ritmo continuo",
       descripcion: "Entrenamientos para responder más rápido ante estímulos visuales.",
-      modos: ["simple", "persecucion", "contrarreloj"],
+      modos: ["simple", "contrarreloj"],
     },
     {
       clave: "coordinacion",
@@ -5963,7 +5973,7 @@ function organizarModosPorCategoriaV8() {
 
       descripcion:
         "Entrena la toma de decisiones e incluye el modo de control directo para entrenadores.",
-      modos: ["prohibido", "libre", "entrenador"],
+      modos: ["prohibido", "entrenador"],
     },
   ];
 
@@ -7104,31 +7114,28 @@ activarSimple = async function () {
 // REACCION POR COLORES
 // =====================================================
 
+var rehabUltimoObjetivoColor = null;
 activarColores = async function () {
   fase = "respuesta";
   var activos = rehabIndicesPodsActivos();
-  var usados = [];
-
+  var claveObjetivo = rehabElegirColorClave([rehabUltimoObjetivoColor]);
+  rehabUltimoObjetivoColor = claveObjetivo;
+  var claves = rehabElegirClavesContrastantes(activos.length, rehabObtenerColoresCazaActivos(), [claveObjetivo]);
+  var distractores = claves.filter(function (c) { return c !== claveObjetivo; });
+  objetivoCorrecto = rehabElegirPodActivo();
   coloresActuales = new Array(podsBLE.length).fill(null);
-
-  activos.forEach((indice) => {
-    var color = obtenerColorAleatorioParaPod(indice, usados);
-    usados.push(color.comando);
+  var pos = 0;
+  activos.forEach(function (indice) {
+    var clave = indice === objetivoCorrecto ? claveObjetivo : distractores[pos++ % distractores.length];
+    var color = rehabColorPorClave(clave);
     coloresActuales[indice] = color;
     encenderVisual(indice, color.css);
   });
-
-  objetivoCorrecto = rehabElegirPodActivo();
-  var objetivo = coloresActuales[objetivoCorrecto];
-
-  await Promise.all(
-    activos.map((indice) => enviarComandoPod(indice, coloresActuales[indice].comando))
-  );
-
+  await Promise.all(activos.map(function (indice) { return enviarComandoPod(indice, coloresActuales[indice].comando); }));
   textoFase.textContent = "¡AHORA!";
   textoObjetivo.textContent = "TOCA EL COLOR";
-  nombreColor.textContent = objetivo.nombre;
-  colorObjetivo.style.background = objetivo.css;
+  nombreColor.textContent = coloresActuales[objetivoCorrecto].nombre;
+  colorObjetivo.style.background = coloresActuales[objetivoCorrecto].css;
   iniciarMedicion();
 };
 
@@ -8362,7 +8369,7 @@ async function rehabV19ActivarCazaColor() {
   }
 
   fase = "cazaColorRespuesta";
-  esperandoRespuesta = true;
+  esperandoRespuesta = false;
 
   var activos = rehabIndicesPodsActivos();
   if (activos.length < 2) {
@@ -8373,7 +8380,8 @@ async function rehabV19ActivarCazaColor() {
   var colorObjetivoCaza = rehabObtenerColorCaza();
   var otros = rehabMezclarCopia(rehabColoresCazaSecundarios());
 
-  objetivoCorrecto = rehabElegirPodActivo();
+  var posiciones = activos.filter(function (indice) { return indice !== objetivoCorrecto; });
+  objetivoCorrecto = posiciones[Math.floor(Math.random() * posiciones.length)];
   coloresActuales = new Array(podsBLE.length).fill(null);
 
   var posicionOtro = 0;
@@ -8666,7 +8674,6 @@ if (btnCancelar) {
 
 var rehabProhibidosActuales = new Set();
 var rehabColorProhibidoActual = null;
-var rehabUltimoColorCazaDinamico = rehabColorCaza;
 var rehabReglaStroopActual = "palabra";
 var rehabObjetivoStroop = -1;
 var rehabColorSemanticoStroop = null;
@@ -8705,9 +8712,9 @@ function rehabDescripcionDificultadEspecifica(modo, dificultad) {
     },
     colores: {
       facil: "Fácil · Ritmo lento para identificar con calma el color objetivo.",
-      media: "Media · Colores dinámicos y ritmo equilibrado.",
+      media: "Media · Objetivo visual nuevo por ronda y ritmo equilibrado.",
       dificil:
-        "Difícil · Los colores cambian con espera y pausas más cortas; exige discriminación rápida.",
+        "Difícil · Objetivo visual nuevo por ronda, con espera y pausas cortas.",
       personalizada:
         "Personal · Mantiene los colores dinámicos y usa tus tiempos personalizados.",
     },
@@ -8758,10 +8765,10 @@ function rehabDescripcionDificultadEspecifica(modo, dificultad) {
         "Personal · Circuito con orden aleatorio y configuración general personalizada.",
     },
     contrarreloj: {
-      facil: "Fácil · Prioriza precisión durante el tiempo disponible.",
-      media: "Media · Equilibrio entre velocidad y precisión.",
+      facil: "Fácil · Suma aciertos contra el reloj; 600 ms entre objetivos después de la confirmación.",
+      media: "Media · Suma aciertos contra el reloj; 300 ms entre objetivos después de la confirmación.",
       dificil:
-        "Difícil · Busca encadenar respuestas lo más rápido posible; el siguiente objetivo aparece inmediatamente tras acertar.",
+        "Difícil · Suma aciertos contra el reloj; 80 ms entre objetivos después de la confirmación.",
       personalizada:
         "Personal · Mantiene la duración elegida y la configuración general personalizada.",
     },
@@ -8774,10 +8781,10 @@ function rehabDescripcionDificultadEspecifica(modo, dificultad) {
         "Personal · El entrenador controla manualmente la exigencia de la sesión.",
     },
     cazaColor: {
-      facil: "Fácil · Busca el mismo color durante todo el entrenamiento.",
-      media: "Media · El color objetivo cambia automáticamente cada 3 rondas.",
+      facil: "Fácil · Sigue el color elegido; 450 ms de pausa después de cada acierto y su confirmación.",
+      media: "Media · Sigue el mismo color; 220 ms de pausa después de cada acierto y su confirmación.",
       dificil:
-        "Difícil · El color objetivo puede cambiar en cada ronda; debes leer el nuevo objetivo antes de responder.",
+        "Difícil · Sigue el mismo color; 80 ms de pausa después de cada acierto y su confirmación.",
       personalizada:
         "Personal · Mantiene fijo el color que elegiste y usa la configuración personalizada.",
     },
@@ -8791,11 +8798,11 @@ function rehabDescripcionDificultadEspecifica(modo, dificultad) {
     },
     stroop: {
       facil:
-        "Fácil · La pantalla te indica claramente si debes seguir la PALABRA o el COLOR visual.",
-      media: "Media · La regla PALABRA/COLOR cambia aleatoriamente en cada ronda.",
+        "Fácil · Toca el color de las letras; palabra y tinta coinciden.",
+      media: "Media · Toca el color de las letras; algunas palabras dicen otro color.",
       dificil:
-        "Difícil · La regla cambia en cada ronda y la palabra siempre aparece escrita con un color diferente para generar interferencia Stroop.",
-      personalizada: "Personal · Regla aleatoria con tus tiempos personalizados.",
+        "Difícil · Toca el color de las letras; la palabra siempre dice otro color.",
+      personalizada: "Personal · Toca el color de las letras con interferencia y tus tiempos personalizados.",
     },
   };
   var grupo = mapa[modo] || mapa.simple;
@@ -8984,30 +8991,8 @@ activarCircuito = async function () {
 };
 
 // -----------------------------------------------------
-// 6. CAZA DE COLOR: OBJETIVO FIJO / CADA 3 / CADA RONDA
-// -----------------------------------------------------
-var rehabV20ActivarCazaBase = rehabV19ActivarCazaColor;
-rehabV19ActivarCazaColor = async function () {
-  var dif = rehabDificultad();
-  var debeCambiar = false;
-
-  if (dif === "media" && (rondaActual - 1) % 3 === 0 && rondaActual > 1)
-    debeCambiar = true;
-  if (dif === "dificil") debeCambiar = true;
-
-  if (debeCambiar) {
-    rehabColorCaza = rehabElegirColorClave([rehabUltimoColorCazaDinamico]);
-    rehabUltimoColorCazaDinamico = rehabColorCaza;
-  }
-
-  await rehabV20ActivarCazaBase();
-
-  if (dif === "media") {
-    mensajeResultado.textContent = "El color objetivo cambia cada 3 rondas";
-  } else if (dif === "dificil") {
-    mensajeResultado.textContent = "Objetivo nuevo: léelo antes de tocar";
-  }
-};
+// 6. CAZA DE COLOR: UN OBJETIVO FIJO, RITMO CONTINUO
+// El motor V19 conserva el color elegido durante toda la sesión.
 
 // -----------------------------------------------------
 // 7. CAMBIO AUTOMATICO: TIEMPO SEGUN DIFICULTAD
@@ -9038,7 +9023,7 @@ function rehabV20CrearTarjetaStroop() {
     <strong style="display:block;font-size:17px;">Palabra vs color</strong>
 
     <small style="display:block;margin-top:6px;line-height:1.45;opacity:.78;">
-      Lee la regla: toca el color que DICE la palabra o el color con el que está ESCRITA.
+      Toca siempre el color de las letras. Ignora el significado de la palabra.
     </small>`;
   tarjeta.addEventListener("click", function () {
     seleccionarModo("stroop");
@@ -9060,20 +9045,16 @@ async function rehabV20ActivarStroop() {
   if (activos.length < 2) return;
 
   fase = "stroopRespuesta";
-  esperandoRespuesta = true;
+  esperandoRespuesta = false;
 
   var clavePalabra = rehabElegirColorClave([]);
-  var claveVisual = rehabElegirColorClave([clavePalabra]);
+  var dif = rehabDificultad();
+  var interferencia = dif === "dificil" || dif === "personalizada" || (dif === "media" && Math.random() < 0.5);
+  var claveVisual = interferencia ? rehabElegirColorClave([clavePalabra]) : clavePalabra;
   rehabColorSemanticoStroop = rehabColorPorClave(clavePalabra);
   rehabColorVisualStroop = rehabColorPorClave(claveVisual);
 
-  var dif = rehabDificultad();
-  if (dif === "facil") {
-    // Fácil alterna de manera predecible por ronda.
-    rehabReglaStroopActual = rondaActual % 2 === 0 ? "visual" : "palabra";
-  } else {
-    rehabReglaStroopActual = Math.random() < 0.5 ? "palabra" : "visual";
-  }
+  rehabReglaStroopActual = "visual";
 
   var colorObjetivoReal =
     rehabReglaStroopActual === "palabra"
@@ -9212,7 +9193,7 @@ rehabActualizarDescripcionModo = function () {
   rehabV20DescripcionBase();
   if (modoActual === "stroop" && descripcionModo) {
     descripcionModo.textContent =
-      "Entrenamiento de atención e inhibición: la palabra puede decir un color pero estar escrita con otro. Sigue la regla indicada en cada ronda.";
+      "Toca siempre el color con el que están escritas las letras, aunque la palabra diga otro color.";
   }
 };
 
@@ -9230,9 +9211,9 @@ obtenerGuiaModoV7 = function () {
       titulo: "Palabra vs color",
       descripcion: "La palabra y el color con el que está escrita pueden ser diferentes.",
       pasos: [
-        "Si dice TOCA LO QUE DICE, busca en los Pods el color nombrado por la palabra.",
-        "Si dice TOCA EL COLOR DE LA PALABRA, ignora el texto y busca el color con el que están pintadas las letras.",
-        "Toca el Pod que tenga el color correcto según la regla.",
+        "Observa el color de las letras, no el significado de la palabra.",
+        "Toca el Pod del mismo color que las letras.",
+        "La regla es la misma en todas las dificultades; cambia la interferencia.",
       ],
     };
   }
@@ -9601,7 +9582,10 @@ respuestaContrarreloj = async function (indice) {
     return;
   }
 
-  await activarObjetivoContrarreloj();
+  var pausa = rehabDificultad() === "facil" ? 600 : rehabDificultad() === "dificil" ? 80 : rehabDificultad() === "personalizada" ? pausaRondasMs : 300;
+  temporizador = setTimeout(function () {
+    if (entrenamientoActivo && !pausado && modoActual === "contrarreloj") activarObjetivoContrarreloj();
+  }, pausa);
 };
 
 // =====================================================
@@ -9691,7 +9675,7 @@ console.log(
     cazaColor: {
       icono: "🎯🎨",
       titulo: "Caza de color",
-      descripcion: "Busca repetidamente el color objetivo aunque cambie de posición.",
+      descripcion: "Sigue el mismo color elegido, que cambia de posición inmediatamente después de cada acierto.",
     },
     automatico: {
       icono: "🔁⚡",
@@ -9702,7 +9686,7 @@ console.log(
     stroop: {
       icono: "🧠🎨",
       titulo: "Palabra vs color",
-      descripcion: "Responde según la palabra escrita o según su color visual.",
+      descripcion: "Toca el color de las letras e ignora lo que dice la palabra.",
     },
   };
 
@@ -9717,14 +9701,12 @@ console.log(
         "Entrenamientos orientados al rendimiento físico, la velocidad de respuesta, los desplazamientos y la coordinación.",
       modos: [
         "simple",
-        "persecucion",
         "doble",
         "circuito",
         "contrarreloj",
         "colores",
         "cazaColor",
         "automatico",
-        "libre",
         "entrenador",
       ],
     },
@@ -9737,7 +9719,6 @@ console.log(
         "Ejercicios que pueden organizarse para trabajar movilidad, coordinación, alcance y respuesta motora de forma progresiva.",
       modos: [
         "simple",
-        "libre",
         "automatico",
         "circuito",
         "colores",
@@ -9965,8 +9946,6 @@ console.log(
     { clave: "simple", nombre: "Reacción aleatoria", icono: "⚡" },
     { clave: "colores", nombre: "Reacción por colores", icono: "🎨" },
     { clave: "secuencia", nombre: "Secuencia / memoria", icono: "🧠" },
-    { clave: "libre", nombre: "Modo libre", icono: "🏃" },
-    { clave: "persecucion", nombre: "Persecución", icono: "🔥" },
     { clave: "doble", nombre: "Doble estímulo", icono: "⚡⚡" },
     { clave: "prohibido", nombre: "Color prohibido", icono: "🚫🎨" },
     { clave: "circuito", nombre: "Circuito", icono: "🔄" },
@@ -16923,7 +16902,7 @@ setTimeout(() => {
 })();
 // =====================================================
 // REHABPOD V44
-// REACCION POR COLORES PROGRESIVA + CONTRASTE PERCEPTUAL
+// REACCION POR COLORES VISUAL + CONTRASTE PERCEPTUAL
 // =====================================================
 
 (function () {
@@ -16931,53 +16910,16 @@ setTimeout(() => {
 
   let tipoPistaColorActual = "visual";
 
-  function elegirTipoPistaColor() {
-    const dificultad = dificultadActual || ajustesApp.dificultad || "media";
-
-    if (dificultad === "facil") return "visual";
-    if (dificultad === "media") return "palabra";
-
-    // Difícil y personalizada mezclan las dos clases de pista por ronda.
-    return Math.random() < 0.5 ? "visual" : "palabra";
-  }
-
   function presentarPistaReaccionColor(objetivo) {
     if (!objetivo || modoActual !== "colores") return;
-
-    tipoPistaColorActual = elegirTipoPistaColor();
+    tipoPistaColorActual = "visual";
     nombreColor.style.color = "";
     nombreColor.style.textShadow = "";
-
-    if (tipoPistaColorActual === "visual") {
-      textoFase.textContent = "PISTA VISUAL";
-      textoObjetivo.textContent = "TOCA ESTE COLOR";
-      nombreColor.textContent = "OBSERVA EL CÍRCULO";
-      colorObjetivo.style.background = objetivo.css;
-      colorObjetivo.setAttribute("aria-label", `Color objetivo: ${objetivo.nombre}`);
-      return;
-    }
-
-    textoFase.textContent = "PISTA DE PALABRA";
-    textoObjetivo.textContent = "TOCA EL COLOR ESCRITO";
-    nombreColor.textContent = objetivo.nombre;
-    nombreColor.style.color = "var(--texto)";
-    const claves = rehabElegirClavesContrastantes(
-      2,
-      obtenerClavesColoresActivos(),
-      [objetivo.comando]
-    );
-    const claveDistractora = claves.find((clave) => clave !== objetivo.comando);
-    const distractor =
-      catalogoColoresPersonalizados[claveDistractora] ||
-      (objetivo.comando === "red"
-        ? catalogoColoresPersonalizados.blue
-        : catalogoColoresPersonalizados.red);
-
-    colorObjetivo.style.background = distractor.css;
-    colorObjetivo.setAttribute(
-      "aria-label",
-      `Color distractor: ${distractor.nombre}. Palabra objetivo: ${objetivo.nombre}`
-    );
+    textoFase.textContent = "PISTA VISUAL";
+    textoObjetivo.textContent = "TOCA ESTE COLOR";
+    nombreColor.textContent = "OBSERVA EL CÍRCULO";
+    colorObjetivo.style.background = objetivo.css;
+    colorObjetivo.setAttribute("aria-label", `Color objetivo: ${objetivo.nombre}`);
   }
 
   const activarColoresBaseV44 = activarColores;
@@ -16997,14 +16939,10 @@ setTimeout(() => {
 
     const dificultad = dificultadActual || ajustesApp.dificultad || "media";
     const textos = {
-      facil:
-        "Observa únicamente el color del círculo y toca el Pod que tenga ese mismo color.",
-      media:
-        "Lee el nombre del color y toca el Pod correspondiente. El círculo muestra otro color para exigir mayor atención.",
-      dificil:
-        "La pista cambia aleatoriamente entre un círculo de color y una palabra. Lee la regla antes de responder.",
-      personalizada:
-        "Combina aleatoriamente pistas visuales y palabras utilizando los tiempos personalizados.",
+      facil: "Busca el color del círculo entre los Pods. El color objetivo cambia en cada ronda, con ritmo pausado.",
+      media: "Busca el color del círculo entre los Pods. El objetivo cambia por ronda, a ritmo normal.",
+      dificil: "Busca el color del círculo entre los Pods. El objetivo cambia por ronda, con pausas cortas.",
+      personalizada: "Busca el color del círculo, que cambia por ronda, usando tus tiempos personalizados.",
     };
 
     descripcionModo.textContent = textos[dificultad] || textos.media;
@@ -17018,11 +16956,11 @@ setTimeout(() => {
       icono: "🎨",
       titulo: "Reacción por colores",
       descripcion:
-        "La forma de indicar el objetivo cambia con la dificultad seleccionada.",
+        "Busca un color objetivo nuevo en cada ronda. Siempre se indica mediante el círculo.",
       pasos: [
-        "Fácil: observa el círculo y toca el Pod del mismo color.",
-        "Media: ignora el color del círculo, lee la palabra y toca el color escrito.",
-        "Difícil: identifica si la ronda usa círculo o palabra antes de tocar.",
+        "Observa el color del círculo.",
+        "Busca y toca el Pod del mismo color.",
+        "En la siguiente ronda busca el nuevo color; la dificultad cambia el ritmo.",
       ],
     };
   };
@@ -17042,6 +16980,6 @@ setTimeout(() => {
   };
 
   console.log(
-    "RehabPod V44: pistas de color por dificultad y separación de colores similares activadas."
+    "RehabPod: objetivo visual por ronda y separación de colores similares activados."
   );
 })();

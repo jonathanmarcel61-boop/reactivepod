@@ -5,8 +5,8 @@ const {
 } = require("./helpers");
 
 const MODOS = [
-  "simple", "persecucion", "doble", "circuito", "contrarreloj", "colores",
-  "cazaColor", "automatico", "libre", "entrenador", "secuencia", "prohibido", "stroop",
+  "simple", "doble", "circuito", "contrarreloj", "colores",
+  "cazaColor", "automatico", "entrenador", "secuencia", "prohibido", "stroop",
   "semaforoMarcha",
 ];
 
