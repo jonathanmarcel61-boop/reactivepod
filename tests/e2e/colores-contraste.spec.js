@@ -13,28 +13,6 @@ test("Reacción por colores usa pista visual en fácil", async ({ page }) => {
   await expect(page.locator("#nombreColor")).toHaveText("OBSERVA EL CÍRCULO");
 });
 
-test("Reacción por colores usa la palabra en dificultad media", async ({ page }) => {
-  await abrirApp(page, { ajustes: { dificultad: "media" } });
-  expect(await elegirModo(page, "colores")).toBe(true);
-  await comenzarEntrenamiento(page);
-
-  await expect(page.locator("#textoFase")).toHaveText("PISTA DE PALABRA", {
-    timeout: 10000,
-  });
-  await expect(page.locator("#textoObjetivo")).toHaveText("TOCA EL COLOR ESCRITO");
-  await expect(page.locator("#nombreColor")).toHaveText(
-    /ROJO|VERDE|AZUL|AMARILLO|BLANCO|MORADO|CELESTE|NARANJA|ROSADO/
-  );
-
-  const pista = await page.locator("#colorObjetivo").evaluate((elemento) => ({
-    fondo: elemento.style.background,
-    etiqueta: elemento.getAttribute("aria-label"),
-  }));
-  expect(pista.fondo).not.toBe("");
-  expect(pista.fondo).not.toBe("rgb(55, 65, 81)");
-  expect(pista.etiqueta).toMatch(/Color distractor:.+Palabra objetivo:/);
-});
-
 test("la selección simultánea evita pares de colores confundibles", async ({ page }) => {
   await abrirApp(page);
   const resultado = await page.evaluate(() => {

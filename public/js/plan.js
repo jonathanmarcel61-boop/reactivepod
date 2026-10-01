@@ -44,21 +44,20 @@
    */
   const APTITUD = {
     simple: { reaccion: 1.0, atencion: 0.3 },
-    persecucion: { reaccion: 0.8, coordinacion: 0.6 },
     contrarreloj: { reaccion: 0.9, coordinacion: 0.3 },
     colores: { reaccion: 0.5, atencion: 0.7, memoria: 0.3 },
     doble: { coordinacion: 0.9, reaccion: 0.5, atencion: 0.4 },
     circuito: { coordinacion: 1.0, reaccion: 0.4 },
     automatico: { coordinacion: 0.8, reaccion: 0.4 },
-    libre: { coordinacion: 0.6, reaccion: 0.2 },
     secuencia: { memoria: 1.0, atencion: 0.4 },
     prohibido: { atencion: 1.0, memoria: 0.4, reaccion: 0.3 },
     stroop: { atencion: 1.0, memoria: 0.5 },
-    cazaColor: { atencion: 0.9, reaccion: 0.4, memoria: 0.3 },
+    cazaColor: { atencion: 0.9, reaccion: 0.6, coordinacion: 0.6 },
+    semaforoMarcha: { atencion: 0.9, reaccion: 0.6, coordinacion: 0.6 },
   };
 
   /** Modos suaves que sirven de calentamiento. */
-  const CALENTAMIENTO = ["simple", "libre", "automatico", "persecucion", "colores"];
+  const CALENTAMIENTO = ["simple", "automatico", "colores"];
 
   const NIVELES = ["principiante", "intermedio", "avanzado"];
   const DIFICULTAD_MOTOR = { principiante: "facil", intermedio: "media", avanzado: "dificil" };
