@@ -11,9 +11,18 @@ test('pods del simulador en pantalla completa registran el acierto y reflejan la
   await expect(page.locator('.rehabPodPantallaCompleta:visible')).toHaveCount(4);
   await page.waitForFunction(() => esperandoRespuesta && fase === 'respuesta');
   const indice = await page.evaluate(() => objetivoCorrecto);
-  const original = await page.locator('#luzPod'+(indice+1)).evaluate(e => getComputedStyle(e).backgroundColor);
+  const original = await page.locator('#luzPod'+(indice+1)).evaluate(e => e.style.background);
   const boton = page.locator(`.rehabPodPantallaCompleta[data-indice-pod="${indice}"]`);
-  await expect.poll(() => boton.locator('span').evaluate(e=>getComputedStyle(e).backgroundColor)).toBe(original);
+  await expect.poll(() => boton.locator('span').evaluate(e=>e.style.background)).toBe(original);
+  expect(original).not.toBe('rgb(55, 65, 81)');
+  const geometria = await page.evaluate(() => {
+    const objetivo = document.getElementById('rehabPantallaEstimuloCirculo').getBoundingClientRect();
+    const grid = document.getElementById('rehabPodsPantallaCompleta').getBoundingClientRect();
+    const luz = document.querySelector('.rehabLuzPodPantallaCompleta').getBoundingClientRect();
+    return {objetivo:objetivo.width,luz:luz.width,abajo:grid.top>objetivo.bottom};
+  });
+  expect(geometria.objetivo).toBeGreaterThan(geometria.luz*2);
+  expect(geometria.abajo).toBe(true);
   await boton.click();
   await page.waitForFunction(() => aciertos === 1);
   await expect(page.locator('#rehabPantallaEstimulo')).toBeVisible();

@@ -7538,3 +7538,24 @@ select {
   .rehabLuzPodPantallaCompleta { width:min(12vw,60px); }
 }
 .rehabPantallaSimulada.rehabPantallaPreparando #rehabPantallaEstimuloColor { color:#86efac; }
+
+/* Objetivo prioritario y respuestas compactas en la zona inferior. */
+.rehabPantallaSimulada { justify-content:space-between; padding-top:max(90px,env(safe-area-inset-top)); gap:20px; }
+.rehabPantallaSimulada .rehabPantallaEstimuloContenido { flex:1; align-content:center; gap:14px; }
+.rehabPantallaSimulada #rehabPantallaEstimuloCirculo { width:min(56vw,30dvh,260px); border-width:8px; }
+.rehabPantallaSimulada #rehabPantallaEstimuloAccion,
+.rehabPantallaSimulada #rehabPantallaEstimuloColor { font-size:clamp(1.35rem,6vw,2.6rem); }
+#rehabSimuladorPantallaCompleta { flex:none; width:min(100%,620px); }
+#rehabPodsPantallaCompleta { grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+.rehabPodPantallaCompleta { min-height:82px; padding:8px 4px; border-radius:14px; gap:6px; font-size:12px; }
+.rehabLuzPodPantallaCompleta { width:clamp(36px,10vw,52px); box-shadow:none !important; }
+@media (orientation:landscape) {
+  .rehabPantallaSimulada { padding-top:max(64px,env(safe-area-inset-top)); gap:8px; }
+  .rehabPantallaSimulada .rehabPantallaEstimuloContenido { gap:12px; }
+  .rehabPantallaSimulada #rehabPantallaEstimuloCirculo { width:min(24vw,32dvh,180px); }
+  .rehabPantallaSimulada #rehabPantallaEstimuloAccion,
+  .rehabPantallaSimulada #rehabPantallaEstimuloColor { font-size:clamp(1.1rem,3vw,2rem); }
+  .rehabPodPantallaCompleta { min-height:64px; flex-direction:row; gap:8px; }
+  .rehabLuzPodPantallaCompleta { width:36px; }
+  .rehabSimuladorInstruccion { margin-bottom:5px; }
+}

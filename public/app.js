@@ -16686,13 +16686,14 @@ setTimeout(() => {
       const indice = Number(boton.dataset.indicePod);
       boton.hidden = !activos.includes(indice);
       boton.disabled = !entrenamientoActivo || pausado || pantallaCuenta?.classList.contains("activa");
-      const luzOriginal = document.getElementById("luzPod" + (indice + 1));
+      const luzOriginal = lucesPods[indice];
       const luz = boton.querySelector(".rehabLuzPodPantallaCompleta");
       // Reflejar la luz real del simulador, incluyendo apagado y feedback.
       if (luzOriginal) {
         const estilo = getComputedStyle(luzOriginal);
-        luz.style.background = estilo.background;
-        luz.style.boxShadow = estilo.boxShadow;
+        // Copiar el destino de la transición, no el gris del primer fotograma.
+        luz.style.background = luzOriginal.style.background || estilo.backgroundColor;
+        luz.style.boxShadow = luzOriginal.style.boxShadow || estilo.boxShadow;
       }
       const nombre = "POD " + rehabNumeroVisiblePod(indice);
       boton.querySelector("strong").textContent = nombre;
