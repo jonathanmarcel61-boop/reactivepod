@@ -16650,15 +16650,60 @@ setTimeout(() => {
         <div id="rehabPantallaEstimuloCirculo"></div>
         <div id="rehabPantallaEstimuloColor">—</div>
       </div>
+      <div id="rehabSimuladorPantallaCompleta" hidden>
+        <p class="rehabSimuladorInstruccion">SIMULACIÓN · toca los pods para responder</p>
+        <div id="rehabPodsPantallaCompleta" role="group" aria-label="Pods simulados"></div>
+      </div>
     `;
     document.body.appendChild(overlay);
     document.getElementById("rehabCerrarPantallaEstimulo").onclick = cerrarPantallaCompleta;
+    const gridPods = document.getElementById("rehabPodsPantallaCompleta");
+    for (let indice = 0; indice < REHABPOD_MAX_PODS; indice++) {
+      const boton = document.createElement("button");
+      boton.type = "button";
+      boton.className = "rehabPodPantallaCompleta";
+      boton.dataset.indicePod = String(indice);
+      boton.innerHTML = '<span class="rehabLuzPodPantallaCompleta" aria-hidden="true"></span><strong></strong>';
+      boton.addEventListener("click", function () {
+        // Usa el mismo motor de pulsaciones que los pods virtuales originales.
+        rehabSimularGolpePod(indice);
+      });
+      gridPods.appendChild(boton);
+    }
     return overlay;
+  }
+
+  function actualizarPodsPantallaCompleta() {
+    const overlay = document.getElementById("rehabPantallaEstimulo");
+    if (!overlay || overlay.hidden) return;
+    const simulacion = rehabModoVirtual === true;
+    const panel = document.getElementById("rehabSimuladorPantallaCompleta");
+    panel.hidden = !simulacion;
+    overlay.classList.toggle("rehabPantallaSimulada", simulacion);
+    if (!simulacion) return;
+    const activos = rehabIndicesPodsActivos();
+    panel.querySelectorAll(".rehabPodPantallaCompleta").forEach(function (boton) {
+      const indice = Number(boton.dataset.indicePod);
+      boton.hidden = !activos.includes(indice);
+      boton.disabled = !entrenamientoActivo || pausado || pantallaCuenta?.classList.contains("activa");
+      const luzOriginal = document.getElementById("luzPod" + (indice + 1));
+      const luz = boton.querySelector(".rehabLuzPodPantallaCompleta");
+      // Reflejar la luz real del simulador, incluyendo apagado y feedback.
+      if (luzOriginal) {
+        const estilo = getComputedStyle(luzOriginal);
+        luz.style.background = estilo.background;
+        luz.style.boxShadow = estilo.boxShadow;
+      }
+      const nombre = "POD " + rehabNumeroVisiblePod(indice);
+      boton.querySelector("strong").textContent = nombre;
+      boton.setAttribute("aria-label", "Tocar " + nombre);
+    });
   }
 
   function actualizarPantallaCompleta() {
     const overlay = document.getElementById("rehabPantallaEstimulo");
     if (!overlay || overlay.hidden) return;
+    actualizarPodsPantallaCompleta();
 
     if (!pantallaCuenta?.classList.contains("activa")) {
       overlay.classList.remove("rehabPantallaPreparando");
@@ -16671,6 +16716,8 @@ setTimeout(() => {
       textoObjetivo?.textContent || "TOCA";
     document.getElementById("rehabPantallaEstimuloColor").textContent =
       nombreColor?.textContent || "—";
+    document.getElementById("rehabPantallaEstimuloColor").style.color =
+      modoActual === "stroop" ? nombreColor?.style.color || "" : "";
   }
 
   async function abrirPantallaCompleta(opciones) {
@@ -16681,6 +16728,7 @@ setTimeout(() => {
       ? "#111827"
       : colorObjetivo?.style?.background || colorPantallaCompleta;
     overlay.hidden = false;
+    actualizarPodsPantallaCompleta();
     document.body.classList.add("rehabEstimuloAbierto");
     if (preparando) {
       overlay.style.background = colorPantallaCompleta;
@@ -16735,6 +16783,18 @@ setTimeout(() => {
   if (colorObjetivo) observadorEstimulo.observe(colorObjetivo, { attributes: true });
   if (textoObjetivo) observadorEstimulo.observe(textoObjetivo, { childList: true });
   if (nombreColor) observadorEstimulo.observe(nombreColor, { childList: true });
+
+  const observadorPodsSimulados = new MutationObserver(actualizarPodsPantallaCompleta);
+  document.querySelectorAll(".pods .pod[data-pod]").forEach(function (pod) {
+    observadorPodsSimulados.observe(pod, { attributes: true, childList: true, subtree: true });
+  });
+  if (pantallaCuenta) observadorPodsSimulados.observe(pantallaCuenta, { attributes: true });
+  if (pantallaEntrenamiento) observadorPodsSimulados.observe(pantallaEntrenamiento, { attributes: true });
+  const actualizarModoVirtualBasePantalla = rehabActualizarModoVirtual;
+  rehabActualizarModoVirtual = function () {
+    actualizarModoVirtualBasePantalla();
+    actualizarPodsPantallaCompleta();
+  };
 
   // La opción se ofrece antes de cada ejercicio. Al abrirla desde el botón
   // COMENZAR conservamos el gesto del usuario, necesario para la API Fullscreen

@@ -15,7 +15,7 @@
 // nueva en vez de seguir usando la vieja del caché.
 // =====================================================
 
-const CACHE_VERSION = "rehabpod-v26-modos-independientes";
+const CACHE_VERSION = "rehabpod-v27-simulador-pantalla-completa";
 
 const ARCHIVOS_DEL_CASCARON = [
   "./",
