@@ -15,7 +15,7 @@
 // nueva en vez de seguir usando la vieja del caché.
 // =====================================================
 
-const CACHE_VERSION = "rehabpod-v29-posicion-simulador";
+const CACHE_VERSION = "rehabpod-v30-stroop-distractor";
 
 const ARCHIVOS_DEL_CASCARON = [
   "./",
