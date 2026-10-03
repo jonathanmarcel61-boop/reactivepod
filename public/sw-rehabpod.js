@@ -15,7 +15,7 @@
 // nueva en vez de seguir usando la vieja del caché.
 // =====================================================
 
-const CACHE_VERSION = "rehabpod-v28-colores-simulador";
+const CACHE_VERSION = "rehabpod-v29-posicion-simulador";
 
 const ARCHIVOS_DEL_CASCARON = [
   "./",
