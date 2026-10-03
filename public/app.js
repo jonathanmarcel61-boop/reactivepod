@@ -3231,6 +3231,7 @@ function crearBotonRepetirEntrenamiento() {
 // =====================================================
 
 function seleccionarModo(modo) {
+  nombreColor.classList.toggle("rehabPalabraStroop", modo === "stroop");
   modoActual = modo;
 
   configurarModo();
@@ -9097,10 +9098,12 @@ async function rehabV20ActivarStroop() {
       ? "TOCA LO QUE DICE"
       : "TOCA EL COLOR DE LA PALABRA";
   nombreColor.textContent = rehabColorSemanticoStroop.nombre;
+  nombreColor.classList.add("rehabPalabraStroop");
   nombreColor.style.color = rehabColorVisualStroop.css;
   nombreColor.style.fontWeight = "900";
   nombreColor.style.textShadow = "0 1px 2px rgba(0,0,0,.25)";
-  colorObjetivo.style.background = rehabColorVisualStroop.css;
+  // El círculo distrae: solo el color de las letras indica la respuesta.
+  colorObjetivo.style.background = rehabColorPorClave(otrasClaves[0]).css;
   mensajeResultado.textContent =
     rehabReglaStroopActual === "palabra"
       ? `La palabra dice ${rehabColorSemanticoStroop.nombre}; ignora el color de las letras.`
@@ -9146,6 +9149,7 @@ async function rehabV20RespuestaStroop(indice) {
     estado: `Stroop ${rehabReglaStroopActual === "palabra" ? "palabra" : "color visual"}`,
   });
 
+  nombreColor.classList.remove("rehabPalabraStroop");
   nombreColor.style.color = "";
   nombreColor.style.textShadow = "";
   await apagarTodosLosPods();
@@ -9238,7 +9242,8 @@ document.querySelectorAll("[data-dificultad]").forEach(function (boton) {
 var rehabV20FinalizarBase = finalizarEntrenamiento;
 finalizarEntrenamiento = async function () {
   if (nombreColor) {
-    nombreColor.style.color = "";
+    nombreColor.classList.remove("rehabPalabraStroop");
+  nombreColor.style.color = "";
     nombreColor.style.textShadow = "";
   }
   return await rehabV20FinalizarBase();
@@ -9247,7 +9252,8 @@ finalizarEntrenamiento = async function () {
 var rehabV20CancelarBase = cancelarEntrenamiento;
 cancelarEntrenamiento = async function () {
   if (nombreColor) {
-    nombreColor.style.color = "";
+    nombreColor.classList.remove("rehabPalabraStroop");
+  nombreColor.style.color = "";
     nombreColor.style.textShadow = "";
   }
   return await rehabV20CancelarBase();
@@ -16711,7 +16717,8 @@ setTimeout(() => {
     }
 
     const fondo = colorPantallaCompleta || colorObjetivo?.style?.background || "#111827";
-    overlay.style.background = fondo;
+    overlay.classList.toggle("rehabPantallaStroop", modoActual === "stroop");
+    overlay.style.background = modoActual === "stroop" ? "#101820" : fondo;
     document.getElementById("rehabPantallaEstimuloCirculo").style.background = fondo;
     document.getElementById("rehabPantallaEstimuloAccion").textContent =
       textoObjetivo?.textContent || "TOCA";
@@ -16974,7 +16981,8 @@ setTimeout(() => {
   function presentarPistaReaccionColor(objetivo) {
     if (!objetivo || modoActual !== "colores") return;
     tipoPistaColorActual = "visual";
-    nombreColor.style.color = "";
+    nombreColor.classList.remove("rehabPalabraStroop");
+  nombreColor.style.color = "";
     nombreColor.style.textShadow = "";
     textoFase.textContent = "PISTA VISUAL";
     textoObjetivo.textContent = "TOCA ESTE COLOR";
