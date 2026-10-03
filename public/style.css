@@ -7539,13 +7539,16 @@ select {
 }
 .rehabPantallaSimulada.rehabPantallaPreparando #rehabPantallaEstimuloColor { color:#86efac; }
 
-/* Objetivo prioritario y respuestas compactas en la zona inferior. */
-.rehabPantallaSimulada { justify-content:space-between; padding-top:max(90px,env(safe-area-inset-top)); gap:20px; }
-.rehabPantallaSimulada .rehabPantallaEstimuloContenido { flex:1; align-content:center; gap:14px; }
+/* Objetivo prioritario y pods entre el ejercicio y la instrucción. */
+.rehabPantallaSimulada { justify-content:center; padding-top:max(90px,env(safe-area-inset-top)); gap:clamp(20px,4dvh,44px); }
+.rehabPantallaSimulada .rehabPantallaEstimuloContenido { flex:none; align-content:center; gap:14px; }
 .rehabPantallaSimulada #rehabPantallaEstimuloCirculo { width:min(56vw,30dvh,260px); border-width:8px; }
 .rehabPantallaSimulada #rehabPantallaEstimuloAccion,
 .rehabPantallaSimulada #rehabPantallaEstimuloColor { font-size:clamp(1.35rem,6vw,2.6rem); }
-#rehabSimuladorPantallaCompleta { flex:none; width:min(100%,620px); }
+#rehabSimuladorPantallaCompleta { flex:none; width:min(100%,620px); display:flex; flex-direction:column; gap:clamp(20px,4dvh,44px); }
+#rehabSimuladorPantallaCompleta[hidden] { display:none; }
+#rehabPodsPantallaCompleta { order:-1; }
+#rehabSimuladorPantallaCompleta .rehabSimuladorInstruccion { margin:0; }
 #rehabPodsPantallaCompleta { grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
 .rehabPodPantallaCompleta { min-height:82px; padding:8px 4px; border-radius:14px; gap:6px; font-size:12px; }
 .rehabLuzPodPantallaCompleta { width:clamp(36px,10vw,52px); box-shadow:none !important; }
@@ -7557,5 +7560,5 @@ select {
   .rehabPantallaSimulada #rehabPantallaEstimuloColor { font-size:clamp(1.1rem,3vw,2rem); }
   .rehabPodPantallaCompleta { min-height:64px; flex-direction:row; gap:8px; }
   .rehabLuzPodPantallaCompleta { width:36px; }
-  .rehabSimuladorInstruccion { margin-bottom:5px; }
+  #rehabSimuladorPantallaCompleta { gap:8px; }
 }
