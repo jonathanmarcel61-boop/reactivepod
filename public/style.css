@@ -7562,3 +7562,10 @@ select {
   .rehabLuzPodPantallaCompleta { width:36px; }
   #rehabSimuladorPantallaCompleta { gap:8px; }
 }
+
+/* Stroop: la palabra es el estímulo principal; el círculo distrae. */
+#pantallaEntrenamiento #nombreColor.rehabPalabraStroop { font-size:clamp(2.8rem,12vw,5rem) !important; line-height:1.1; overflow-wrap:anywhere; }
+.rehabPantallaStroop #rehabPantallaEstimuloColor { font-size:clamp(2.8rem,12vw,5rem); line-height:1.1; overflow-wrap:anywhere; }
+@media (orientation:landscape) {
+  .rehabPantallaStroop #rehabPantallaEstimuloColor { font-size:clamp(2rem,7vw,3.5rem); }
+}
