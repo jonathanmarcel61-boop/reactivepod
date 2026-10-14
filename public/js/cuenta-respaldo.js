@@ -374,7 +374,7 @@
       let respuesta;
       if (crear) {
         const nombre = (typeof obtenerPerfilActivo === "function" && obtenerPerfilActivo()?.nombre) || "Usuario RehabPod";
-        respuesta = await c.auth.signUp({ email, password, options: { data: { full_name: nombre, role: "user", specialty: registro.specialty, rehabpod_registration: registro } } });
+        respuesta = await c.auth.signUp({ email, password, options: { data: { full_name: nombre, specialty: registro.specialty, rehabpod_registration: registro } } });
       } else {
         respuesta = await c.auth.signInWithPassword({ email, password });
       }

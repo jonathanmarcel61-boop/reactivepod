@@ -15,7 +15,7 @@
 // nueva en vez de seguir usando la vieja del caché.
 // =====================================================
 
-const CACHE_VERSION = "rehabpod-v30-stroop-distractor";
+const CACHE_VERSION = "rehabpod-v31-cuenta-unica";
 
 const ARCHIVOS_DEL_CASCARON = [
   "./",
@@ -25,7 +25,6 @@ const ARCHIVOS_DEL_CASCARON = [
   "./js/ui.js",
   "./js/plan.js",
   "./js/rutinas.js",
-  "./js/compartidas.js",
   "./js/duelo.js",
   "./js/metas.js",
   "./js/recordatorios.js",

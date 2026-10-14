@@ -35,6 +35,5 @@ test("los scripts se cargan en un orden que respeta sus dependencias", () => {
   antes("js/asistente.js", "js/misrutinas.js");
   antes("js/asistente.js", "js/dosjugadores.js");
   antes("js/motivacion.js", "js/recordatorios-ui.js");
-  antes("js/rutinas.js", "js/compartidas.js");
   antes("app.js", "js/colores-ajustes.js");
 });

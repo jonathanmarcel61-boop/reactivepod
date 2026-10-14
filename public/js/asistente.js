@@ -186,7 +186,7 @@
       </fieldset>
 
       <p id="asisError" class="asis-error" role="alert"></p>
-      <p class="asis-nota">Si trabajas una condición médica específica, vincúlate también con un profesional (Cuenta → Vincular): esta rutina es una guía general.</p>
+      <p class="asis-nota">Si trabajas una condición médica específica, consulta con un profesional de salud: esta rutina es una guía general.</p>
 
       <div class="asis-acciones">
         <button type="button" id="asisArmar" class="boton botonPrincipal">Armar mi rutina</button>

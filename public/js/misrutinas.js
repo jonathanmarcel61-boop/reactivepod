@@ -20,7 +20,6 @@
   const NOMBRE_DIF = { facil: "Fácil", media: "Media", dificil: "Difícil" };
   const fmtSeg = (s) => (s % 60 ? `${Math.floor(s / 60)} min ${s % 60} s`.replace(/^0 min /, "") : `${s / 60} min`);
 
-  const nube = () => window.rehabRutinasNube;
 
   const perfilId = () => (obtenerPerfilActivo() || {}).id || "local";
 
@@ -217,7 +216,6 @@
       if (nombre) {
         guardar(R.renombrar(lista, id, nombre));
         pintarInicio();
-        if (r.compartida && nube()) nube().sincronizar(leer().find((x) => x.id === id));
       }
       return abrirLista();
     }
@@ -235,8 +233,6 @@
         guardar(R.eliminar(lista, id));
         pintarInicio();
         avisarRehab("Rutina eliminada.", { tipo: "info" });
-        // Si estaba compartida, también deja de verse en la biblioteca.
-        if (r.compartida && nube()) nube().dejarDeCompartir(r, { silencioso: true });
       }
       return abrirLista();
     }
@@ -370,7 +366,6 @@
         pintarInicio();
         v.cerrar();
         avisarRehab(`Rutina «${rutina.nombre}» guardada.`, { tipo: "exito" });
-        if (existente && rutina.compartida && nube()) nube().sincronizar(rutina);
         if (empezar) iniciar(rutina.id);
         else abrirLista();
       };
