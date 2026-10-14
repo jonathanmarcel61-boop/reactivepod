@@ -133,6 +133,7 @@
     if (!forzar && copia && dueno !== usuario.id) return false;
 
     const datos = capturarDatos();
+    validarPerfilesCopia(datos);
     const fingerprint = huella(datos);
     if (!forzar && fingerprint === localStorage.getItem(CLAVE_HUELLA)) return true;
 
@@ -156,7 +157,16 @@
     }
   }
 
+  function validarPerfilesCopia(payload) {
+    if (!payload?.reactipodDatos) return;
+    const datos = JSON.parse(payload.reactipodDatos);
+    if (!Array.isArray(datos.perfiles) || datos.perfiles.length < 1 || datos.perfiles.length > 5) {
+      throw new Error("La copia debe contener entre 1 y 5 perfiles. Ajusta los perfiles del dispositivo de origen antes de restaurar.");
+    }
+  }
+
   function aplicarCopia(payload) {
+    validarPerfilesCopia(payload);
     if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
       throw new Error("La copia guardada no tiene un formato válido.");
     }
@@ -206,7 +216,7 @@
         <h3>${conSesion ? "Tus datos están protegidos" : "Protege tus entrenamientos"}</h3>
         <p>${conSesion ? esc(usuario?.email || "") : "Inicia sesión para recuperar tus datos si cambias de teléfono."}</p>
       </div></div>
-      <div class="rehabV46PerfilesTitulo"><span>PERFILES DE ESTE TELÉFONO</span><strong>${perfiles.lista.length}</strong></div>
+      <div class="rehabV46PerfilesTitulo"><span>PERFILES DE ESTE TELÉFONO</span><strong>${perfiles.lista.length} / 5</strong></div>
       <div class="rehabV46Perfiles">${chips}</div>
     </section>`;
   }
@@ -318,7 +328,7 @@
         <p class="rehabV47Privacidad">Estos datos no son obligatorios y no se usan para diagnóstico médico.</p>
       </div></div>
       <button id="rehabV47Enviar" class="rehabV40Btn rehabV46LoginPrincipal" type="button">INICIAR SESIÓN</button>
-      <button id="rehabV45Recuperar" class="rehabV27Link rehabV46Recuperar" type="button">Olvidé mi contraseña</button>
+      <button id="rehabV45Recuperar" class="rehabCuentaLink rehabV46Recuperar" type="button">Olvidé mi contraseña</button>
       <div id="rehabV45LoginMensaje" class="rehabV40Mensaje" aria-live="polite"></div></div>`;
     document.body.appendChild(overlay);
     document.getElementById("rehabV45CerrarLogin").onclick = cerrarLogin;
@@ -447,16 +457,7 @@
     }
   });
 
-  function ocultarFuncionesProfesionales() {
-    ["rehabV28HomeBtn", "rehabV27BtnCloud"].forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = "none";
-    });
-  }
-
   window.rehabV40RenderCuenta = render;
   window.rehabCloudAbrir = abrirLogin;
   window.rehabV45GuardarCopia = guardarCopia;
-  setTimeout(ocultarFuncionesProfesionales, 0);
-  setTimeout(ocultarFuncionesProfesionales, 1600);
 })();

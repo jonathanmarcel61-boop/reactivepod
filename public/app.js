@@ -2178,7 +2178,14 @@ function mostrarModalConsentimiento(nombre, alConfirmar, alCancelar) {
   });
 }
 
+const REHAB_MAX_PERFILES = 5;
+window.REHAB_MAX_PERFILES = REHAB_MAX_PERFILES;
+
 async function crearPerfil() {
+  if (datosApp.perfiles.length >= REHAB_MAX_PERFILES) {
+    avisarRehab("Puedes guardar hasta 5 perfiles. Elimina uno para crear otro.", { tipo: "info" });
+    return;
+  }
   const nombre = await pedirTextoRehab({
     titulo: "Nuevo deportista",
     etiqueta: "Nombre del deportista",
@@ -2202,6 +2209,7 @@ async function crearPerfil() {
   }
 
   mostrarModalConsentimiento(nombre, (consentimiento) => {
+    if (datosApp.perfiles.length >= REHAB_MAX_PERFILES) return;
     const nuevo = {
       id: Date.now().toString(),
 

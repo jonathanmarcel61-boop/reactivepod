@@ -5,13 +5,6 @@ alter table public.rehab_profiles drop constraint if exists rehab_profiles_role_
 alter table public.rehab_profiles add constraint rehab_profiles_role_check check (role='user');
 alter table public.rehab_profiles alter column role set default 'user';
 
--- Deshabilita APIs antiguas sin borrar cuentas, rutinas ni históricos.
-revoke all on public.rehab_professional_users, public.rehab_assignments,
-  public.rehab_notifications, public.rehab_shared_routines from public, anon, authenticated;
-comment on table public.rehab_professional_users is 'Archivo retirado de RehabPod; sin acceso desde la aplicación.';
-comment on table public.rehab_assignments is 'Archivo retirado de RehabPod; sin acceso desde la aplicación.';
-comment on table public.rehab_notifications is 'Archivo retirado de RehabPod; sin acceso desde la aplicación.';
-comment on table public.rehab_shared_routines is 'Archivo retirado de RehabPod; sin acceso desde la aplicación.';
 do $$ declare r record; begin
   for r in select p.proname,pg_get_function_identity_arguments(p.oid) as args
     from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'
@@ -36,7 +29,28 @@ create policy rehab_sessions_owner on public.rehab_routine_sessions for all to a
 create policy rehab_training_owner on public.rehab_training_sessions for all to authenticated
   using ((select auth.uid())=user_id) with check ((select auth.uid())=user_id);
 
--- El campo role queda fijo en user por compatibilidad con los datos archivados.
+-- Conserva los resultados personales al retirar asignaciones y códigos.
+drop trigger if exists rehab_on_auth_user_created on auth.users;
+drop trigger if exists rehab_proteger_privilegios_perfil on public.rehab_profiles;
+alter table public.rehab_routine_sessions drop column if exists assignment_id;
+drop table public.rehab_notifications;
+drop table public.rehab_shared_routines;
+drop table public.rehab_assignments;
+drop table public.rehab_professional_users;
+do $$ declare r record; begin
+  for r in select p.proname,pg_get_function_identity_arguments(p.oid) as args
+    from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'
+    and p.proname like 'rehab_%' loop
+    if r.proname in ('rehab_handle_new_user','rehab_es_profesional','rehab_proteger_privilegios_perfil',
+      'rehab_connect_user_by_code','rehab_unlink_relationship','rehab_make_user_code','rehab_can_assign_routine',
+      'rehab_cancel_assignment','rehab_notify_assignment_changes','rehab_assignment_status_timestamps',
+      'rehab_assignments_update_guard','rehab_shared_routines_antes') then
+      execute format('drop function public.%I(%s)',r.proname,r.args);
+    end if;
+  end loop;
+end $$;
+alter table public.rehab_profiles drop column role, drop column user_code;
+-- Cuenta única de usuario, sin roles ni códigos de vinculación.
 alter table public.rehab_profiles enable row level security;
 revoke all on public.rehab_profiles from anon, authenticated;
 grant select on public.rehab_profiles to authenticated;
@@ -60,8 +74,8 @@ begin
   if length(nombre) < 2 then nombre := 'Usuario RehabPod'; end if;
   uso := coalesce(new.raw_user_meta_data->>'specialty', 'other');
   if uso not in ('athlete','fitness','rehabilitation','cognitive_training','recreational','other') then uso := 'other'; end if;
-  insert into public.rehab_profiles(user_id, full_name, specialty, role)
-    values(new.id, nombre, uso, 'user') on conflict (user_id) do nothing;
+  insert into public.rehab_profiles(user_id, full_name, specialty)
+    values(new.id, nombre, uso) on conflict (user_id) do nothing;
   return new;
 end;
 $$;
@@ -112,3 +126,11 @@ using ((select auth.uid()) = user_id);
 
 comment on table public.rehab_user_backups is
   'Copia privada de los datos locales de RehabPod para recuperar un dispositivo.';
+
+-- Las copias nuevas o actualizadas admiten un máximo de cinco perfiles.
+-- NOT VALID conserva cualquier copia antigua hasta que su dueño la actualice.
+alter table public.rehab_user_backups add constraint rehab_backup_max_cinco_perfiles
+check (case when payload ? 'reactipodDatos' then coalesce(
+  jsonb_typeof((payload->>'reactipodDatos')::jsonb->'perfiles')='array'
+  and jsonb_array_length((payload->>'reactipodDatos')::jsonb->'perfiles') between 1 and 5, false)
+  else true end) not valid;
