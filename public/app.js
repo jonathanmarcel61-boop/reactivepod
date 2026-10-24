@@ -80,13 +80,17 @@ function rehabEsErrorDeRed(error) {
     texto.includes("network request failed") ||
     texto.includes("load failed") ||
     texto.includes("timeout") ||
+    texto.includes("tiempo de espera") ||
     texto.includes("err_internet_disconnected")
   );
 }
 
 function rehabMensajeError(error) {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    return "Tu dispositivo indica que está sin conexión. Revisa Wi-Fi o datos móviles e inténtalo de nuevo.";
+  }
   if (rehabEsErrorDeRed(error)) {
-    return "Sin conexión a internet. Tus datos se cargarán cuando vuelvas a conectarte.";
+    return "No se pudo conectar con la cuenta en la nube. Comprueba tu conexión e inténtalo de nuevo; el servicio también puede estar temporalmente inactivo.";
   }
 
   return String(error?.message || error || "Ocurrió un error inesperado.");
@@ -11265,7 +11269,7 @@ window.rehabGetSupabaseClient = async function () {
           document.head.appendChild(script);
         }),
         6000,
-        "Sin conexión a internet."
+        "Tiempo de espera agotado al conectar con la nube."
       );
     }
 
@@ -11307,7 +11311,7 @@ window.rehabGetSupabaseClient = async function () {
           document.head.appendChild(script);
         }),
         6000,
-        "Sin conexión a internet."
+        "Tiempo de espera agotado al conectar con la nube."
       );
     }
 
