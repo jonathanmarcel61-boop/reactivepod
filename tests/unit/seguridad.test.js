@@ -48,3 +48,31 @@ test("el servidor exige token al exponerse fuera de localhost", () => {
   assert.match(servidor, /HOST !== "127\.0\.0\.1"/);
   assert.match(servidor, /MAX_MESSAGES_PER_10S/);
 });
+
+// Ejecuta los mensajes reales sin cargar la interfaz ni realizar peticiones.
+function mensajesRed(enLinea) {
+  const vm = require("node:vm");
+  const app = leer("public/app.js");
+  const inicio = app.indexOf("function rehabEsErrorDeRed(");
+  const fin = app.indexOf("function rehabValidarEmail(", inicio);
+  const contexto = { navigator: { onLine: enLinea } };
+  vm.createContext(contexto);
+  vm.runInContext(app.slice(inicio, fin), contexto);
+  return contexto.rehabMensajeError;
+}
+
+test("fallo de nube con conexión no afirma que el teléfono está sin internet", () => {
+  const mensaje = mensajesRed(true)(new Error("Failed to fetch"));
+  assert.match(mensaje, /cuenta en la nube/);
+  assert.doesNotMatch(mensaje, /Sin conexión a internet|Tus datos se cargarán/);
+});
+
+test("dispositivo desconectado muestra instrucciones de conexión", () => {
+  assert.match(mensajesRed(false)(new Error("Failed to fetch")), /dispositivo indica que está sin conexión/);
+});
+
+test("tiempo agotado se distingue de errores de cuenta", () => {
+  const mensaje = mensajesRed(true);
+  assert.match(mensaje(new Error("Tiempo de espera agotado al conectar con la nube.")), /cuenta en la nube/);
+  assert.equal(mensaje(new Error("Invalid login credentials")), "Invalid login credentials");
+});
