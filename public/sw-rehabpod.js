@@ -15,7 +15,7 @@
 // nueva en vez de seguir usando la vieja del caché.
 // =====================================================
 
-const CACHE_VERSION = "rehabpod-v32-cinco-perfiles";
+const CACHE_VERSION = "rehabpod-v33-errores-conexion";
 
 const ARCHIVOS_DEL_CASCARON = [
   "./",
